@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Introdução ao Machine Learning com R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Curso-R" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introdução ao Machine Learning com R
+### Curso-R
+
+---
+
+
+
+
+## Sobre nós
+
+&lt;img src="img/professores.png" style=" display: block; margin-left: auto; margin-right: auto;"&gt;&lt;/img&gt;
+
+---
+
+# Programa do curso
+
+-  Introdução ao Machine Learning
+
+-  Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
+
+- Regressão linear, regularização
+
+- Regressão logística, regressão vs classificação
+
+- Modelos de árvores
+
+- Bagging e Boosting
+
+---
+
+# Ciência de dados
+
+&lt;img src="img/ciclo-ciencia-de-dados.png" style = "display: block; margin-left: auto; margin-right: auto;"&gt;
+
+---
+
+# Referências
+
+.pull-left[
+&lt;a href = "https://r4ds.had.co.nz/"&gt;
+&lt;img src="img/r4ds.png" style=" display: block; margin-left: auto; margin-right: auto;"&gt;&lt;/img&gt;
+&lt;/a&gt;
+]
+
+.pull-right[
+&lt;a href = "http://www-bcf.usc.edu/~gareth/ISL/"&gt;
+&lt;img src="img/islr.png" style=" display: block; margin-left: auto; margin-right: auto;"&gt;&lt;/img&gt;
+&lt;/a&gt;
+]
+
+---
+
+class: middle, center, inverse
+
+# Introdução
+
+---
+
+# O que é Machine Learning?
+
+&lt;br&gt;
+
+--
+
+- Não é um termo novo: criado por Arthur Samuel, em 1959
+
+&lt;img src="img/arthur-sam.png" class="center2" width=100&gt;
+
+--
+
+- Existe um grande hype atualmente em cima desse termo (~50 artigos por dia no Arxiv!!!)
+
+--
+
+- Machine Learning é um nome marketeiro para modelagem preditiva
+
+--
+
+- Modelagem preditiva é um framework de análise de dados que visa gerar a estimativa mais precisa possível para uma quantidade ou fenômeno (Max Kuhn, 2014).
+
+
+---
+
+# Por que o hype?
+
+- Poderio computacional
+
+- Disponibilidade de dados
+
+- Sucesso em resolver problemas historicamente difíceis
+
+---
+
+## Exemplos
+
+&lt;img src="https://user-images.githubusercontent.com/4706822/45316589-db1b4580-b50d-11e8-8e53-33950d5c4c07.jpg" style="position: fixed; width: 40%; top: 250px; left: 300px;"&gt;
+
+--
+
+&lt;img src="http://pennachio.wpengine.com/wp-content/uploads/2017/02/diabetic-retinopathy_comparison-1024x469.jpg" style="position: fixed; width: 40%; top: 100px; left: 100px;"&gt;
+
+--
+
+&lt;img src="https://www.extremetech.com/wp-content/uploads/2014/09/self-driving-head-640x353.jpg" style="position: fixed;  width: 40%; top: 100px; left: 500px;"&gt;
+
+--
+
+&lt;img src="http://multimidia.correiodopovo.com.br/thumb.aspx?Caminho=multimidia/2017/10/07/434592.JPG&amp;Tamanho=690" style="position: fixed; width: 40%; top: 400px; left: 100px;"&gt;
+
+--
+
+&lt;img src="https://i2.wp.com/www.yaabot.com/wp-content/uploads/2016/11/yaabot_algo2.jpg?resize=759%2C500&amp;ssl=1" style="position: fixed; width: 40%; top: 400px; left: 500px;"&gt;
+
+--
+
+&lt;img src="https://5.imimg.com/data5/NT/NK/MY-38742550/life-insurance-health-insurance-and-general-insurance-250x250.png" style="position: fixed; width: 20%; top: 200px; left: 100px;"&gt;
+
+--
+
+&lt;img src="https://i.ytimg.com/vi/DmPLEURo-Vk/maxresdefault.jpg" style="position: fixed; width: 40%; top: 200px; left: 300px;"&gt;
+
+---
+
+class: middle, center
+
+# Relação com a Estatística
+
+Leo Breiman: ["Statistical Modeling: The Two Cultures"](https://projecteuclid.org/euclid.ss/1009213726)
+
+&lt;img src="https://upload.wikimedia.org/wikipedia/en/4/4d/Leo_Breiman.jpg"&gt;
+
+---
+
+# Machine Learning e Estatística
+
+&lt;img src = "img/box.png" class = "center2"&gt;
+
+--
+
+1) Gostaríamos de saber como `\(x\)` e `\(y\)` estão relacionadas.
+
+--
+
+2) Gostaríamos de prever `\(y\)` a partir de `\(x\)`.
+
+--
+
+&lt;br&gt;
+
+Matematicamente, queremos encontrar uma função `\(f()\)` tal que:
+
+$$
+y \approx f(x)
+$$
+
+---
+
+# Machine Learning e Estatística
+
+ &lt;img src="img/box-data-models.png" class = "center2"&gt; 
+ 
+--
+
+&lt;br&gt;
+&lt;br&gt;
+ 
+&lt;img src="img/box-algorithmic-models.png" class = "center2"&gt;
+
+---
+
+&lt;img src="https://wordstream-files-prod.s3.amazonaws.com/s3fs-public/styles/simple_image/public/images/machine-learning1.png?Q_SmWhhhAEOO_32HNjPhcxsPhreWV26o&amp;itok=yjEJbEKD" style="display: block; margin-left: auto; margin-right: auto;"&gt;&lt;/img&gt;
+
+---
+
+# Pensamento crítico
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+- Entender o problema
+
+- Entender o objetivo
+
+- Entender a métrica
+
+&lt;img src="https://media.giphy.com/media/sqefuSs2oD8sg/giphy.gif" class="smart_cat"&gt;
+
+---
+
+&lt;br&gt;
+
+&lt;img src="img/aviao.png" class="center2"&gt;
+
+---
+
+&lt;img src="img/google.png" class="google"&gt;
+
+---
+class: middle, center, inverse
+
+# Estratégias
+
+---
+
+# Vamos falar de
+
+- Intuição
+
+- Viés e variância
+
+- Erro de treino e erro de teste
+
+- Validação cruzada
+
+---
+
+# Motivação
+
+
+
+
+Somos consultores e fomos contratados para dar conselhos para uma empresa aumentar as suas vendas.
+
+--
+
+Obtivemos o seguinte banco de dados
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+* O propritário não consegue interferir diretamente nas vendas, mas consegue interferir no investimento em propaganda. 
+
+---
+
+# Definições
+
+- **X1**: budget para propagandas em jornal
+- **X2**: budget para propagandas em radio
+- **X3**: budget para propagandas em TV
+
+* __Y__: qtd vendida
+
+--
+
+* __X1, X2 e X3__ são as variáveis explicativas, independentes, *features* ou preditores.
+
+* Y é a variável resposta ou variável dependente. 
+
+---
+
+# Intuição
+
+Queremos encontrar `\(f\)` tal que
+
+$$ Y \approx f(X) $$
+ou
+
+`$$Y = f(X) + \epsilon$$`
+
+* `\(X = (X_1, X_2, ..., X_n)\)`
+* `\(\epsilon\)` é chamado de erro aleatório. Esse termo representa toda a variabilidade de `\(Y\)` não explicada pelos preditores em `\(X\)`.
+
+--
+
+Machine Learning se refere a um conjunto de técnicas para obter estimativas o mais precisas possível da função `\(f\)`. 
+
+---
+
+# Por que estimar f?
+
+--
+* Predição
+--
+
+* Inferência
+
+--
+
+## Predição
+
+Em muitas situações X está disponível facilmente mas, Y não é fácil de descobrir. (Ou mesmo não é possível descobrí-lo).
+
+`$$\hat{Y} = \hat{f}(X)$$`
+é uma boa estimativa.
+Neste caso não estamos interessados em como é a estrutura `\(\hat{f}\)` desde que ela apresente predições boas para `\(Y\)`.
+
+---
+
+## Predição
+
+A acurácia de uma estimativa `\(\hat{Y}\)` pode ser dividade em duas quantidades:
+
+* erro redutível
+* erro irredutível
+
+![](https://user-images.githubusercontent.com/4706822/47453479-34c88e00-d7a3-11e8-9865-4e8b8bd001b3.png)
+
+* Essa parte irredutível, significa não redutível pela escolha do modelo/algoritmo. Ela pode ser reduzida se forem coletadas outras variáveis, mais dados etc.
+
+---
+
+## Inferência
+
+Em inferência estamos mais interessados em entender a relação entre as variáveis explciativas `\(X\)` e a variável resposta `\(Y\)`.
+
+Por exemplo:
+
+* Quais são as variáveis que estão mais relacionadas com a respostas?
+* Qual a relação entre a resposta e cada um dos preditores?
+
+--
+
+Neste curso, vamos falar principalmente sobre **predição**.
+
+---
+
+# Como estimamos f?
+
+Para estimar `\(f\)`, coletamos um conjunto de pares `\((X, Y)\)` e usamos algum algoritmo para encontrar uma `\(f\)` tal que `\(Y \approx f(X)\)`.
+
+Os modelos são geralmente dividios em duas classes:
+
+* Paramétricos
+* Não paramétricos
+
+---
+
+## Paramétricos
+
+Assumem uma forma funcional para `\(f\)` e depois estimam parâmetros. 
+
+--
+
+Podemos assumir que `\(f\)` possui a forma funcional linear:
+
+`$$f(X) = \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p*X_p$$`
+
+Então utilizamos os dados para encontrar valores `\(\hat{\beta_1}, \hat{\beta_2}, ..., \hat{\beta_p}\)` tal que:
+
+`$$Y \approx \hat{\beta_1}*X_1 + \hat{\beta_2}*X_2 + ... + \hat{\beta_p}*X_p$$`
+---
+
+## Paramétricos
+
+Chamamos de paramétricos pois reduzimos o problema de estimar `\(f\)` para o problema de estimar um conjunto de parâmetros `\(\beta\)`.
+
+--
+
+**Desvantagens**:
+
+- geralmente a forma funcional que escolhemos para `\(f\)` não é a forma forma funcional da verdadeira `\(f\)`.
+- se aumentarmos muito o número de parâmetros, podemos gerar *overfitting*.
+
+**Vantagens**:
+
+- em geral, é computacionalmente mais eficiente
+- em geral, precisa de menos observações
+
+
+---
+
+## Não-paramétricos
+
+Não fazem suposições explícitas sobre a forma funcional de `\(f\)`. Estimam uma `\(f\)` que fica o mais próximo possível das obervações segundo alguma regra bem definida.
+
+![](https://freakonometrics.hypotheses.org/files/2015/06/boosting-algo-3.gif)
+
+---
+
+## Não paramétricos
+
+**Vantagens**
+
+* A principal vantagem sobre os modelos paramétricos é que por não fazerem suposiçõe sobre a forma de `\(f\)` podem se ajustar bem á diversas formas possíveis de `\(f\)`. 
+
+**Desvantagens**
+
+* Em geral precisa de mais observações para ficar bem ajustado.
+* Pode ser computacionalmente mais custoso.
+
+---
+
+# Flexibilidade ou Intertabilidade?
+
+![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+
+---
+
+# Regressão e Classificação
+
+Existem dois principais tipos de problemas em Machine Learning:
+
+* Regressão
+* Classificação
+
+A principal razão para fazermos essa distinção é a escolha da métrica de performance.
+
+---
+
+# Estimando a performance
+
+Para problemas de regressão:
+
+* `\(R^2\)`
+* Raíz do erro quadrático médio (RMSE)
+
+`$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i - \hat{f}(x_i)\big)^2}$$`
+
+---
+
+# Estimando a performance
+
+Para problemas de classificação:
+
+- Acurácia
+- Área sobre a curva ROC.
+- KS
+- Sensibilidade: Taxa de verdadeiros positivos.
+- Especificidade: Taxa de verdadeiros negativos. 
+
+
+---
+
+# Estimando a performance
+
+Essas medidas poderiam calculadas na base de dados que usamos para ajustar o modelo, chamada de *base de treino*. 
+
+Por que isso seria um problema?
+
+--
+
+&lt;br&gt;
+
+&gt; Estamos interessados nas métricas de erro/acerto para observações que não foram vistas durante o treino.
+
+&lt;br&gt;
+
+**Exemplo**: Se fazemos um modelo para prever o valor de ações no mercado. Não estamos interessados no quanto acertamos para os últimos 6 meses. Estamos interessados em acertar o valor da ação amanhã, ou no próximo mês.
+
+---
+
+# Estimando a performance
+
+Considere que treinamos um modelo com uma base de dados:
+
+`$${(x_1, y_1), (x_2, y_2), ... ,(x_x, y_n)}$$`
+
+Ajustando um modelo, obtemos uma `\(\hat{f}\)` tal que `\(y_1 \approx \hat{f}(x_1)\)`, `\(y_2 \approx \hat{f}(x_2)\)`, ..., `\(y_n \approx \hat{f}(x_n)\)`.
+
+Em vez de calcular, por exemplo, o MSE na base de treino
+
+`$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i - \hat{f}(x_i)\big)^2}$$`
+
+queremos na verdade calcular o MSE em uma base de novas observações
+
+`$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i^0 - \hat{f}(x_i^0)\big)^2}$$`
+em que `\((x_0 , y_0)\)` é o conjunto de novas observações, chamada base de teste.
+
+---
+
+## Como estimamos o MSE para novas observações?
+
+Podemos separar uma parte da base de dados que não será utilizada para ajustar o modelo.
+
+---
+
+# Exemplo no R
+
+---
+
+# Estimando a performance do modelo
+
+- **Erro de treino**: é o erro encontrado ao aplicar o modelo na própria base utilizada para treiná-lo.
+
+- **Erro de teste**: é o erro encontrado ao aplicar o modelo a uma base não utilizada no treino.
+
+---
+
+# Separação da base
+
+- **base de treino**: observações utilizadas para estimar os parâmetros do modelo e determinar os parâmetros de complexidade (hiperparâmetros)
+
+- **base de teste**: observações utilizadas para estimar o erro de teste. Essas observações não devem ser usadas para treinar o modelo.
+
+--
+
+- Muitas observações na base de treino vão levar a estimativas mais precisas para os parâmetros, mas não teremos uma boa estimativa da performance do modelo.
+
+- Muitas observações na base de teste não vão permitir termos boas estimativas dos parâmetros.
+
+---
+
+# Viés e variância
+
+&lt;img src="https://cdn-images-1.medium.com/max/1600/1*v63L_h5WXGOb4o6oh_daAA.jpeg"&gt;
+
+---
+
+# Hiperparâmetros
+
+Hiperparâmetros são parâmetros do ligados à complexidade do modelo que devem ser escolhidos antes ajuste.
+
+Por exemplo, considere um modelo polinomial:
+
+`$$f(X) = \beta_0  + \beta_1 * X + \beta_2 * X^2 + \beta_3 * X^3 + \cdots + \beta_{p} * X^{p}$$`
+
+Para selecioná-los, podemos utilizar **validação cruzada**.
+
+--
+
+**Validação cruzada**: método para estimar o erro preditivo de um modelo utilizando reamostragem.
+
+--
+
+- Leave-one-out cross-validation (LOOCV)
+- K-fold cross-validation
+
+---
+
+# LOOCV
+
+&lt;img src="img/loocv.png" width="644" style="display: block; margin: auto;" /&gt;
+
+---
+
+# k-fold
+
+&lt;img src="img/k-fold-cv.png" width="609" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Atenção especial quando o tempo está envolvido.
+
+![](http://topepo.github.io/caret/splitting/Split_time-1.svg)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
