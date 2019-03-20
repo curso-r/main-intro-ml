@@ -63,7 +63,7 @@ $$
 No R, podemos fazer isso facilmente usando a função `lm()`.
 
 ```{r}
-ajuste <- lm(log(y) ~ x, dados)
+ajuste <- lm(y ~ x, dados)
 summary(ajuste)
 ```
 
@@ -74,11 +74,11 @@ novas_obs <- data.frame(x = c(1, 2, 4, 10))
 predict(ajuste, novas_obs)
 ```
 
-Fazer modelagem preditiva envolve 3 tarefas práticas:
+Em geral, fazer modelagem preditiva envolve 3 tarefas:
 
 - especificar o modelo
 - treinar o modelo
-- fazer predições
+- gerar predições
 
 ## Pacote recipes
 
@@ -132,15 +132,13 @@ base_treino <- bake(prep, diamantes)
 
 ajuste <- lm(price ~ ., base_treino)
 summary(ajuste)
-
-ajuste$coefficients
 ```
 
 ## Caret
 
 - Abreviação de *Classification And Regression Training*.
 
-- Padroniza a especificação do ajuste de modelos preditivos no R.
+- Padroniza o ajuste de modelos preditivos no R.
 
 - Abstrai a aplicação de diversos tipos de validação cruzada.
 
@@ -153,21 +151,21 @@ ajuste$coefficients
 Para ajustar um modelo, sempre utilizamos a função `train()`.
 
 ```{r}
-set.seed(14122018)
+set.seed(20032019)
 
-modelo2 <- train(
+modelo <- train(
   receita, 
   diamantes, 
   method = "lm",
   trControl = trainControl(method = "cv", number = 5)
 )
 
-modelo2
+modelo
 
 # Para acessar o modelo final
 summary(modelo$finalModel)
 
-  # Função para avaliar a "importância" de cada preditor
+# Função para avaliar a "importância" de cada preditor
 varImp(modelo)
 ```
 
@@ -224,53 +222,23 @@ modelo <- train(
 modelo
 ```
 
-Precisamos deixar as métricas na mesma unidade para poder compará-las.
-
-```{r}
-summary_log <- function(data, lev = NULL, model = NULL) {
-  
-  metrics <- defaultSummary(data, lev, model)
-  
-  residuo <- exp(data$obs) - exp(data$pred)
-  metrics["RMSE"] <- sqrt(mean((residuo)^2))
-  metrics["MAE"] <- mean(abs(residuo))
-  
-  metrics
-}
-
-train_control <- trainControl(
-  method = "cv", 
-  number = 5, 
-  summaryFunction = summary_log
-)
-
-modelo <- train(
-  receita, 
-  diamantes, 
-  method = "lm", 
-  trControl = train_control
-)
-
-modelo
-```
-
 Fazendo as previsões:
 
 ```{r}
-# Valores obs vs pred (log)
+# Valores obs vs pred 
 diamantes %>% 
   mutate(pred = predict(modelo, diamantes)) %>% 
   ggplot(aes(y = pred, x = log(price))) +
-  geom_point(alpha = 0.1) +
+  geom_point() +
   geom_abline(intercept = 0, slope = 1, color = "blue") +
   theme_bw()
 
-# Valores obs vs pred (exp)
+# Valores obs vs pred 
 diamantes %>% 
   mutate(pred = predict(modelo, diamantes)) %>% 
   ggplot(aes(y = exp(pred), x = price)) +
-  geom_point(alpha = 0.1) +
+  geom_point() +
   geom_abline(intercept = 0, slope = 1, color = "blue") +
-  theme_bw() +
-  coord_cartesian(x = c(0, 20000), ylim = c(0, 25000))
+  theme_bw()
+
 ```

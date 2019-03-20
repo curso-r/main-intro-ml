@@ -35,8 +35,6 @@ $$
 P(Y = 1| X) \approx f(X)
 $$
 
-
-
 Na regressão linear:
 
 $$
@@ -130,8 +128,6 @@ receita <- recipe(Status ~ ., data = credit_data) %>%
   step_corr(all_predictors()) %>%
   step_nzv(all_predictors())
 
-receita
-
 modelo <- train(
   receita, 
   credit_data, 
@@ -189,7 +185,6 @@ modelo <- train(
 )
 
 modelo
-summary(modelo)
 ```
 
 ```{r}
@@ -213,6 +208,7 @@ Plotando a curva ROC
 library(pROC)
 
 plot.roc(modelo$pred$obs, modelo$pre$good, legacy.axes = TRUE)
+modelo$pred$good
 ```
 
 # Exercício

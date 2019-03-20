@@ -31,6 +31,14 @@ $$
 \underset{\beta}{\text{minimizar}}L(y, f(x)) \text{ sujeito à } \sum_{j=1}^p \beta_j^2 \leq s \text{ ou } \sum_{j=1}^p |\beta_j| \leq s
 $$
 
+$$
+f(X) = \beta_0 + \beta_1X_1 + \beta_2X_2
+$$
+
+```{r}
+knitr::include_graphics("../img/lasso_ridge.png")
+```
+
 ```{r}
 receita <- recipe(price ~ . , data = diamantes) %>%
   step_dummy(all_nominal(), -all_outcomes()) %>%
@@ -53,7 +61,10 @@ modelo
 ```
 
 ```{r}
-tune_grid <- expand.grid(alpha = c(0.05, 0.1, 0.15), lambda = c(0.01, 0.02, 0.03))
+tune_grid <- expand.grid(
+  alpha = c(0.05, 0.1, 0.15), 
+  lambda = c(0.01, 0.02, 0.03)
+)
 
 modelo <- train(
   receita, 
@@ -86,28 +97,6 @@ diamantes %>%
   coord_cartesian(x = c(0, 20000), ylim = c(0, 25000))
 ```
 
-
-```{r}
-receita <- recipe(price ~ . , data = diamantes) %>%
-  step_dummy(all_nominal(), -all_outcomes()) %>%
-  step_log(all_outcomes()) %>% 
-  step_center(all_predictors()) %>%
-  step_scale(all_predictors())
-
-tune_grid <- expand.grid(alpha = 0.05, lambda = c(0.01, 0.1, 1))
-
-modelo <- train(
-  receita, 
-  diamantes, 
-  method = "glmnet", 
-  trControl = trainControl(method = "cv", number = 5),
-  tuneGrid = tune_grid
-)
-
-modelo
-coef(modelo$finalModel, 1)
-```
-
 # Exercício (AmesHousing)
 
 1. Ajuste um modelo de regressão para o banco de dados 'AmesHousing'.
@@ -124,6 +113,8 @@ ames <- make_ames()
 glimpse(ames)
 ames$Sale_Price
 ```
+
+
 
 
 ```{r}
