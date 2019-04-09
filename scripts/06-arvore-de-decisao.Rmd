@@ -1,0 +1,358 @@
+---
+title: "Árvore de decisão"
+output: html_document
+---
+  
+```{r}
+library(tidyverse)
+library(AmesHousing)
+library(recipes)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(pROC)
+```
+
+
+
+
+# Medidas de impureza
+
+```{r}
+entropia = function(valores) {
+  n = table(valores)
+  p = table(valores)/sum(n)
+  entropia = -sum(p*log(p, 2))
+  return(entropia)
+}
+
+gini = function(valores) {
+  n = table(valores)
+  p = table(valores)/sum(n)
+  gini = # PREENCHA AQUI
+  return(gini)
+}
+
+
+# grafico de gini e entropia no caso de resposta binária.
+# ggplot(aes(x = x), data = data.frame(x = c(0,1))) +
+#   stat_function(fun = function(p){return(2*(1 - p^2 - (1-p)^2))}, geom = "line", colour = "royalblue") +
+#   stat_function(fun = function(p){return( - p*log(p + 10^-8, 2) - (1-p)*log(1-p + 10^-8, 2))}, geom = "line", colour = "salmon")
+```
+
+```{r}
+# Função para ordinarizar uma função categórica.
+# consultar link https://freakonometrics.hypotheses.org/20736
+ordinarizar = function(fator, resposta) {
+  
+  dados = tibble(
+    fator = as.character(fator),
+    resposta = resposta
+  ) 
+  
+  sumarios = dados %>%
+    group_by(fator) %>%
+    summarise(media = mean(resposta)) %>%
+    arrange(media) %>%
+    mutate(
+      fator_nome = paste0("{", purrr::accumulate(fator, paste, sep = ", "), "}"),
+      fator_valor = 1:n()
+    )
+  
+  dados = left_join(dados, sumarios, by = "fator")
+  
+  factor(x = dados$fator_valor, ordered = TRUE, labels = sumarios$fator_nome)
+}
+```
+
+
+
+
+
+
+
+
+
+# Algoritmo
+
+```{r}
+arvore = function(formula, dados, .impureza_fun = gini, min_n_child = 1, profundidade = 1) {
+  
+  #############################################
+  # Extraindo informacoes da formula
+  resposta_nome = all.vars(formula)[1]
+  explicativas_nome = attr(terms(formula, data = dados), "term.labels")
+  
+  resposta_valores = dados[[resposta_nome]]
+  impureza_atual = .impureza_fun(resposta_valores)
+  
+  n   = length(resposta_valores)
+  n_0 = sum(resposta_valores %in% unique(resposta_valores)[1])
+  n_1 = sum(resposta_valores %in% unique(resposta_valores)[2])
+  
+  #############################################
+  # Encontrando a melhor pergunta
+  # percorre todas as variaveis e todos seus respectivos valores unicos a fim de encontrar
+  # a quebra com o melhor ganho de informacao.
+  melhor_explicativa = ""
+  melhor_pergunta = ""
+  melhor_ganho_de_informacao = 0
+  
+  for(explicativa_nome in explicativas_nome) {
+    
+    # utilizamos a estrategia de transformar as variaveis categoricas em ordinais
+    explicativa = dados[[explicativa_nome]]
+    if(class(explicativa) %in% c("character", "factor")) explicativa = ordinarizar(explicativa, resposta_valores)
+    
+    # 'for' pra percorrer todos os valores únicos da 'explicativa' da vez e computar o respectivo ganho de informação.
+    valores = sort(unique(explicativa))[-1]
+    for(valor in valores) {
+      
+      dados_sim =  dados[explicativa <  valor, ]
+      dados_nao = dados[explicativa >= valor, ]
+      
+      n_sim = nrow(dados_sim)
+      n_nao = nrow(dados_nao)
+      
+      # só continua adiante se a pergunta resultar em folhas com tamanhos maiores do que 'min_n_child' 
+      ganho_de_informacao = 0
+      if(n_sim > min_n_child & n_nao > min_n_child) {
+        impureza_sim = .impureza_fun(dados_sim[[resposta_nome]])
+        impureza_nao = .impureza_fun(dados_nao[[resposta_nome]])
+        
+        ganho_de_informacao = impureza_atual - impureza_sim * n_sim/n - impureza_nao * n_nao/n
+      }
+      
+      # se a pergunta der mais ganho de informacao, atualize os valores dos melhores resultados
+      if(ganho_de_informacao > melhor_ganho_de_informacao) {
+        melhor_explicativa = explicativa_nome
+        melhor_valor= valor
+        melhor_ganho_de_informacao = ganho_de_informacao
+      } 
+    }
+  }
+  
+  #############################################
+  # Montando o nó
+  noh = list(
+    infos = list(
+      n_0 = n_0,
+      n_1 = n_1,
+      n = n,
+      profundidade = profundidade
+    )
+  )
+  
+  if(melhor_ganho_de_informacao > 0) {# se valer a pena fazer a quebra pela melhor pergunta, continue com o crescimento da árvore.
+    noh$infos$tipo = if_else(profundidade == 1, "raiz", "nó")
+    noh$infos$explicativa = melhor_explicativa
+    noh$infos$valor = melhor_valor
+    noh$infos$ganho_de_informacao = melhor_ganho_de_informacao
+    
+    noh$sim = arvore(formula, dados_sim, .impureza_fun, min_n_child, profundidade+1)
+    noh$nao = arvore(formula, dados_nao, .impureza_fun, min_n_child, profundidade+1)
+    
+    return(noh)
+  } else { # caso contrario, retorne uma folha (e sua respectiva estimativa para y).
+    noh$infos$tipo = "folha"
+    noh$y_previsto = mean(resposta_valores)
+    
+    return(noh)
+  }
+  
+}
+```
+
+
+
+
+
+
+
+# Predição
+
+```{r}
+predizer_uma_obs = function(noh, novo_dado) {
+  if(noh$infos$tipo == "folha") {
+    return(noh$y_previsto)
+  } else {
+    if(novo_dado[[noh$infos$explicativa]] < noh$infos$valor) {
+      return(predizer_uma_obs(noh$sim, novo_dado))
+    } else {
+      return(predizer_uma_obs(noh$nao, novo_dado))
+    }
+  }
+}
+
+predizer = function(fit, novos_dados) {
+  predicoes = numeric(nrow(novos_dados))
+  for(i in 1:nrow(novos_dados))
+    predicoes[i] = predizer_uma_obs(fit, novos_dados[i,])
+  return(predicoes)
+}
+```
+
+
+
+
+
+
+
+# Ajuste de uma árvore
+
+```{r}
+pacientes <- tribble(
+  ~paciente, ~pressao, ~glicose, ~diabetes,
+  "Alfredo", "hipertensao",  92, "nao",
+  "Beatriz", "normal",      130, "sim",
+  "Carla",   "normal",      130, "nao",
+  "Daniela", "normal",       55, "nao",
+  "Ernesto", "hipertensao", 220, "sim",
+  "Flavia",  "normal",      195, "sim",
+)
+
+ajuste = arvore(
+  formula = diabetes ~ . - paciente,
+  dados = pacientes %>% mutate(diabetes = if_else(diabetes == "nao", 0, 1)),
+  min_n_child = 1
+)
+
+str(ajuste)
+```
+
+Previsões
+
+```{r}
+pacientes$pred = predizer(ajuste, pacientes)
+```
+
+
+
+
+
+# Pacote rpart
+
+## Exemplo 1 - Credit Data usando rpart
+```{r}
+data("credit_data")
+
+ajuste_rpart <- rpart(
+  Status ~ ., 
+  credit_data, 
+  control = rpart.control(
+    maxdepth = 30,
+    minsplit = 20,
+    minucket = 5,
+    cp = 0.01
+  )
+)
+
+ajuste_rpart
+rpart.plot(ajuste_rpart)
+ajuste_rpart$cptable
+
+# ##########
+#  bad good      erro
+# 1254 3200 0.2815447 * (1254 + 3200)
+# 
+# 
+# 
+# ###########
+#        Status
+# Records  bad good erro
+#     no   825 2856 825
+#     yes  429  344 344
+#     
+#     
+# ##########
+#                   Status  bad good
+# Records                       
+# no      FALSE             174 1438 174
+#         TRUE              651 1418 651
+# yes     FALSE             123  204 123
+#         TRUE              306  140 140
+```
+
+
+
+
+
+## Exemplo 2 - Credit Data usando recipes + caret
+
+### Data prep
+```{r}
+set.seed(1)
+linhas_de_treino = runif(nrow(credit_data)) < 0.8
+credit_data$base = if_else(linhas_de_treino, "treino", "teste")
+
+credit_data_treino <- credit_data %>% filter(base == "treino") %>% select(-base)
+credit_data_teste <-  credit_data %>% filter(base == "teste") %>% select(-base)
+
+receita <- recipe(Status ~ ., data = credit_data_treino) %>%
+  step_meanimpute(all_numeric(), -all_outcomes()) %>%
+  step_modeimpute(all_nominal(), -all_outcomes()) %>%
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_corr(all_predictors()) %>%
+  step_nzv(all_predictors())
+```
+
+### Ajuste
+
+```{r}
+train_control_rpart <- trainControl(
+  method = "cv", 
+  number = 5, 
+  classProbs = TRUE,
+  summaryFunction = twoClassSummary, # <- novidade
+  verboseIter = 1 # <- novidade
+)
+
+# DICA: rode
+# info <- getModelInfo("rpart", FALSE)$rpart
+# info$parameters
+
+grid_rpart <- data.frame(
+  cp = seq(-0.001, 0.01, by= 0.001)
+)
+
+modelo_rpart <- train(
+  receita, 
+  credit_data_treino, 
+  method = "rpart", 
+  metric = "ROC",
+  trControl = train_control_rpart,
+  tuneGrid = grid_rpart
+)
+```
+
+### Resultado
+
+```{r}
+modelo_rpart
+modelo_rpart$bestTune
+varImp(modelo_rpart)
+```
+
+```{r}
+# Matriz de confusão
+credit_data_teste <- credit_data_teste %>% mutate(pred_rpart = predict(modelo_rpart, ., type = "prob")$bad)
+caret::confusionMatrix(predict(modelo_rpart, credit_data_teste), credit_data_teste$Status)
+```
+
+```{r}
+#curva ROC
+roc_rpart <- roc(credit_data_teste$Status, credit_data_teste$pred_rpart)
+ggroc(roc_rpart)
+```
+
+```{r}
+# área sob a curva ROC
+auc(roc_rpart)
+```
+
+
+
+
+
+
+
