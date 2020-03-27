@@ -6,49 +6,60 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidymodels)
 library(tidyverse)
-library(ISLR)
+library(MASS)
 # install.packages("remotes")
 # remotes::install_github("curso-r/treesnip")
 library(treesnip)
-knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
 ```{r}
-Hitters
+Boston
 ```
 
 Base de Treino/Teste - Split inicial
 
 ```{r}
-hitters_split <- mc_cv(Hitters, prop = 0.8, times = 1)
+boston_split <- mc_cv(Boston, prop = 0.8, times = 1)
 ```
 
 Modelo - algoritmo, modo e motor
 
 ```{r}
-hitters_model <- decision_tree(min_n = tune()) %>%
+glimpse(MASS::Boston)
+boston_model <- decision_tree(min_n = tune()) %>%
   set_mode("regression") %>%
   set_engine("tree")
 ```
 
 ```{r}
-hitters_tune <- tune_grid(
-  Salary ~ Hits + Years,
-  model = hitters_model,
-  grid = 10,
-  resamples = hitters_split
+pars <- parameters(boston_model) %>% 
+  update(min_n = dials::min_n(range = c(2, 150)))
+
+#boston_split <- vfold_cv(MASS::Boston, v = 5)
+
+boston_tune <- tune_grid(
+  boston_model,
+  medv ~ .,
+  grid = grid_regular(pars, levels = 10),
+  resamples = boston_split
 )
+
+autoplot(boston_tune)
 ```
 
 ```{r}
-autoplot(hitters_tune)
+collect_metrics(boston_tune) %>% 
+  ggplot(aes(x = min_n, y = mean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - std_err, ymax = mean + std_err)) +
+  facet_wrap(~.metric, scales = "free")
 ```
 
 
 O melhor modelo
 
 ```{r}
-hitters_best <- select_best(hitters_tune, metric = "rmse")
+boston_best <- select_best(boston_tune, metric = "rmse")
 ```
 
