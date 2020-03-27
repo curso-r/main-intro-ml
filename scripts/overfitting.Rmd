@@ -1,0 +1,54 @@
+---
+title: "Overfitting"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidymodels)
+library(tidyverse)
+library(ISLR)
+# install.packages("remotes")
+# remotes::install_github("curso-r/treesnip")
+library(treesnip)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+Hitters
+```
+
+Base de Treino/Teste - Split inicial
+
+```{r}
+hitters_split <- mc_cv(Hitters, prop = 0.8, times = 1)
+```
+
+Modelo - algoritmo, modo e motor
+
+```{r}
+hitters_model <- decision_tree(min_n = tune()) %>%
+  set_mode("regression") %>%
+  set_engine("tree")
+```
+
+```{r}
+hitters_tune <- tune_grid(
+  Salary ~ Hits + Years,
+  model = hitters_model,
+  grid = 10,
+  resamples = hitters_split
+)
+```
+
+```{r}
+autoplot(hitters_tune)
+```
+
+
+O melhor modelo
+
+```{r}
+hitters_best <- select_best(hitters_tune, metric = "rmse")
+```
+
