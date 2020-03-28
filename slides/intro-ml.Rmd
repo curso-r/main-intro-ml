@@ -13,6 +13,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+theme_set(theme_minimal(14))
 options(htmltools.dir.version = FALSE)
 ```
 
@@ -24,17 +28,19 @@ options(htmltools.dir.version = FALSE)
 
 # Programa do curso
 
--  Introdução ao Machine Learning
+- Introdução ao Machine Learning
 
--  Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
+- Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
 
 - Regressão linear, regularização
 
 - Regressão logística, regressão vs classificação
 
-- Modelos de árvores
+- Árvores de Decisão
 
 - Bagging e Boosting
+
+- Estudo de Caso
 
 ---
 
@@ -95,43 +101,12 @@ class: middle, center, inverse
 
 --
 
-<img src="http://multimidia.correiodopovo.com.br/thumb.aspx?Caminho=multimidia/2017/10/07/434592.JPG&Tamanho=690" style="position: fixed; width: 40%; top: 400px; left: 100px;">
-
---
-
 <img src="https://i2.wp.com/www.yaabot.com/wp-content/uploads/2016/11/yaabot_algo2.jpg?resize=759%2C500&ssl=1" style="position: fixed; width: 40%; top: 400px; left: 500px;">
 
 --
 
 <img src="https://5.imimg.com/data5/NT/NK/MY-38742550/life-insurance-health-insurance-and-general-insurance-250x250.png" style="position: fixed; width: 20%; top: 200px; left: 100px;">
 
---
-
-<img src="https://i.ytimg.com/vi/DmPLEURo-Vk/maxresdefault.jpg" style="position: fixed; width: 40%; top: 200px; left: 300px;">
-
----
-
-# Machine Learning 
-
-
-Matematicamente, queremos encontrar uma função $f()$ tal que:
-
-$$
-y \approx f(x)
-$$
-
----
-
-# Machine Learning e Estatística
-
- <img src="img/box-data-models.png" class = "center2"> 
- 
---
-
-<br>
-<br>
- 
-<img src="img/box-algorithmic-models.png" class = "center2">
 
 ---
 
@@ -140,7 +115,6 @@ $$
 ---
 
 # Motivação
-
 
 ```{r echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(
@@ -151,7 +125,7 @@ knitr::opts_chunk$set(
   fig.height=6,
   fig.align='center'
 )
-library(tidyverse)
+library(rpart)
 adv <- read_csv("data/Advertising.csv")
 ```
 
@@ -160,36 +134,80 @@ Somos consultores e fomos contratados para dar conselhos para uma empresa aument
 Obtivemos o seguinte banco de dados
 
 ```{r, fig.width = 10, fig.height = 4}
-adv %>% 
-  gather(midia, investimento, -sales) %>% 
+adv_ok <- adv %>% 
+  gather(midia, investimento, -sales)
+
+adv_ok %>% 
   ggplot(aes(x = investimento, y = sales)) + 
   geom_point() +
   facet_wrap(~midia, scales = "free")
 ```
 
-* O propritário não consegue interferir diretamente nas vendas, mas consegue interferir no investimento em propaganda. 
+* PERGUNTA: Como investimento em propaganda influencia nas vendas?
 
 ---
 
-# Definições
+# Motivação
 
-- **X1**: budget para propagandas em jornal
-- **X2**: budget para propagandas em radio
-- **X3**: budget para propagandas em TV
 
-* __Y__: qtd vendida
+Somos consultores e fomos contratados para dar conselhos para uma empresa aumentar as suas vendas.
 
---
+Obtivemos o seguinte banco de dados
 
-* __X1, X2 e X3__ são as variáveis explicativas, independentes, *features* ou preditores.
+```{r, fig.width = 10, fig.height = 4}
+adv_ok %>% 
+  ggplot(aes(x = investimento, y = sales)) + 
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~midia, scales = "free")
+```
 
-* Y é a variável resposta ou variável dependente. 
+* PERGUNTA: Como investimento em propaganda influencia nas vendas?
+
+---
+
+# Machine Learning 
+
+Matematicamente, queremos encontrar uma função $f()$ tal que:
+
+<img src="img/y_fx.png" style="position: fixed; width: 40%; top: 250px; left: 300px;">
+
+
+
+---
+
+# Exemplos de $f(x)$
+
+```{r, fig.width = 12, fig.height = 5}
+adv_ok <- adv %>% 
+  gather(midia, investimento, -sales)
+
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok)
+regressao_linear <- lm(sales ~ investimento + midia, data = adv_ok)
+adv_ok <- adv_ok %>%
+  mutate(
+    arvore = predict(arvore, newdata = .),
+    regressao_linear = predict(regressao_linear, newdata = .),
+  )
+adv_ok %>% 
+  ggplot(aes(x = investimento, y = sales)) + 
+  geom_point() +
+  geom_line(aes(y = arvore, colour = "Árvore de Decisão"), size = 2) +
+  geom_step(aes(y = regressao_linear, colour = "Regressão Linear"), size = 2) +
+  facet_wrap(~midia, scales = "free") +
+  labs(colour = "f(x):") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+```
+
+Curiosidade: $f(x)$ também é conhecida também como "Modelo" ou "Hipótese".
 
 ---
 
 # Intuição
 
-Queremos encontrar $f$ tal que
+Queremos encontrar $f$ tal que $f(X)$ de $Y$ 
 
 $$ Y \approx f(X) $$
 ou
@@ -199,9 +217,33 @@ $$Y = f(X) + \epsilon$$
 * $X = (X_1, X_2, ..., X_n)$
 * $\epsilon$ é chamado de erro aleatório. Esse termo representa toda a variabilidade de $Y$ não explicada pelos preditores em $X$.
 
---
-
 Machine Learning se refere a um conjunto de técnicas para obter estimativas o mais precisas possível da função $f$. 
+
+
+
+
+---
+
+# Definições e Nomenclaturas
+
+
+* $X_1$, $X_2$, ..., $X_p$: variáveis explicativas (ou variáveis independentes ou *features* ou preditores).
+
+- $\boldsymbol{X} = {X_1, X_2, \dots, X_p}$: conjunto de todas as *features*.
+
+
+* __Y__: variável resposta (ou variável dependente ou *target*). 
+
+
+## No exemplo:
+
+- $X_1$: `midia` - indicadador de se a propaganda é para jornal, para rádio, ou para TV.
+- $X_2$: `investimento` - valor do orçamento
+
+
+* __Y__: `sales` - qtd vendida
+
+
 
 ---
 
@@ -221,6 +263,12 @@ Neste caso não estamos interessados em como é a estrutura $\hat{f}$ desde que 
 
 ---
 
+# Por que estimar f?
+
+
+* Predição
+* Inferência
+
 ## Inferência
 
 Em inferência estamos mais interessados em entender a relação entre as variáveis explciativas $X$ e a variável resposta $Y$.
@@ -235,38 +283,57 @@ Neste curso, vamos falar principalmente sobre **predição**.
 
 ---
 
-# Como estimamos f?
-
-Para estimar $f$, coletamos um conjunto de pares $(X, Y)$ e usamos algum algoritmo para encontrar uma $f$ tal que $Y \approx f(X)$.
-
-(dar exemplos de f) - grQafico de reta (reg lin)
-grafico arvore
-
----
-
 # Flexibilidade ou Interpretabilidade?
 
-![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+```{r}
+#![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+```
+
+```{r, fig.width=11, fig.height=7}
+library(ggrepel)
+set.seed(1)
+tribble(
+  ~modelo, ~Flexibilidade, ~Interpretabilidade,
+  "Regressão Linear", 0, 3,
+  "Regressão Logística", 0, 3, 
+  "LASSO", 0.3, 2.7,
+  "Árvore de Decisão", 1, 2.2,
+  "Generalized Additive Models", 1.5, 1.5,
+  "Redes Neurais, Deep Learning", 3, 1,
+  "Bagging, Boosting", 3.2, 0.8,
+  "SVM", 2.6, 0.5
+) %>%
+  ggplot(aes(x = Flexibilidade, y = Interpretabilidade)) +
+  geom_text_repel(aes(label = modelo), size = 7) +
+  theme_minimal(24) +
+  scale_x_continuous(breaks = c(0, 3.2), labels = c("Baixo", "Alto")) +
+  scale_y_continuous(breaks = c(0, 3.5), labels = c("Baixo", "Alto"))
+
+
+```
+
 
 ---
 
-# Regressão e Classificação
+# Modo - Regressão e Classificação
 
 Existem dois principais tipos de problemas em Machine Learning:
 
-* Regressão
-* Classificação
+.pull-left[
 
-A principal razão para fazermos essa distinção é a escolha da métrica de performance.
+## Regressão
 
---
+]
 
-# Árvore
+.pull-right[
 
-- Intuição blablabla
-- Foto que ilustre o CART
+## Classificação
 
---
+]
+
+
+
+---
 
 # Ir p/ R
 
