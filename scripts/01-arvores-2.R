@@ -26,21 +26,21 @@ dados_plot_2 <- novos_dados %>%
   gather(tipo, y, -x)
 
 ggplot() +
-  geom_point(aes(x, y), data = filter(dados_plot, tipo == "y"), color = 'red') +
-  geom_step(aes(x, y), data = filter(dados_plot, tipo != "y"), color = 'red') +
+  geom_point(aes(x, y), data = filter(dados_plot_1, tipo == "y"), color = 'red') +
+  geom_step(aes(x, y), data = filter(dados_plot_1, tipo != "y"), color = 'red') +
   theme_bw() +
   geom_point(aes(x, y), data = novos_dados, color = 'blue')
   
 
 # Us ----------------------------------------------------------------------
 
-rmse(dados_e_previsao, truth = y, estimate = y_e)
+rmse(dados1_com_previsao, truth = y, estimate = y_e)
 rmse(novos_dados, truth = y, estimate = y_e)
 
-mape(dados_e_previsao, truth = y, estimate = y_e)
+mape(dados1_com_previsao, truth = y, estimate = y_e)
 mape(novos_dados, truth = y, estimate = y_e)
 
-mae(dados_e_previsao, truth = y, estimate = y_e)
+mae(dados1_com_previsao, truth = y, estimate = y_e)
 mae(novos_dados, truth = y, estimate = y_e)
 
 # You ---------------------------------------------------------------------
@@ -51,6 +51,6 @@ mae(novos_dados, truth = y, estimate = y_e)
 
 Hitters2 <- readRDS("dados/Hitters2.rds")
 
-# 1. Usando a base Hitters2, crie uma tabela que compara o que você previu usando o modelo do exercício 1 com o que realmente aconteceu.
+# 1. Usando a base Hitters2, crie uma tabela que compara o que você previu usando o modelo do primeiro bloco de exercícios 1 com o que realmente aconteceu.
 # 2. Calcule RMSE, MAPE, MAE e MASE das suas previsões para os novos dados. Essas métricas são parecidas com as que você tinha visto antes?
 # 3. [Extra] Faça um gráfico comparando as suas predições antes de ver os novos dados e o que realmente aconteceu.

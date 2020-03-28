@@ -14,6 +14,7 @@ library(ISLR)
 
 #saveRDS(dados3, "dados/dados_1_3.rds")
 
+# Devido aos nossos grandes erros, recebemos mais dados ainda...
 dados3 <- readRDS("dados/dados1_3.rds")
 
 todos_os_dados <- bind_rows(dados1, dados2, dados3)
@@ -24,6 +25,8 @@ separacao <- initial_split(todos_os_dados, prop = .5)
 
 treino <- training(separacao)
 teste <- testing(separacao)
+# a ideia é simular dados novos.
+# o nosso "teste" vai representar o que vai acontecer quando tivermos dados novos
 
 # Us ----------------------------------------------------------------------
 
@@ -83,5 +86,5 @@ mae(final, truth = y, estimate = y_e2)
 mape(final, truth = y, estimate = y_e1)
 mape(final, truth = y, estimate = y_e2)
 
-# 1. Avalia o modelo 1 e o modelo 2 nos novos dados. Qual deles foi melhor? Varie os valores e min_n e veja se você consegue encontrar um modelo melhor ainda.
-# 2. [Extra] Encontra o melhor min_n da base Hitters separando a base em 3. Ajuste o modelo em um pedaço, procure o melhor min_n na outra e teste na que sobrou.
+# 1. Avalia o modelo 1 e o modelo 2 nos novos dados. Qual deles foi melhor? Tente pelo menos outros 4 valores de min_n e veja se você consegue encontrar um modelo melhor ainda.
+# 2. [Extra] Encontra um bom min_n da base Hitters separando a base em 3, aplicando initial_split duas vezes. Ajuste o modelo em um pedaço, procure o melhor min_n na outra e teste na que sobrou.

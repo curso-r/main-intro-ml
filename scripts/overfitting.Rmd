@@ -7,11 +7,10 @@ output: html_document
 library(tidymodels)
 library(tidyverse)
 library(MASS)
-# install.packages("remotes")
-# remotes::install_github("curso-r/treesnip")
+install.packages("remotes")
+remotes::install_github("curso-r/treesnip")
 library(treesnip)
 ```
-
 
 ```{r}
 Boston
@@ -29,7 +28,7 @@ Modelo - algoritmo, modo e motor
 glimpse(MASS::Boston)
 boston_model <- decision_tree(min_n = tune()) %>%
   set_mode("regression") %>%
-  set_engine("tree")
+  set_engine("rpart")
 ```
 
 ```{r}
@@ -39,8 +38,8 @@ pars <- parameters(boston_model) %>%
 #boston_split <- vfold_cv(MASS::Boston, v = 5)
 
 boston_tune <- tune_grid(
-  boston_model,
   medv ~ .,
+  boston_model,
   grid = grid_regular(pars, levels = 10),
   resamples = boston_split
 )
@@ -55,7 +54,6 @@ collect_metrics(boston_tune) %>%
   geom_errorbar(aes(ymin = mean - std_err, ymax = mean + std_err)) +
   facet_wrap(~.metric, scales = "free")
 ```
-
 
 O melhor modelo
 

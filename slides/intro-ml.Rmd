@@ -264,6 +264,7 @@ A principal razão para fazermos essa distinção é a escolha da métrica de pe
 # Árvore
 
 - Intuição blablabla
+- Foto que ilustre o CART
 
 --
 
@@ -271,12 +272,10 @@ A principal razão para fazermos essa distinção é a escolha da métrica de pe
 
 --
 
-# Resíduos
-
-
---
-
 # Métricas
+
+- Definir resíduo
+- Definir RMSE, MAE, MAPE, MASE
 
 --
 
