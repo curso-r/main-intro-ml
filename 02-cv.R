@@ -4,14 +4,45 @@ library(tidymodels)
 library(parsnip)
 library(ISLR)
 library(rsample)
-
+library(dials)
+library(yardstick)
 
 # Me ----------------------------------------------------------------------
 
 todos_os_dados <- bind_rows(dados1, dados2, dados3, dados4)
 
-boston_split <- mc_cv(Boston, prop = 0.8, times = 1)
+quebra_50p <- mc_cv(todos_os_dados, prop = 0.5, times = 1)
+# MC CV serve para termos o treino e o teste dentro do mesmo objeto
 
 especificacao_arvore_n_variavel <- decision_tree(min_n = tune()) %>%
+  # A especificação é igual, mas se queremos que a f possa ter qualquer n, e não um fixo,
+  # usamos a função tune()
   set_mode("regression") %>%
   set_engine("rpart")
+
+# Us ---------------------------------------------------------------------
+
+pars <- parameters(especificacao_arvore_n_variavel) %>% 
+  update(min_n = dials::min_n(range = c(XXXXXX, XXXXXX)))
+  # precisamos trocar os XXX pelo range de hiperparâmetros que queremos procurar
+
+tune <- tune_grid(
+  # quando for fitar vários modelos, você deve usar a função tune_grid
+  y ~ x,
+  especificacao_arvore_n_variavel,
+  grid = grid_regular(pars, levels = 20),
+  # o parâmetro levels define em quantos pontos queremos fazer a conta
+  resamples = quebra_50p,
+  metrics = metric_set(rmse, mae, mape, mase)
+)
+
+autoplot(tune)
+
+# You ---------------------------------------------------------------------
+
+# 1. Encontre o melhor min_n para a base Hitters.
+# 2. [Extra ]Encontra o melhor min_n para a base Hitters, mas fazendo um modelo que
+# tem todas as variáveis históricas dos jogadores (elas começam com C maiúsculo).
+# Lembre-se: se você quiser usar mais variáveis no seu modelo de árvore,
+# basta fazer x+y+z quando for especificar a formula.
+
