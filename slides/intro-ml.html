@@ -3,7 +3,8 @@
   <head>
     <title>Introdução ao Machine Learning com R</title>
     <meta charset="utf-8" />
-    <meta name="author" content="Curso-R" />
+    <meta name="author" content="" />
+    <meta name="date" content="2020-03-28" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
     <link rel="stylesheet" href="custom.css" type="text/css" />
@@ -13,7 +14,8 @@
 class: center, middle, inverse, title-slide
 
 # Introdução ao Machine Learning com R
-### Curso-R
+### <img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>
+### 2020-03-28
 
 ---
 
@@ -32,13 +34,15 @@ class: center, middle, inverse, title-slide
 
 - Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
 
-- Regressão linear, regularização
+- Regressão linear, Regularização (LASSO e Ridge)
 
 - Regressão logística, regressão vs classificação
 
 - Árvores de Decisão
 
-- Bagging e Boosting
+- Random Forest 
+
+- Boosting - XGBoost
 
 - Estudo de Caso
 
@@ -153,26 +157,23 @@ Matematicamente, queremos encontrar uma função `\(f()\)` tal que:
 
 # Exemplos de `\(f(x)\)`
 
-&lt;img src="intro-ml_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
 
-Curiosidade: `\(f(x)\)` também é conhecida também como "Modelo" ou "Hipótese".
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
-# Intuição
+# Exemplos de `\(f(x)\)`
 
-Queremos encontrar `\(f\)` tal que `\(f(X)\)` de `\(Y\)` 
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
 
-$$ Y \approx f(X) $$
-ou
+---
 
-`$$Y = f(X) + \epsilon$$`
+# Flexibilidade ou Interpretabilidade da f(x)
 
-* `\(X = (X_1, X_2, ..., X_n)\)`
-* `\(\epsilon\)` é chamado de erro aleatório. Esse termo representa toda a variabilidade de `\(Y\)` não explicada pelos preditores em `\(X\)`.
 
-Machine Learning se refere a um conjunto de técnicas para obter estimativas o mais precisas possível da função `\(f\)`. 
 
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -180,29 +181,39 @@ Machine Learning se refere a um conjunto de técnicas para obter estimativas o m
 
 # Definições e Nomenclaturas
 
-
 * `\(X_1\)`, `\(X_2\)`, ..., `\(X_p\)`: variáveis explicativas (ou variáveis independentes ou *features* ou preditores).
 
 - `\(\boldsymbol{X} = {X_1, X_2, \dots, X_p}\)`: conjunto de todas as *features*.
 
-
 * __Y__: variável resposta (ou variável dependente ou *target*). 
-
+* __Ŷ__: valor **esperado** (ou predição ou estimado ou *fitted*). 
+* `\(f(X)\)` também é conhecida também como "Modelo" ou "Hipótese".
 
 ## No exemplo:
 
-- `\(X_1\)`: `midia` - indicadador de se a propaganda é para jornal, para rádio, ou para TV.
+- `\(X_1\)`: `midia` - indicadador de se a propaganda é para jornal, rádio, ou TV.
 - `\(X_2\)`: `investimento` - valor do orçamento
-
 
 * __Y__: `sales` - qtd vendida
 
 
+---
+
+# Definições e Nomenclaturas
+
+## Observado VERSUS Esperado
+
+- __Y__ é um valor **observado** (ou verdade ou *truth*)
+- __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
+
+Por definição, `\(\hat{Y} = f(x)\)` que é o valor que a função `\(f\)` retorna. 
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
 
 ---
 
-# Por que estimar f?
-
+# Por que ajustar uma f?
 
 * Predição
 * Inferência
@@ -219,7 +230,6 @@ Neste caso não estamos interessados em como é a estrutura `\(\hat{f}\)` desde 
 
 # Por que estimar f?
 
-
 * Predição
 * Inferência
 
@@ -235,14 +245,6 @@ Por exemplo:
 
 Neste curso, vamos falar principalmente sobre **predição**.
 
----
-
-# Flexibilidade ou Interpretabilidade?
-
-
-
-&lt;img src="intro-ml_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
-
 
 ---
 
@@ -254,11 +256,27 @@ Existem dois principais tipos de problemas em Machine Learning:
 
 ## Regressão
 
+__Y__ é uma variável contínua.
+
+- Volume de vendas
+- Peso
+- Temperatura
+- Valor de Ações
+
 ]
 
 .pull-right[
 
 ## Classificação
+
+__Y__ é uma variável categórica.
+
+- Fraude/Não Fraude
+- Pegou em dia/Não pagou
+- Cancelou assinatura/Não cancelou (churn)
+- Gato/Cachorro/Cavalo/Outro
+
+
 
 ]
 
@@ -268,9 +286,13 @@ Existem dois principais tipos de problemas em Machine Learning:
 
 # Ir p/ R
 
+
+
 --
 
 # Métricas
+
+Métricas: para medir o quanto a `\(f(x)\)` está errando as previsões.
 
 - Definir resíduo
 - Definir RMSE, MAE, MAPE, MASE
