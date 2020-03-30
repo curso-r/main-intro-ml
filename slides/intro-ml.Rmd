@@ -586,7 +586,27 @@ arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 
 ]
 
+---
+
+# Overfitting
+
+```{r}
+
+```
+
 
 ---
 
 # Dados novos vs antigos
+
+
+---
+class: inverse
+background-image: url(img/ml_101.png)
+background-position: left 145px
+background-size: contain
+
+# Resumo dos conceitos
+
+
+
