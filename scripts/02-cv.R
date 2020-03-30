@@ -22,15 +22,31 @@ especificacao_arvore_n_variavel <- decision_tree(min_n = tune()) %>%
 
 # Us ---------------------------------------------------------------------
 
+# deixando o tune_grid() sortear valores para os hiperparâmetros
+tune <- tune_grid(
+  # quando for fitar vários modelos, você deve usar a função tune_grid
+  y ~ x,
+  especificacao_arvore_n_variavel,
+  grid = 20,
+  # o parâmetro levels define em quantos pontos queremos fazer a conta
+  resamples = quebra_50p,
+  metrics = metric_set(rmse, mae, mape, mase)
+)
+
+autoplot(tune)
+
+
+# usando lista de parâmetros explicitamente com as funções parameters() + update() + min_n(range =) + grid_regular
 pars <- parameters(especificacao_arvore_n_variavel) %>% 
-  update(min_n = dials::min_n(range = c(XXXXXX, XXXXXX)))
+  update(min_n = dials::min_n(range = c(XXXXXX, XXXXXX))) %>%
+  grid_regular(levels = 20)
   # precisamos trocar os XXX pelo range de hiperparâmetros que queremos procurar
 
 tune <- tune_grid(
   # quando for fitar vários modelos, você deve usar a função tune_grid
   y ~ x,
   especificacao_arvore_n_variavel,
-  grid = grid_regular(pars, levels = 20),
+  grid = pars,
   # o parâmetro levels define em quantos pontos queremos fazer a conta
   resamples = quebra_50p,
   metrics = metric_set(rmse, mae, mape, mase)
