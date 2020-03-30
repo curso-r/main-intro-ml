@@ -588,11 +588,16 @@ arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 
 ---
 
-# Overfitting
+# Overfitting (sobreajuste)
 
-```{r}
+Intuição
 
-```
+![scatter_eqm](img/overfiting_scatter_eqm.gif)
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
+]
+
 
 
 ---
