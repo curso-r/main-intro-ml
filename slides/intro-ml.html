@@ -4,7 +4,7 @@
     <title>Introdução ao Machine Learning com R</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2020-03-29" />
+    <meta name="date" content="2020-03-30" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
     <link rel="stylesheet" href="custom.css" type="text/css" />
@@ -15,7 +15,7 @@ class: center, middle, inverse, title-slide
 
 # Introdução ao Machine Learning com R
 ### <img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>
-### 2020-03-29
+### 2020-03-30
 
 ---
 
@@ -397,11 +397,58 @@ $$
 
 # Ir para o R
 
---
+---
 
 # Hiperparâmetros
 
---
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
+
+Exemplo: `min_n` das árvores
+
+
+.pull-left[
+
+```
+decision_tree(min_n = 100)
+```
+
+]
+
+.pull-right[
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+---
+
+# Hiperparâmetros
+
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
+
+Exemplo: `min_n` das árvores
+
+
+.pull-left[
+
+```
+decision_tree(min_n = 5)
+```
+
+
+
+]
+
+.pull-right[
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
 
 # Dados novos vs antigos
     </textarea>

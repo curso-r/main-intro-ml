@@ -528,10 +528,65 @@ $$
 
 # Ir para o R
 
---
+---
 
 # Hiperparâmetros
 
---
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
+
+Exemplo: `min_n` das árvores
+
+
+.pull-left[
+
+```
+decision_tree(min_n = 100)
+```
+
+]
+
+.pull-right[
+
+```{r}
+
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 100))
+arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
+```
+
+
+]
+
+
+---
+
+# Hiperparâmetros
+
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
+
+Exemplo: `min_n` das árvores
+
+
+.pull-left[
+
+```
+decision_tree(min_n = 5)
+```
+
+
+
+]
+
+.pull-right[
+
+```{r}
+
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 5))
+arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
+```
+
+]
+
+
+---
 
 # Dados novos vs antigos
