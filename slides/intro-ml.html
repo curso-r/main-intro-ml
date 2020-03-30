@@ -465,6 +465,55 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 # Dados novos vs antigos
 
+- **Base de Treino** (dados antigos): a base de histórico que usamos para ajustar o modelo.
+
+- **Base de Teste** (dados novos): a base que irá simular a chegada de dados novos, "em produção".
+
+.pull-left[
+
+
+```r
+initial_split(dados, prop=3/4)
+```
+
+
+&gt; "Quanto mais complexo for o modelo, menor será o **erro de treino.**"
+
+&gt; "Porém, o que importa é o **erro de teste**."
+
+]
+
+.pull-right[
+&lt;img src="img/erro_treino_erro_teste.png" width = "500px"&gt;
+
+]
+
+---
+
+# Dados novos vs antigos
+
+## Estratégia
+
+
+### 1) Separar inicialmente a base de dados em duas: treino e teste.
+
+
+```r
+initial_split(dados, prop=3/4) # 3/4 da base será de treino
+```
+
+A base de teste que só será tocada quando a modelagem terminar. Ela nunca deverá influenciar as decisões que tomamos no período da modelagem.
+
+### 2) Criar bases de reamostragem na base de treino para "estimar" o erro de teste.
+
+
+```r
+mc_cv(dados_treino)
+vfold_cv(dados_treino)
+bootstraps(dados_treino)
+# etc.
+```
+
 
 ---
 class: inverse
