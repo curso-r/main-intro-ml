@@ -85,6 +85,12 @@ mase(dados1_com_previsao, truth = y, estimate = y_e)
 
 # Exercícios
 
+subir <- function() {
+  system("git add -A")
+  system(paste0("git commit -m 'automatico durante a aula ", runif(1), "'"))
+  system("git push")
+}
+
 # Estude o resultado dos modelo que você fez nos exercícios anteriores na base Hitters1
 
 Hitters1 <- readRDS("dados/Hitters1.rds")

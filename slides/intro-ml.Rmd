@@ -278,6 +278,7 @@ tribble(
 
 - __Y__ é um valor **observado** (ou verdade ou *truth*)
 - __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
+- __Y__ - __Ŷ__ é o resíduo (ou erro)
 
 Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
 
@@ -383,10 +384,6 @@ __Y__ é uma variável categórica.
 ---
 
 
-
----
-
-
 # Métricas
 
 Métricas: para medir o quanto a $f(x)$ está errando as previsões.
@@ -400,6 +397,8 @@ __Y__ é uma variável contínua.
 - RMSE
 - R2
 - MAE
+- MAPE
+...
 ]
 
 .pull-right[
@@ -408,16 +407,124 @@ __Y__ é uma variável contínua.
 
 __Y__ é uma variável categórica.
 
-- Fraude/Não Fraude
-- Pegou em dia/Não pagou
-- Cancelou assinatura/Não cancelou (churn)
-- Gato/Cachorro/Cavalo/Outro
+- Acurácia
+- AUROC
+- Precision/Recall
+- Deviance (Cross-Entropy)
+- F1
+- Kappa
+...
+]
+
+[lista de métricas no `yardstick`](https://tidymodels.github.io/yardstick/articles/metric-types.html)
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+Ou seja, nosso **objetivo** é
+
+## Encontrar $f(x)$ que nos retorne o ~menor~ RMSE.
+
+```
+Exercício mental: encontre a expressão dos resíduos na fórmula.
+```
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+```{r, fig.width=10, fig.height=4, warning=FALSE}
+melhor_reta <- lm(dist ~ speed, data = cars)
+cars_com_predicoes <- melhor_reta %>% 
+  broom::augment() %>%
+  rename(pred_melhor_reta = .fitted) %>%
+  mutate(
+    pred_reta_a_mao = 12 + 3 * speed
+  )
+
+grafico_residuos_melhor_reta <- cars_com_predicoes %>%
+  ggplot(aes(x = speed, y = dist)) +
+  geom_point(size = 2) +
+  geom_abline(
+    intercept = melhor_reta$coefficients[1], 
+    slope =     melhor_reta$coefficients[2], 
+    size = 1,
+    colour = "salmon"
+  ) +
+  geom_segment(aes(xend = speed, yend = pred_melhor_reta), colour = "blue", size = 1) +
+  labs(
+    subtitle = "Resíduos da Melhor Reta",
+    title = "Os segmentos azuis são os resíduos (ou o quanto o modelo errou naqueles pontos)."
+  ) 
+
+grafico_residuos_reta_a_mao <- cars_com_predicoes %>%
+  ggplot(aes(x = speed, y = dist)) +
+  geom_point(size = 2) +
+  geom_abline(
+    intercept = 12, 
+    slope =     3, 
+    size = 1,
+    colour = "orange"
+  ) +
+  geom_segment(aes(xend = speed, yend = pred_reta_a_mao), colour = "blue", size = 1) +
+  labs(
+    subtitle = "Resíduos da Reta Escolhida a Mão"
+  ) 
+library(patchwork)
+grafico_residuos_melhor_reta + grafico_residuos_reta_a_mao
+```
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
 
 
+.pull-left[
+
+MAE: Mean Absolute Error
+
+$$
+MAE = \frac{1}{N}\sum|y_i - \hat{y_i}|
+$$
 
 ]
 
---
+.pull-right[
+
+R2: R-squared
+
+$$
+R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royalblue}{\bar{y}})^2}
+$$
+]
+
+
+---
 
 # Ir para o R
 

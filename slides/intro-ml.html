@@ -4,7 +4,7 @@
     <title>Introdução ao Machine Learning com R</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2020-03-28" />
+    <meta name="date" content="2020-03-29" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
     <link rel="stylesheet" href="custom.css" type="text/css" />
@@ -15,7 +15,7 @@ class: center, middle, inverse, title-slide
 
 # Introdução ao Machine Learning com R
 ### <img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>
-### 2020-03-28
+### 2020-03-29
 
 ---
 
@@ -205,6 +205,7 @@ Matematicamente, queremos encontrar uma função `\(f()\)` tal que:
 
 - __Y__ é um valor **observado** (ou verdade ou *truth*)
 - __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
+- __Y__ - __Ŷ__ é o resíduo (ou erro)
 
 Por definição, `\(\hat{Y} = f(x)\)` que é o valor que a função `\(f\)` retorna. 
 
@@ -288,16 +289,111 @@ __Y__ é uma variável categórica.
 
 
 
---
+---
+
 
 # Métricas
 
 Métricas: para medir o quanto a `\(f(x)\)` está errando as previsões.
 
-- Definir resíduo
-- Definir RMSE, MAE, MAPE, MASE
+.pull-left[
 
---
+## Regressão
+
+__Y__ é uma variável contínua.
+
+- RMSE
+- R2
+- MAE
+- MAPE
+...
+]
+
+.pull-right[
+
+## Classificação
+
+__Y__ é uma variável categórica.
+
+- Acurácia
+- AUROC
+- Precision/Recall
+- Deviance (Cross-Entropy)
+- F1
+- Kappa
+...
+]
+
+[lista de métricas no `yardstick`](https://tidymodels.github.io/yardstick/articles/metric-types.html)
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a `\(f(x)\)` que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+Ou seja, nosso **objetivo** é
+
+## Encontrar `\(f(x)\)` que nos retorne o ~menor~ RMSE.
+
+```
+Exercício mental: encontre a expressão dos resíduos na fórmula.
+```
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a `\(f(x)\)` que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+&lt;img src="intro-ml_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a `\(f(x)\)` que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+
+.pull-left[
+
+MAE: Mean Absolute Error
+
+$$
+MAE = \frac{1}{N}\sum|y_i - \hat{y_i}|
+$$
+
+]
+
+.pull-right[
+
+R2: R-squared
+
+$$
+R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royalblue}{\bar{y}})^2}
+$$
+]
+
+
+---
 
 # Ir para o R
 
