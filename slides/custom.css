@@ -67,4 +67,37 @@ div.willy {
     left: 90px;
     height: 490px;
 }
- s
+.sem-padding {
+  padding: 0;
+}
+.cinza { 
+  color: #999999; 
+}
+
+.pull-left-maior {
+  float: left;
+  width: 60%;
+}
+.pull-right-maior {
+  float: right;
+  width: 60%;
+}
+.pull-left-menor {
+  float: left;
+  width: 34%;
+}
+.pull-right-menor {
+  float: right;
+  width: 34%;
+}
+.footnote {
+  position: absolute;
+  bottom: 2em;
+  padding-right: 4em;
+  font-size: 80%;
+}
+.pull-right-abaixo{
+  clear: none;
+  float: right;
+  width: 47%;
+}

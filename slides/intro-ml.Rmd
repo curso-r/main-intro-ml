@@ -1,7 +1,7 @@
 ---
 title: "Introdução ao Machine Learning com R"
-author: "Curso-R"
-date: ""
+author: "<img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>"
+date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -13,6 +13,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+theme_set(theme_minimal(14))
 options(htmltools.dir.version = FALSE)
 ```
 
@@ -24,17 +28,21 @@ options(htmltools.dir.version = FALSE)
 
 # Programa do curso
 
--  Introdução ao Machine Learning
+- Introdução ao Machine Learning
 
--  Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
+- Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
 
-- Regressão linear, regularização
+- Regressão linear, Regularização (LASSO e Ridge)
 
 - Regressão logística, regressão vs classificação
 
-- Modelos de árvores
+- Árvores de Decisão
 
-- Bagging e Boosting
+- Random Forest 
+
+- Boosting - XGBoost
+
+- Estudo de Caso
 
 ---
 
@@ -70,34 +78,14 @@ class: middle, center, inverse
 
 <br>
 
---
 
 - Não é um termo novo: criado por Arthur Samuel, em 1959
 
 <img src="img/arthur-sam.png" class="center2" width=100>
 
---
-
-- Existe um grande hype atualmente em cima desse termo (~50 artigos por dia no Arxiv!!!)
-
---
-
-- Machine Learning é um nome marketeiro para modelagem preditiva
-
---
 
 - Modelagem preditiva é um framework de análise de dados que visa gerar a estimativa mais precisa possível para uma quantidade ou fenômeno (Max Kuhn, 2014).
 
-
----
-
-# Por que o hype?
-
-- Poderio computacional
-
-- Disponibilidade de dados
-
-- Sucesso em resolver problemas historicamente difíceis
 
 ---
 
@@ -115,66 +103,12 @@ class: middle, center, inverse
 
 --
 
-<img src="http://multimidia.correiodopovo.com.br/thumb.aspx?Caminho=multimidia/2017/10/07/434592.JPG&Tamanho=690" style="position: fixed; width: 40%; top: 400px; left: 100px;">
-
---
-
 <img src="https://i2.wp.com/www.yaabot.com/wp-content/uploads/2016/11/yaabot_algo2.jpg?resize=759%2C500&ssl=1" style="position: fixed; width: 40%; top: 400px; left: 500px;">
 
 --
 
 <img src="https://5.imimg.com/data5/NT/NK/MY-38742550/life-insurance-health-insurance-and-general-insurance-250x250.png" style="position: fixed; width: 20%; top: 200px; left: 100px;">
 
---
-
-<img src="https://i.ytimg.com/vi/DmPLEURo-Vk/maxresdefault.jpg" style="position: fixed; width: 40%; top: 200px; left: 300px;">
-
----
-
-class: middle, center
-
-# Relação com a Estatística
-
-Leo Breiman: ["Statistical Modeling: The Two Cultures"](https://projecteuclid.org/euclid.ss/1009213726)
-
-<img src="https://upload.wikimedia.org/wikipedia/en/4/4d/Leo_Breiman.jpg">
-
----
-
-# Machine Learning e Estatística
-
-<img src = "img/box.png" class = "center2">
-
---
-
-1) Gostaríamos de saber como $x$ e $y$ estão relacionadas.
-
---
-
-2) Gostaríamos de prever $y$ a partir de $x$.
-
---
-
-<br>
-
-Matematicamente, queremos encontrar uma função $f()$ tal que:
-
-$$
-y \approx f(x)
-$$
-
----
-
-# Machine Learning e Estatística
-
- <img src="img/box-data-models.png" class = "center2"> 
- 
---
-
-<br>
-<br>
- 
-<img src="img/box-algorithmic-models.png" class = "center2">
 
 ---
 
@@ -182,51 +116,7 @@ $$
 
 ---
 
-# Pensamento crítico
-
-<br>
-<br>
-<br>
-
-- Entender o problema
-
-- Entender o objetivo
-
-- Entender a métrica
-
-<img src="https://media.giphy.com/media/sqefuSs2oD8sg/giphy.gif" class="smart_cat">
-
----
-
-<br>
-
-<img src="img/aviao.png" class="center2">
-
----
-
-<img src="img/google.png" class="google">
-
----
-class: middle, center, inverse
-
-# Estratégias
-
----
-
-# Vamos falar de
-
-- Intuição
-
-- Viés e variância
-
-- Erro de treino e erro de teste
-
-- Validação cruzada
-
----
-
 # Motivação
-
 
 ```{r echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(
@@ -237,71 +127,189 @@ knitr::opts_chunk$set(
   fig.height=6,
   fig.align='center'
 )
-library(tidyverse)
+library(rpart)
 adv <- read_csv("data/Advertising.csv")
 ```
 
 Somos consultores e fomos contratados para dar conselhos para uma empresa aumentar as suas vendas.
 
---
-
 Obtivemos o seguinte banco de dados
 
 ```{r, fig.width = 10, fig.height = 4}
-adv %>% 
-  gather(midia, investimento, -sales) %>% 
+adv_ok <- adv %>% 
+  gather(midia, investimento, -sales)
+
+adv_ok %>% 
   ggplot(aes(x = investimento, y = sales)) + 
   geom_point() +
   facet_wrap(~midia, scales = "free")
 ```
 
-* O propritário não consegue interferir diretamente nas vendas, mas consegue interferir no investimento em propaganda. 
+* PERGUNTA: Como investimento em propaganda influencia nas vendas?
 
 ---
 
-# Definições
+# Motivação
 
-- **X1**: budget para propagandas em jornal
-- **X2**: budget para propagandas em radio
-- **X3**: budget para propagandas em TV
 
-* __Y__: qtd vendida
+Somos consultores e fomos contratados para dar conselhos para uma empresa aumentar as suas vendas.
 
---
+Obtivemos o seguinte banco de dados
 
-* __X1, X2 e X3__ são as variáveis explicativas, independentes, *features* ou preditores.
+```{r, fig.width = 10, fig.height = 4}
+adv_ok %>% 
+  ggplot(aes(x = investimento, y = sales)) + 
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~midia, scales = "free")
+```
 
-* Y é a variável resposta ou variável dependente. 
-
----
-
-# Intuição
-
-Queremos encontrar $f$ tal que
-
-$$ Y \approx f(X) $$
-ou
-
-$$Y = f(X) + \epsilon$$
-
-* $X = (X_1, X_2, ..., X_n)$
-* $\epsilon$ é chamado de erro aleatório. Esse termo representa toda a variabilidade de $Y$ não explicada pelos preditores em $X$.
-
---
-
-Machine Learning se refere a um conjunto de técnicas para obter estimativas o mais precisas possível da função $f$. 
+* PERGUNTA: Como investimento em propaganda influencia nas vendas?
 
 ---
 
-# Por que estimar f?
+# Machine Learning 
 
---
+Matematicamente, queremos encontrar uma função $f()$ tal que:
+
+<img src="img/y_fx.png" style="position: fixed; width: 40%; top: 250px; left: 300px;">
+
+
+
+---
+
+# Exemplos de $f(x)$
+
+```{r, fig.width = 12, fig.height = 5}
+adv_ok <- adv %>% 
+  gather(midia, investimento, -sales)
+
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok)
+regressao_linear <- lm(sales ~ investimento + midia, data = adv_ok)
+adv_ok <- adv_ok %>%
+  mutate(
+    arvore = predict(arvore, newdata = .),
+    regressao_linear = predict(regressao_linear, newdata = .),
+  )
+grafico_sem_curva <- adv_ok %>% 
+  ggplot(aes(x = investimento, y = sales)) + 
+  geom_point() +
+  facet_wrap(~midia, scales = "free") +
+  labs(colour = "f(x):") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+
+grafico_curva_arvore <- grafico_sem_curva +
+  geom_line(aes(y = arvore, colour = "Árvore de Decisão"), size = 2)
+```
+
+```{r, fig.width = 12, fig.height = 5}
+grafico_sem_curva + 
+  geom_step(aes(y = regressao_linear, colour = "Regressão Linear"), size = 2)
+```
+
+---
+
+# Exemplos de $f(x)$
+
+```{r, fig.width = 12, fig.height = 5}
+grafico_curva_arvore
+```
+
+---
+
+# Flexibilidade ou Interpretabilidade da f(x)
+
+```{r}
+#![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+```
+
+```{r, fig.width=11, fig.height=7}
+library(ggrepel)
+set.seed(1)
+tribble(
+  ~modelo, ~Flexibilidade, ~Interpretabilidade,
+  "Regressão Linear", 0, 3,
+  "Regressão Logística", 0, 3, 
+  "LASSO", 0.3, 2.7,
+  "Árvore de Decisão", 1, 2.2,
+  "Generalized Additive Models", 1.5, 1.5,
+  "Redes Neurais, Deep Learning", 3, 1,
+  "Bagging, Boosting", 3.2, 0.8,
+  "SVM", 2.6, 0.5
+) %>%
+  ggplot(aes(x = Flexibilidade, y = Interpretabilidade)) +
+  geom_text_repel(aes(label = modelo), size = 7) +
+  theme_minimal(24) +
+  scale_x_continuous(breaks = c(0, 3.2), labels = c("Baixo", "Alto")) +
+  scale_y_continuous(breaks = c(0, 3.5), labels = c("Baixo", "Alto"))
+
+
+```
+
+
+
+---
+
+# Definições e Nomenclaturas
+
+* $X_1$, $X_2$, ..., $X_p$: variáveis explicativas (ou variáveis independentes ou *features* ou preditores).
+
+- $\boldsymbol{X} = {X_1, X_2, \dots, X_p}$: conjunto de todas as *features*.
+
+* __Y__: variável resposta (ou variável dependente ou *target*). 
+* __Ŷ__: valor **esperado** (ou predição ou estimado ou *fitted*). 
+* $f(X)$ também é conhecida também como "Modelo" ou "Hipótese".
+
+## No exemplo:
+
+- $X_1$: `midia` - indicadador de se a propaganda é para jornal, rádio, ou TV.
+- $X_2$: `investimento` - valor do orçamento
+
+* __Y__: `sales` - qtd vendida
+
+
+---
+
+# Definições e Nomenclaturas
+
+## Observado VERSUS Esperado
+
+- __Y__ é um valor **observado** (ou verdade ou *truth*)
+- __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
+- __Y__ - __Ŷ__ é o resíduo (ou erro)
+
+Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
+
+```{r, fig.width = 12, fig.height = 5}
+ponto_predito = tibble::tribble(
+   ~investimento,   ~yend, ~midia,
+             150,    0, "TV",
+              35,    0, "radio",
+              60,    0, "newspaper"
+) %>%
+  mutate(
+    sales = predict(arvore, .)
+  )
+
+grafico_curva_arvore +
+  geom_segment(aes(xend = investimento, yend = yend), data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = 0, yend = sales), data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_point(data = ponto_predito, colour = "purple", size = 5) +
+  theme_minimal(20)  +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+```
+
+
+---
+
+# Por que ajustar uma f?
+
 * Predição
---
-
 * Inferência
-
---
 
 ## Predição
 
@@ -313,18 +321,10 @@ Neste caso não estamos interessados em como é a estrutura $\hat{f}$ desde que 
 
 ---
 
-## Predição
+# Por que ajustar uma f?
 
-A acurácia de uma estimativa $\hat{Y}$ pode ser dividade em duas quantidades:
-
-* erro redutível
-* erro irredutível
-
-<img src="img/erros.png" style=" display: block; margin-left: auto; margin-right: auto; width: 70%"></img>
-
-* Essa parte irredutível, significa não redutível pela escolha do modelo/algoritmo. Ela pode ser reduzida se forem coletadas outras variáveis, mais dados etc.
-
----
+* Predição
+* Inferência
 
 ## Inferência
 
@@ -335,236 +335,328 @@ Por exemplo:
 * Quais são as variáveis que estão mais relacionadas com a respostas?
 * Qual a relação entre a resposta e cada um dos preditores?
 
---
 
 Neste curso, vamos falar principalmente sobre **predição**.
 
----
-
-# Como estimamos f?
-
-Para estimar $f$, coletamos um conjunto de pares $(X, Y)$ e usamos algum algoritmo para encontrar uma $f$ tal que $Y \approx f(X)$.
-
-Os modelos são geralmente dividios em duas classes:
-
-* Paramétricos
-* Não paramétricos
 
 ---
 
-## Paramétricos
-
-Assumem uma forma funcional para $f$ e depois estimam parâmetros. 
-
---
-
-Podemos assumir que $f$ possui a forma funcional linear:
-
-$$f(X) = \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p*X_p$$
-
-Então utilizamos os dados para encontrar valores $\hat{\beta_1}, \hat{\beta_2}, ..., \hat{\beta_p}$ tal que:
-
-$$Y \approx \hat{\beta_1}*X_1 + \hat{\beta_2}*X_2 + ... + \hat{\beta_p}*X_p$$
----
-
-## Paramétricos
-
-Chamamos de paramétricos pois reduzimos o problema de estimar $f$ para o problema de estimar um conjunto de parâmetros $\beta$.
-
---
-
-**Desvantagens**:
-
-- geralmente a forma funcional que escolhemos para $f$ não é a forma forma funcional da verdadeira $f$.
-- se aumentarmos muito o número de parâmetros, podemos gerar *overfitting*.
-
-**Vantagens**:
-
-- em geral, é computacionalmente mais eficiente
-- em geral, precisa de menos observações
-
-
----
-
-## Não-paramétricos
-
-Não fazem suposições explícitas sobre a forma funcional de $f$. Estimam uma $f$ que fica o mais próximo possível das obervações segundo alguma regra bem definida.
-
-![](https://freakonometrics.hypotheses.org/files/2015/06/boosting-algo-3.gif)
-
----
-
-## Não paramétricos
-
-**Vantagens**
-
-* A principal vantagem sobre os modelos paramétricos é que por não fazerem suposiçõe sobre a forma de $f$ podem se ajustar bem á diversas formas possíveis de $f$. 
-
-**Desvantagens**
-
-* Em geral precisa de mais observações para ficar bem ajustado.
-* Pode ser computacionalmente mais custoso.
-
----
-
-# Flexibilidade ou Interpretabilidade?
-
-![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
-
----
-
-# Regressão e Classificação
+# Modo - Regressão e Classificação
 
 Existem dois principais tipos de problemas em Machine Learning:
 
-* Regressão
-* Classificação
+.pull-left[
 
-A principal razão para fazermos essa distinção é a escolha da métrica de performance.
+## Regressão
+
+__Y__ é uma variável contínua.
+
+- Volume de vendas
+- Peso
+- Temperatura
+- Valor de Ações
+
+]
+
+.pull-right[
+
+## Classificação
+
+__Y__ é uma variável categórica.
+
+- Fraude/Não Fraude
+- Pegou em dia/Não pagou
+- Cancelou assinatura/Não cancelou (churn)
+- Gato/Cachorro/Cavalo/Outro
+
+
+
+]
+
+
 
 ---
 
-# Estimando a performance
+# Ir para o R
 
-Para problemas de regressão:
 
-* $R^2$
-* Raíz do erro quadrático médio (RMSE)
-
-$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i - \hat{f}(x_i)\big)^2}$$
 
 ---
 
-# Estimando a performance
 
-Para problemas de classificação:
+# Métricas
+
+Métricas: para medir o quanto a $f(x)$ está errando as previsões.
+
+.pull-left[
+
+## Regressão
+
+__Y__ é uma variável contínua.
+
+- RMSE
+- R2
+- MAE
+- MAPE
+...
+]
+
+.pull-right[
+
+## Classificação
+
+__Y__ é uma variável categórica.
 
 - Acurácia
-- Área sobre a curva ROC.
-- KS
-- Sensibilidade: Taxa de verdadeiros positivos.
-- Especificidade: Taxa de verdadeiros negativos. 
+- AUROC
+- Precision/Recall
+- Deviance (Cross-Entropy)
+- F1
+- Kappa
+...
+]
+
+[lista de métricas no `yardstick`](https://tidymodels.github.io/yardstick/articles/metric-types.html)
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+Ou seja, nosso **objetivo** é
+
+## Encontrar $f(x)$ que nos retorne o ~menor~ RMSE.
+
+```
+Exercício mental: encontre a expressão dos resíduos na fórmula.
+```
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+```{r, fig.width=10, fig.height=4, warning=FALSE}
+melhor_reta <- lm(dist ~ speed, data = cars)
+cars_com_predicoes <- melhor_reta %>% 
+  broom::augment() %>%
+  rename(pred_melhor_reta = .fitted) %>%
+  mutate(
+    pred_reta_a_mao = 12 + 3 * speed
+  )
+
+grafico_residuos_melhor_reta <- cars_com_predicoes %>%
+  ggplot(aes(x = speed, y = dist)) +
+  geom_point(size = 2) +
+  geom_abline(
+    intercept = melhor_reta$coefficients[1], 
+    slope =     melhor_reta$coefficients[2], 
+    size = 1,
+    colour = "salmon"
+  ) +
+  geom_segment(aes(xend = speed, yend = pred_melhor_reta), colour = "blue", size = 1) +
+  labs(
+    subtitle = "Resíduos da Melhor Reta",
+    title = "Os segmentos azuis são os resíduos (ou o quanto o modelo errou naqueles pontos)."
+  ) 
+
+grafico_residuos_reta_a_mao <- cars_com_predicoes %>%
+  ggplot(aes(x = speed, y = dist)) +
+  geom_point(size = 2) +
+  geom_abline(
+    intercept = 12, 
+    slope =     3, 
+    size = 1,
+    colour = "orange"
+  ) +
+  geom_segment(aes(xend = speed, yend = pred_reta_a_mao), colour = "blue", size = 1) +
+  labs(
+    subtitle = "Resíduos da Reta Escolhida a Mão"
+  ) 
+library(patchwork)
+grafico_residuos_melhor_reta + grafico_residuos_reta_a_mao
+```
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+
+.pull-left[
+
+MAE: Mean Absolute Error
+
+$$
+MAE = \frac{1}{N}\sum|y_i - \hat{y_i}|
+$$
+
+]
+
+.pull-right[
+
+R2: R-squared
+
+$$
+R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royalblue}{\bar{y}})^2}
+$$
+]
 
 
 ---
 
-# Estimando a performance
-
-Essas medidas poderiam calculadas na base de dados que usamos para ajustar o modelo, chamada de *base de treino*. 
-
-Por que isso seria um problema?
-
---
-
-<br>
-
-> Estamos interessados nas métricas de erro/acerto para observações que não foram vistas durante o treino.
-
-<br>
-
-**Exemplo**: Se fazemos um modelo para prever o valor de ações no mercado. Não estamos interessados no quanto acertamos para os últimos 6 meses. Estamos interessados em acertar o valor da ação amanhã, ou no próximo mês.
+# Ir para o R
 
 ---
 
-# Estimando a performance
+# Overfitting (sobreajuste)
 
-Considere que treinamos um modelo com uma base de dados:
+Intuição
 
-$${(x_1, y_1), (x_2, y_2), ... ,(x_x, y_n)}$$
+![scatter_eqm](img/overfiting_scatter_eqm.gif)
 
-Ajustando um modelo, obtemos uma $\hat{f}$ tal que $y_1 \approx \hat{f}(x_1)$, $y_2 \approx \hat{f}(x_2)$, ..., $y_n \approx \hat{f}(x_n)$.
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
+]
 
-Em vez de calcular, por exemplo, o MSE na base de treino
 
-$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i - \hat{f}(x_i)\big)^2}$$
-
-queremos na verdade calcular o MSE em uma base de novas observações
-
-$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n \big(y_i^0 - \hat{f}(x_i^0)\big)^2}$$
-em que $(x_0 , y_0)$ é o conjunto de novas observações, chamada base de teste.
 
 ---
 
-## Como estimamos o MSE para novas observações?
+# Dados novos vs antigos
 
-Nem sempre temos acesso a uma nova base de dados...
+- **Base de Treino** (dados antigos): a base de histórico que usamos para ajustar o modelo.
 
---
+- **Base de Teste** (dados novos): a base que irá simular a chegada de dados novos, "em produção".
 
-Podemos separar uma parte da base disponível que não será utilizada para ajustar o modelo.
+.pull-left[
 
----
+```{r, eval = FALSE, echo=TRUE}
+initial_split(dados, prop=3/4)
+```
 
-# Estimando a performance do modelo
 
-- **Erro de treino**: é o erro encontrado ao aplicar o modelo na própria base utilizada para treiná-lo.
+> "Quanto mais complexo for o modelo, menor será o **erro de treino.**"
 
-- **Erro de teste**: é o erro encontrado ao aplicar o modelo a uma base não utilizada no treino.
+> "Porém, o que importa é o **erro de teste**."
 
----
+]
 
-# Separação da base
+.pull-right[
+<img src="img/erro_treino_erro_teste.png" width = "500px">
 
-- **base de treino**: observações utilizadas para estimar os parâmetros do modelo e determinar os parâmetros de complexidade (hiperparâmetros)
-
-- **base de teste**: observações utilizadas para estimar o erro de teste. Essas observações não devem ser usadas para treinar o modelo.
-
---
-
-- Muitas observações na base de treino vão levar a estimativas mais precisas para os parâmetros, mas não teremos uma boa estimativa da performance do modelo.
-
-- Muitas observações na base de teste não vão permitir termos boas estimativas dos parâmetros.
+]
 
 ---
 
-# Viés e variância
+# Dados novos vs antigos
 
-<img src="https://cdn-images-1.medium.com/max/1600/1*v63L_h5WXGOb4o6oh_daAA.jpeg">
+## Estratégia
+
+
+### 1) Separar inicialmente a base de dados em duas: treino e teste.
+
+```{r, eval = FALSE, echo=TRUE}
+initial_split(dados, prop=3/4) # 3/4 da base será de treino
+```
+
+A base de teste que só será tocada quando a modelagem terminar. Ela nunca deverá influenciar as decisões que tomamos no período da modelagem.
+
+### 2) Criar bases de reamostragem na base de treino para "estimar" o erro de teste.
+
+```{r, eval = FALSE, echo=TRUE}
+
+mc_cv(dados_treino)
+vfold_cv(dados_treino) # cross-validation: a mais popular.
+bootstraps(dados_treino)
+# etc.
+```
+
 
 ---
 
 # Hiperparâmetros
 
-Hiperparâmetros são parâmetros do ligados à complexidade do modelo que devem ser escolhidos antes ajuste.
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
 
-Por exemplo, considere um modelo polinomial:
+Exemplo: `min_n` das árvores
 
-$$f(X) = \beta_0  + \beta_1 * X + \beta_2 * X^2 + \beta_3 * X^3 + \cdots + \beta_{p} * X^{p}$$
 
-Para selecioná-los, podemos utilizar **validação cruzada**.
+.pull-left[
 
---
-
-**Validação cruzada**: método para estimar o erro preditivo de um modelo utilizando reamostragem.
-
---
-
-- Leave-one-out cross-validation (LOOCV)
-- K-fold cross-validation
-
----
-
-# LOOCV
-
-```{r}
-knitr::include_graphics("img/loocv.png")
+```
+decision_tree(min_n = 100)
 ```
 
----
+]
 
-# k-fold
+.pull-right[
 
 ```{r}
-knitr::include_graphics("img/k-fold-cv.png")
+
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 100))
+arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 ```
 
+
+]
+
+
 ---
 
-# Atenção especial quando o tempo está envolvido.
+# Hiperparâmetros
 
-![](http://topepo.github.io/caret/splitting/Split_time-1.svg)
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
+
+Exemplo: `min_n` das árvores
+
+
+.pull-left[
+
+```
+decision_tree(min_n = 5)
+```
+
+]
+
+.pull-right[
+
+```{r}
+arvore <- rpart::rpart(sales ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 5))
+arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
+```
+
+]
+
 ---
 
-# Exemplo no R
+class: inverse
+background-image: url(img/ml_101.png)
+background-position: left 140px
+background-size: contain
 
-<img src="https://media.giphy.com/media/o0vwzuFwCGAFO/giphy.gif" style = "display: block; margin-left: auto; margin-right: auto;">
+# Resumo dos conceitos
+
+
+
