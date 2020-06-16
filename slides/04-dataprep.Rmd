@@ -2,11 +2,11 @@
 title: "Introdução ao Machine Learning com R"
 subtitle: "Dataprep e Workflows"
 author: "<img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>"
-date: "`r Sys.Date()`"
+date: "`r paste(lubridate::month(Sys.Date(), label = TRUE, abbr = FALSE), 'de', lubridate::year(Sys.Date()))`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: ["default", "default-fonts", "custom.css", "curso-r-bg.css"]
+    css: ["default", "default-fonts", "static/css/custom.css", "static/css/curso-r-bg.css"]
     nature:
       highlightStyle: github
       highlightLines: true
@@ -267,7 +267,7 @@ Você pode ver o resultado com `receita %>% prep() %>% juice()`.
 **step**: `step_dummy()`
 
 ```{r, echo = FALSE}
-knitr::include_graphics("img/one-hot-encoding.png")
+knitr::include_graphics("static/img/one-hot-encoding.png")
 ```
 
 ]
@@ -277,7 +277,7 @@ knitr::include_graphics("img/one-hot-encoding.png")
 # Workflow
 
 ```{r, echo = FALSE, out.width=700}
-knitr::include_graphics("img/workflow.png")
+knitr::include_graphics("static/img/workflow.png")
 ```
 
 ---

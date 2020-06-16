@@ -1,7 +1,7 @@
 ---
 title: "Introdução ao Machine Learning com R"
 author: "<img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>"
-date: "`r Sys.Date()`"
+date: "`r paste(lubridate::month(Sys.Date(), label = TRUE, abbr = FALSE), 'de', lubridate::year(Sys.Date()))`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -10,6 +10,8 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -17,35 +19,10 @@ library(ggplot2)
 library(magrittr)
 library(knitr)
 library(tidyverse)
+library(kableExtra)
 theme_set(theme_minimal(14))
 options(htmltools.dir.version = FALSE)
 ```
-
-## Sobre nós
-
-<img src="static/img/professores.png" style=" display: block; margin-left: auto; margin-right: auto;"></img>
-
----
-
-# Programa do curso
-
-- Introdução ao Machine Learning
-
-- Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
-
-- Regressão linear, Regularização (LASSO e Ridge)
-
-- Regressão logística, regressão vs classificação
-
-- Árvores de Decisão
-
-- Random Forest 
-
-- Boosting - XGBoost
-
-- Estudo de Caso
-
----
 
 # Ciência de dados
 
@@ -80,7 +57,7 @@ class: middle, center, inverse
 <br>
 
 
-- Não é um termo novo: criado por Arthur Samuel, em 1959
+- Termo criado por Arthur Samuel, em 1959
 
 <img src="static/img/arthur-sam.png" class="center2" width=100>
 
@@ -251,6 +228,21 @@ tribble(
 ```
 
 
+---
+
+# Definições e Nomenclaturas
+
+### A tabela por trás
+
+```{r}
+set.seed(1)
+adv_ok %>%
+  sample_n(8) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  select(midia, investimento, vendas) %>%
+  kable(format = "html")
+```
+
 
 ---
 
@@ -271,21 +263,6 @@ tribble(
 
 * __Y__: `vendas` - qtd vendida
 
-
----
-
-# Definições e Nomenclaturas
-
-### A tabela por trás
-
-```{r}
-set.seed(1)
-adv_ok %>%
-  sample_n(8) %>%
-  mutate_if(is.numeric, round, digits = 1) %>%
-  select(midia, investimento, vendas) %>%
-  kable(format = "html")
-```
 
 ---
 
@@ -628,13 +605,13 @@ bootstraps(dados_treino)
 
 São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
 
-Exemplo: `min_n` das árvores
+Exemplo: `tree_depth` das árvores (profundidade das árvores)
 
 
 .pull-left[
 
 ```
-decision_tree(min_n = 100)
+decision_tree(tree_depth = 2)
 ```
 
 ]
@@ -643,7 +620,7 @@ decision_tree(min_n = 100)
 
 ```{r}
 
-arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 100))
+arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(maxdepth = 2))
 arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 ```
 
@@ -657,13 +634,13 @@ arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 
 São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
 
-Exemplo: `min_n` das árvores
+Exemplo: `tree_depth` das árvores (profundidade das árvores)
 
 
 .pull-left[
 
 ```
-decision_tree(min_n = 5)
+decision_tree(tree_depth = 5)
 ```
 
 ]
@@ -671,7 +648,7 @@ decision_tree(min_n = 5)
 .pull-right[
 
 ```{r}
-arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(minbucket = 5))
+arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(maxdepth = 5))
 arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 ```
 
@@ -687,4 +664,636 @@ background-size: contain
 # Resumo dos conceitos
 
 
+
+---
+
+# Cross-validation (validação cruzada)
+
+**Objetivo da Validação cruzada:** estimar melhor o erro de predição.
+
+## Estratégia
+
+.pull-left[
+
+1) Dividir o banco de dados em K partes. (Por ex, K = 5 como na figura)
+
+2) Ajustar o mesmo modelo K vezes, deixar sempre um pedaço de fora para servir de base de teste.
+
+3) Teremos K valores de erros de teste. Tira-se a média dos erros.
+
+]
+
+.pull-right[
+<img src="static/img/k-fold-cv.png">
+---------------------------------> linhas
+]
+
+---
+
+## Validação Cruzada
+
+```{r, eval = FALSE}
+vfold_cv(cars, v = 5)
+```
+
+```{r, echo = FALSE}
+library(rsample)
+set.seed(1)
+cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
+  mutate(
+    n_treino = map_dbl(splits, ~nrow(as.data.frame(.x))),
+    n_teste = map_dbl(splits, ~nrow(assessment(.x))),
+    regressao = map(splits, ~lm(dist ~ speed, data = .x)),
+    rmse_teste = map2_dbl(regressao, splits, ~ {
+      df <- rsample::assessment(.y) %>%
+        mutate(pred = predict(.x, newdata = rsample::assessment(.y)))
+      
+      round(sqrt(mean((df$dist - df$pred)^2)), 2)
+    })
+  )
+cars_cv
+```
+
+ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{10}\sum_{i=1}^{10}RMSE_{Fold_i}} = 15,01$$
+
+---
+
+# Cross-validation (validação cruzada)
+
+Ir para o R
+
+
+---
+
+# Regressão Linear
+
+
+
+.pull-left[
+
+### Regressão Linear Simples
+
+$$
+y = \beta_0 + \beta_1x
+$$
+
+### Exemplo: 
+
+$$
+dist = \beta_0 + \beta_1speed
+$$
+
+]
+
+
+.pull-right[
+
+```{r,echo = FALSE, fig.height=4.5}
+grafico_da_reta <- ggplot(cars, aes(x = speed, y = dist)) + 
+  geom_point(size = 5)  +
+  geom_smooth(se = FALSE, size = 3, method = "lm", colour = "red") +
+  theme_minimal(24)+
+  labs(
+    title = " "
+  ) 
+
+grafico_da_reta
+```
+
+]
+
+### No R:
+
+```{r, eval = FALSE}
+linear_reg() %>% 
+  fit(dist ~ speed, data=cars)
+```
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
+]
+
+
+---
+
+# Regressão Linear
+
+
+.pull-left[
+
+### Regressão Linear Múltipla
+
+$$
+y = \beta_0 + \beta_1x_1 + \dots + \beta_px_p
+$$
+
+### Exemplo: 
+
+$$
+disp = \beta_0 + \beta_1wt + \beta_2mpg
+$$
+
+]
+
+.pull-right[
+
+```{r, fig.height=4, fig.align="center", fig.width=7, echo=FALSE}
+# x, y, z variables
+x <- mtcars$wt
+y <- mtcars$disp
+z <- mtcars$mpg
+# Compute the linear regression (z = ax + by + d)
+fit <- lm(z ~ x + y)
+# predict values on regular xy grid
+grid.lines = 26
+x.pred <- seq(min(x), max(x), length.out = grid.lines)
+y.pred <- seq(min(y), max(y), length.out = grid.lines)
+xy <- expand.grid( x = x.pred, y = y.pred)
+z.pred <- matrix(predict(fit, newdata = xy), 
+                 nrow = grid.lines, ncol = grid.lines)
+library(plotly)
+fig <- plot_ly(data = mtcars) %>% 
+  add_trace(x = ~wt, y = ~disp, z = ~mpg, 
+            type = "scatter3d", mode = "markers",
+            opacity = .8) %>%
+  add_trace(z = z.pred,
+            x = x.pred,
+            y = y.pred,
+            type = "surface",
+            opacity = .9)
+fig
+```
+
+]
+
+
+### No R:
+
+```{r, eval = FALSE}
+linear_reg() %>% 
+  fit(disp ~ wt + mpg, data=mtcars)
+```
+
+.footnote[
+Fonte: [sthda.com/impressive-package-for-3d](http://www.sthda.com/english/wiki/impressive-package-for-3d-and-4d-graph-r-software-and-data-visualization)
+]
+
+
+---
+
+# Regressão Linear - "Melhor Reta"
+
+Queremos a reta que **erre menos**.
+
+Uma medida de erro: RMSE
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+Ou seja, nosso é **encontrar os $\hat{\beta}'s$ que nos retorne o ~menor~ RMSE.**
+
+#### IMPORTANTE! 
+
+o RMSE é a nossa **Função de Custo** e pode ser diferente da **Métrica** que vimos nos slides anteriores!
+
+- **Função de Custo** - para encontrar os melhores parâmetros.
+- **Métrica** - para encontrar os melhores hiperparâmetros.
+
+---
+
+## Qual o valor ótimo para $\beta_0$ e $\beta_1$?
+
+No nosso exemplo, a nossa **HIPÓTESE** é de que 
+
+$$
+dist = \beta_0 + \beta_1speed
+$$
+
+Então podemos escrever o RMSE
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1speed)})^2} 
+$$
+
+Com ajuda do Cálculo é possível mostrar que os valores ótimos para $\beta_0$ e $\beta_1$ são
+
+$\hat{\beta}_1 = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sum(x_i - \bar{x})^2}$
+
+$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x}$
+
+OBS: Já que vieram do EQM, eles são chamados de **Estimadores de Mínimos Quadrados**.
+
+
+---
+
+## Regularização - LASSO
+
+Relembrando o nossa **função de custo** RMSE.
+
+$$RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1x_{1i} + \dots + \hat{\beta}_px_{pi})})^2}$$
+
+Regularizar é "não deixar os $\beta's$ soltos demais".
+
+$$RMSE_{regularizado} = RMSE + \color{red}{\lambda}\sum_{j = 1}^{p}|\beta_j|$$
+
+Ou seja, **penalizamos** a função de custo se os $\beta's$ forem muito grandes.
+
+**PS1:** O $\color{red}{\lambda}$ é um hiperparâmetro para a Regressão Linear.
+
+**PS2:** Quanto maior o $\color{red}{\lambda}$, mais penalizamos os $\beta's$ por serem grandes.
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 203 (Linear Model Selection and Regularization).
+]
+
+
+---
+
+## Regularização - LASSO
+
+Conforme aumentamos o $\color{red}{\lambda}$, forçamos os $\beta's$ a serem cada vez menores.
+
+
+![scatter_eqm](static/img/betas.png)
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 219 (The LASSO).
+]
+
+---
+
+## Regularização - LASSO
+
+Existe um $\color{red}{\lambda}$ que retorna o menor erro de cross-validation.
+
+
+![scatter_eqm](static/img/lasso_lambda.png)
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 219 (The LASSO).
+]
+
+
+---
+
+## Regularização - LASSO
+
+Ir para o R
+
+
+
+
+---
+class: inverse, center, middle
+
+# CLASSIFICAÇÃO
+
+---
+
+# Regressão Logística
+
+
+
+.pull-left[
+
+### Para  $Y \in \{0, 1\}$ (binário)
+
+$$
+log\left\(\frac{p}{1-p}\right\) = \beta_0 + \beta_1x
+$$
+
+em que $p = P(Y = 1|x)$.
+
+
+]
+
+
+.pull-right[
+
+```{r,echo = FALSE, fig.height=5}
+set.seed(1)
+email <- tibble(
+  pts_exclamacao = sample.int(300, 1000, replace = TRUE),
+  x = runif(1000) - 0.5,
+  spam = rbinom(1000, 1, prob = 1/(1 + exp(-(-5.9 + 1/23*pts_exclamacao + 2 * x)))),
+    `Regressão Linear` = predict(lm(spam~pts_exclamacao)),
+    `Regressão Logística` = predict(glm(spam~pts_exclamacao, family = binomial()), type = "response")
+  ) 
+
+email %>%
+  sample_n(100) %>%
+  gather("modelo", "pred", starts_with("Reg")) %>%
+  ggplot(aes(x = pts_exclamacao, y = spam)) + 
+  geom_point(size = 5, alpha = 0.2)  +
+  geom_line(size = 3, aes(y = pred, colour = modelo), show.legend = FALSE) +
+  facet_wrap(~ modelo) +
+  theme_minimal(24)+
+  labs(
+    title = "Y = 1: E-mail é Spam", x = "Qtd de pontos de exclamação"
+  ) +
+  scale_y_continuous(breaks = c(0, 1), labels = c("Y = 0", "Y = 1")) +
+  theme(axis.title.y = element_blank())
+```
+
+]
+
+### No R:
+
+```{r, eval = FALSE}
+logistic_reg() %>% 
+  fit(dist ~ speed, data=Default)
+```
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 131 (Logistic Regression).
+]
+
+---
+
+# Regressão Logística
+
+```{r,echo = FALSE, fig.height=6, fig.width=10, warning=FALSE, message=FALSE}
+email %>%
+  select(-`Regressão Linear`) %>%
+  # sample_n(100) %>%
+  gather("modelo", "pred", starts_with("Reg")) %>%
+  ggplot(aes(x = pts_exclamacao, y = spam)) + 
+  geom_point(size = 5, alpha = 0.2)  +
+  geom_line(size = 3, aes(y = pred, colour = modelo), show.legend = FALSE) +
+  stat_summary_bin(size = 1, alpha = 0.7, colour = "purple", aes(x = pts_exclamacao))  +
+  facet_wrap(~ modelo) +
+  theme_minimal(20)+
+  labs(
+    title = "Y = 1: E-mail é Spam", x = "Qtd de pontos de exclamação"
+  ) +
+  scale_y_continuous(breaks = c(0, 1), labels = c("Y = 0", "Y = 1")) +
+  theme(axis.title.y = element_blank())
+```
+
+
+---
+
+# Regressão Logística - Custo e Regularização
+A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
+
+$$D = \frac{1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
+
+Regularizar é analogo a Regressão Linear.
+
+$$D_{regularizado} = D + \color{red}{\lambda}\sum_{j = 1}^{p}|\beta_j|$$
+
+**PS1:** $\hat{y_i} = \hat{p_i} = \hat{P}(Y = 1|X)$.
+
+**PS2:** Se $\log\left(\frac{\hat{p_i}}{1-\hat{p_i}}\right) = \beta_0 + \beta_1x$ então 
+$\hat{p_i} = \frac{1}{1 + e^{-(\beta_0 + \beta_1x)}}$. 
+
+
+
+---
+
+# Regressão Logística - Predições
+
+O "produto final" será um vetor de probabilidades estimadas.
+
+.pull-left[
+
+```{r, echo = FALSE}
+email_tratado <- email %>%
+  select(pts_exclamacao, spam, `Regressão Logística`) %>%
+  rename(
+    prob = `Regressão Logística`,
+    `pts excl` = pts_exclamacao,
+    `classe observada` = spam
+  ) %>%
+  mutate(
+    prob = round(prob, 2),
+    `classe predita` = if_else(prob < 0.5, "Não Spam", "Spam"),
+    `classe observada` = if_else(`classe observada` == 0, "Não Spam", "Spam"),
+  ) 
+
+email_tratado %>%
+  head() %>%
+  kable() %>%
+  kableExtra::row_spec(0:6, align = "center", background = "white") %>%
+  kableExtra::column_spec(3, background = "#6688f3", color = "white", include_thead = TRUE)
+```
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE}
+email_tratado %>%
+  ggplot(aes(x = `prob`, fill = `classe observada`, colour = `classe observada`)) +
+  geom_density(alpha = 0.2, size = 2) +
+  geom_vline(xintercept = 0.5, size = 2, colour = "purple", linetype = "dashed") +
+  geom_label(x = 0.5, y = 5, hjust = -0.1, label = "threshold", colour = "purple", size = 7, fontface = "bold", fill = "#f0deff") +
+  theme_minimal(28) +
+  labs(y = "Concentração", x = expression(hat(y) (prob))) +
+  theme(
+    legend.position = "bottom"
+  ) +
+  guides(fill = guide_legend(nrow = 2, ncol = 1, byrow = TRUE)) 
+```
+
+
+]
+
+
+---
+
+```{r, echo=FALSE}
+confusion_matrix_kable <- function(threshold, font_size = 20) {
+  header <- c(1, 2)
+  names(header) <- c(paste0("p > ", scales::percent(threshold)), "Observado")
+  email %>%
+    mutate(
+      Predito = factor(if_else(`Regressão Logística` < threshold, "Não Spam", "Spam"), levels = c("Não Spam", "Spam")),
+      spam = factor(if_else(spam == 0, "Não Spam", "Spam"), levels = c("Não Spam", "Spam")),
+    ) %>%
+    count(Predito, spam) %>%
+    spread(spam, n, fill = 0) %>% 
+    kable() %>%
+    kable_styling(c("bordered", "basic"), full_width = FALSE, font_size = font_size) %>%
+    add_header_above(header, background = "white", color = c("red", "black", "black")) %>%
+    collapse_rows(columns = 1, valign = "top") %>%
+    kableExtra::row_spec(0:2, background = "white", align = "center") %>%
+    kableExtra::column_spec(1, "3in", bold = TRUE) %>%
+    kableExtra::column_spec(2, "3in") %>%
+    kableExtra::column_spec(3, "2in") 
+}
+
+
+cm_num <- confusion_matrix_kable(threshold = 0.5)
+
+cm <- tribble(
+  ~Predito, ~`Neg     `, ~`Pos `,
+  "Neg",    "TN", "FN",
+  "Pos",    "FP", "TP"
+) %>% 
+  kable() %>%
+  kable_styling(c("bordered", "basic"), full_width = FALSE, font_size = 20) %>%
+  add_header_above(c(" " = 1, "Observado" = 2), background = "white") %>%
+  collapse_rows(columns = 1, valign = "top") %>%
+  kableExtra::row_spec(0:2, background = "white", align = "center") %>%
+  kableExtra::column_spec(1, "3in", bold = TRUE) %>%
+  kableExtra::column_spec(2, "3in") %>%
+  kableExtra::column_spec(3, "2in")
+```
+
+
+# Matriz de Confusão
+
+.pull-left[
+```{r, echo = FALSE}
+cm 
+```
+
+<br/>
+
+```{r, echo = FALSE}
+cm_num
+```
+]
+
+.pull-right[
+
+$$
+\begin{array}{lcc}
+\mbox{accuracy}  & = & \frac{TP + TN}{TP + TN + FP + FN}\\\\
+&   & \\\\
+\mbox{precision} & = & \frac{TP}{TP + FP}\\\\
+&   & \\\\
+\mbox{recall}    & = & \frac{TP}{TP + FN} \\\\
+&   & \\\\
+\mbox{F1 score}       & =& \frac{2}{1/\mbox{precision} + 1/\mbox{recall}}\\\\
+&   & \\\\
+\mbox{TPR}    & = & \frac{TP}{TP + FN} \\\\
+&   & \\\\
+\mbox{FPR}    & = & \frac{FP}{FP + TN}
+\end{array}
+$$
+
+]
+
+---
+
+# Nota de Corte (Threshold)
+
+.pull-left[
+
+```{r, echo=FALSE}
+confusion_matrix_kable(threshold = 0.1, font_size = 16)
+confusion_matrix_kable(threshold = 0.25, font_size = 16)
+confusion_matrix_kable(threshold = 0.5, font_size = 16)
+```
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE}
+confusion_matrix_kable(threshold = 0.75, font_size = 16)
+confusion_matrix_kable(threshold = 0.9, font_size = 16)
+```
+
+]
+
+
+---
+
+
+# Curva ROC
+
+.pull-left[
+```{r, echo = FALSE}
+roc_df <- email_tratado %>%
+  mutate(`classe observada` = as.factor(`classe observada`)) %>%
+  yardstick::roc_curve(`classe observada`, `prob`) 
+
+roc_df_points <- roc_df %>%
+  filter(.threshold %in% c(0.1, 0.25, 0.5, 0.75, 0.9))
+
+roc_curve <- roc_df %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path(size = 2) +
+  geom_point(data = roc_df_points, size = 7, colour = "red", shape = 21) +
+  geom_point(data = roc_df_points, size = 5, colour = "red") +
+  geom_abline(lty = "dashed", size = 1) +
+  coord_equal() +
+  theme_minimal(28) +
+  labs(x = "False Positive Rate (FPR)", y = "True Positive Rate (TPR)")
+
+roc_curve
+```
+
+]
+
+.pull-right[
+
+<br/>
+
+```{r, echo = FALSE}
+cm
+```
+
+
+$$
+\begin{array}{lcc}
+\mbox{TPR}    & = & \frac{TP}{TP + FN} \\\\
+&   & \\\\
+\mbox{FPR}    & = & \frac{FP}{FP + TN}
+\end{array}
+$$
+
+]
+
+
+.footnote[
+[An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
+]
+
+---
+
+# Curva ROC - Métrica AUC
+
+.pull-left[
+
+```{r, echo = FALSE}
+
+auc <- email_tratado %>%
+  mutate(`classe observada` = as.factor(`classe observada`)) %>%
+  yardstick::roc_auc(`classe observada`, `prob`) 
+
+roc_curve +
+  stat_smooth(
+        geom = 'area', method = 'loess', span = 1/3,
+        alpha = 0.3, fill = "royalblue") +
+  geom_label(x = 0.5, y = 0.25, label = paste("AUC = ", scales::percent(auc$.estimate)), hjust = 0, fill = "transparent", size = 7)
+```
+
+]
+
+.pull-right[
+
+<br/>
+
+```{r, echo = FALSE}
+cm
+```
+
+$$
+\mbox{AUC} = \mbox{Area Under The ROC Curve}
+$$
+]
+
+**PS:** AUC varia de 0.5 a 1.0. O que significa se AUC for zero?
+
+.footnote[
+[An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
+]
 

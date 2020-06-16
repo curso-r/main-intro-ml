@@ -2,11 +2,11 @@
 title: "Introdução ao Machine Learning com R"
 subtitle: "Modelos de Árvores"
 author: "<img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>"
-date: "`r Sys.Date()`"
+date: "`r paste(lubridate::month(Sys.Date(), label = TRUE, abbr = FALSE), 'de', lubridate::year(Sys.Date()))`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: ["default", "default-fonts", "custom.css", "curso-r-bg.css"]
+    css: ["default", "default-fonts", "static/css/custom.css", "static/css/curso-r-bg.css"]
     nature:
       highlightStyle: github
       highlightLines: true
@@ -44,7 +44,7 @@ options(htmltools.dir.version = FALSE, fig.retina = 2)
 
 class: sem-padding
 
-<img src="img/arvore_rf_gbm.png" style="width: 100%;margin -1000px" />
+<img src="static/img/arvore_rf_gbm.png" style="width: 100%;margin -1000px" />
 
 ---
 
@@ -98,13 +98,13 @@ modelo_xgb <- boost_tree(
 
 .pull-left[
 <a href = "https://web.stanford.edu/~hastie/Papers/ESLII.pdf">
-<img src="img/esl.jpg" style=" display: block; margin-left: auto; margin-right: auto;width:300px;"></img>
+<img src="static/img/esl.jpg" style=" display: block; margin-left: auto; margin-right: auto;width:300px;"></img>
 </a>
 ]
 
 .pull-right[
 <a href = "http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf">
-<img src="img/isl.jpg" style=" display: block; margin-left: auto; margin-right: auto;width:300px"></img>
+<img src="static/img/isl.jpg" style=" display: block; margin-left: auto; margin-right: auto;width:300px"></img>
 </a>
 ]
 
@@ -118,55 +118,55 @@ class: inverse, center, middle
 
 # Árvore de Decisão
 
-<img src="img/arvore01.png" style="width: 100%;" />
+<img src="static/img/arvore01.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore02.png" style="width: 100%;" />
+<img src="static/img/arvore02.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore03.png" style="width: 100%;" />
+<img src="static/img/arvore03.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore04.png" style="width: 100%;" />
+<img src="static/img/arvore04.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore05.png" style="width: 100%;" />
+<img src="static/img/arvore05.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore06.png" style="width: 100%;" />
+<img src="static/img/arvore06.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão
 
-<img src="img/arvore07.png" style="width: 100%;" />
+<img src="static/img/arvore07.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão - Perguntas
 
-<img src="img/arvore08.png" style="width: 100%;" />
+<img src="static/img/arvore08.png" style="width: 100%;" />
 
 ---
 
 # Árvore de Decisão - Perguntas
 
-<img src="img/arvore09.png" style="width: 100%;" />
+<img src="static/img/arvore09.png" style="width: 100%;" />
 
 ---
 
@@ -181,7 +181,7 @@ $$
 ### Medidas de Impureza mais comuns
 
 .center[
-<img src="img/impurezas.png" style="width: 83%;"/>
+<img src="static/img/impurezas.png" style="width: 83%;"/>
 ]
 
 .footnote[
@@ -197,7 +197,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 
 .center[
-<img src="img/gini_exemplo.png" style="width: 100%;"/>
+<img src="static/img/gini_exemplo.png" style="width: 100%;"/>
 ]
 
 
@@ -218,7 +218,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 .pull-right[
 
-<img src="img/arvore_hiperparam01.png" style="width: 100%;"/>
+<img src="static/img/arvore_hiperparam01.png" style="width: 100%;"/>
 
 ]
 
@@ -240,7 +240,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 .pull-right[
 
-<img src="img/arvore_hiperparam02.png" style="width: 100%;"/>
+<img src="static/img/arvore_hiperparam02.png" style="width: 100%;"/>
 
 ]
 
@@ -262,7 +262,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 .pull-right[
 
-<img src="img/arvore_hiperparam03.png" style="width: 100%;"/>
+<img src="static/img/arvore_hiperparam03.png" style="width: 100%;"/>
 
 ]
 
@@ -339,7 +339,7 @@ collect_metrics(ajuste) %>%
 ]
 
 .pull-right[
-<img src="img/arvore_intuicao.png" style="width: 100%;"/>
+<img src="static/img/arvore_intuicao.png" style="width: 100%;"/>
 
 ]
 
@@ -366,7 +366,7 @@ $$\small\color{#AB2729}{\mbox{}\mbox{E} [(Y - \hat{f}(x_o))^2]}  = \\ \\ \small\
 
 <br/> 
 
-<img src="img/vies_variancia3.png" style="width: 100%;"/>
+<img src="static/img/vies_variancia3.png" style="width: 100%;"/>
 
 
 
@@ -374,7 +374,7 @@ $$\small\color{#AB2729}{\mbox{}\mbox{E} [(Y - \hat{f}(x_o))^2]}  = \\ \\ \small\
 
 
 .pull-right[
-<img src="img/vies_variancia.png" style="width: 100%;"/>
+<img src="static/img/vies_variancia.png" style="width: 100%;"/>
 
 ]
 
@@ -396,7 +396,7 @@ $$\small\color{#AB2729}{\mbox{}\mbox{E} [(Y - \hat{f}(x_o))^2]}  = \\ \\ \small\
 
 <br/> 
 
-<img src="img/vies_variancia3.png" style="width: 100%;"/>
+<img src="static/img/vies_variancia3.png" style="width: 100%;"/>
 
 
 
@@ -404,7 +404,7 @@ $$\small\color{#AB2729}{\mbox{}\mbox{E} [(Y - \hat{f}(x_o))^2]}  = \\ \\ \small\
 
 
 .pull-right[
-<img src="img/vies_variancia2.png" style="width: 100%;"/>
+<img src="static/img/vies_variancia2.png" style="width: 100%;"/>
 
 ]
 
@@ -434,7 +434,7 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 ]
 
 .pull-right-menor[
-<img src="img/rf1.png" style="width: 100%;"/>
+<img src="static/img/rf1.png" style="width: 100%;"/>
 
 
 ]
@@ -484,13 +484,13 @@ class: inverse, middle, center
 
 .pull-left[
 
-<img src="img/forward_stagewise.png" style="width: 85%;"/>
+<img src="static/img/forward_stagewise.png" style="width: 85%;"/>
 
 ]
 
 .pull-right[
 
-<img src="img/boost1.png" style="width: 70%;"/>
+<img src="static/img/boost1.png" style="width: 70%;"/>
 
 ]
 
@@ -510,13 +510,13 @@ Ver [ESL](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) página 341 (Gradie
 **Adaboost (versão para classificação binária)**
 .pull-left[
 
-<img src="img/adaboost.png" style="width: 90%;"/>
+<img src="static/img/adaboost.png" style="width: 90%;"/>
 
 ]
 
 .pull-right[
 
-<img src="img/boost1.png" style="width: 70%;"/>
+<img src="static/img/boost1.png" style="width: 70%;"/>
 
 
 ]
@@ -547,7 +547,7 @@ class: inverse, middle, center
 
 .pull-right[
 
-<img src="img/xgb_obj.png" style="width: 100%;"/>
+<img src="static/img/xgb_obj.png" style="width: 100%;"/>
 ]
 
 .pull-left[
@@ -586,7 +586,7 @@ Ver [Introduction to Boosted Trees](https://xgboost.readthedocs.io/en/latest/tut
 
 
 
-<img src="img/xgboost_tuned_vs_untuned.gif" style="width: 100%;"/>
+<img src="static/img/xgboost_tuned_vs_untuned.gif" style="width: 100%;"/>
 
 
 
@@ -611,7 +611,7 @@ modelo <- boost_tree(
 .pull-right[
 
 
-<img src="img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
 
 
 ]
@@ -634,7 +634,7 @@ modelo <- boost_tree(
 
 .pull-right-abaixo[
 
-<img src="img/xgb_trees100@min_n1@tree_depth2@learn_rate1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth2@learn_rate1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
 
 ]
 
@@ -659,7 +659,7 @@ modelo <- boost_tree(
 .pull-right[
 
 
-<img src="img/xgb_trees100@min_n1@tree_depth1@learn_rate0.1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth1@learn_rate0.1@sample_size1@loss_reduction1.gif" style="width: 75%;"/>
 
 
 ]
@@ -682,7 +682,7 @@ modelo <- boost_tree(
 
 .pull-right-abaixo[
 
-<img src="img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size0.5@loss_reduction1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size0.5@loss_reduction1.gif" style="width: 75%;"/>
 
 ]
 
@@ -708,7 +708,7 @@ modelo <- boost_tree(
 .pull-right[
 
 
-<img src="img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size1@loss_reduction0.1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth1@learn_rate1@sample_size1@loss_reduction0.1.gif" style="width: 75%;"/>
 
 
 ]
@@ -731,7 +731,7 @@ modelo <- boost_tree(
 
 .pull-right-abaixo[
 
-<img src="img/xgb_trees100@min_n1@tree_depth2@learn_rate0.1@sample_size0.5@loss_reduction0.1.gif" style="width: 75%;"/>
+<img src="static/img/xgb_trees100@min_n1@tree_depth2@learn_rate0.1@sample_size0.5@loss_reduction0.1.gif" style="width: 75%;"/>
 
 ]
 

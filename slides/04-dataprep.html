@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Introdução ao Machine Learning com R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="static\css\custom.css" type="text/css" />
+    <link rel="stylesheet" href="static\css\curso-r-bg.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introdução ao Machine Learning com R
+## Dataprep e Workflows
+### <img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>
+### junho de 2020
+
+---
+
+
+
+
+
+# Conteúdo
+
+- recipes (recipe -&gt; prep -&gt; bake/juice)
+- Principais problemas na variável resposta e nas features
+    - features categóricas
+        - encoding (one-hot, dummy, etc)
+        - transformar em número se ordinal
+    - multicolinearidade
+    - vars constantes
+    - alta cardinalidade (muitas categorias)
+    - categorias pouco frequentes (step_other)
+    - escala
+    - assimetria
+    - valores faltantes
+    - valores novos
+- workflow
+
+---
+
+# Recipes
+
+Todos os modelos, de uma forma ou de outra, representam interpretações possíveis da relação entre
+Uma matriz `\(X\)` de variáveis independentes e a coluna `\(Y\)` de variáveis independentes.
+
+Muitas vezes os dados brutos precisam passar por várias transformações até chegar na matrix `\(X\)`.
+
+Por exemplo, é conveniente tratar os valores omissos.
+
+O pacote `recipes` fornece uma maneira de organizar esse passo transformação dos dados brutos.
+
+
+```r
+library(recipes)
+
+receita &lt;- recipes(resposta ~ variavel_dependente1 + variavel_dependente2,
+                   data = dados_brutos) %&gt;% 
+  step_naomit()
+```
+
+
+Podemos selecionar as variávels nas quais queremos mexer escrevendo os nomes delas ou usando as funções `all_numeric()`,  `all_nominal()` entre outras.
+
+Você pode ver o resultado com `receita %&gt;% prep() %&gt;% juice()`.
+---
+
+
+# Valores omissos 
+
+.pull-left[
+**o que é: ** valores omissos são céluals preenchidas com NA. A menos que você tenha um jeito pré-definido de como tratar esse caso, muitas vezes o melhor é removê-los.
+
+**por que fazer**: 
+
+1) para que o motor de regressão não faça isso sozinho sem te avisar;
+
+2) para que a variável resposta não entre como vazia.
+
+]
+
+.pull-right[
+
+**step**: `step_naomit()`
+
+]
+
+---
+
+# Valores omissos 
+
+.pull-left[
+**o que é: ** valores omissos são céluals preenchidas com NA. Se você quiser, pode trocar os NAs de uma coluna números pelo seu valor médio ou mediano.
+
+**por que fazer**: 
+
+1) para que os NAs não diminuam muito a sua amostra.
+
+2) para não perder informação de outras colunas.
+
+3) para identificar padrão nos valores omissos.
+
+]
+
+.pull-right[
+
+**step**: `step_medianimpute()`, `step_meanimpute()`, `step_unknown()`
+
+]
+
+---
+
+# Normalização
+
+.pull-left[
+**o que é: ** é a transformação da variável para ter média próxima de zero e dispersão próxima de 1.
+
+**por que fazer**: 
+
+1) para penalização LASSO funcionar; 
+
+2) para evitar problemas numéricos;
+
+]
+
+.pull-right[
+
+**step**: `step_center()`, `step_scale()`
+
+]
+
+
+---
+
+# Simetrização
+
+.pull-left[
+**o que é: ** é a transformação da variável para ter forma aproximadamente simétrica.
+
+**por que fazer**: 
+
+1) para a estabilidade dos modelos lineares; 
+
+2) menos peso para valores aberrantes (pontos de alavanca);
+
+3) variável resposta precisa ser simétrica para a loss `rmse` não priorizar valores aberrantes.
+
+]
+
+.pull-right[
+
+**step**: `step_YeoJohnson()`, `step_BoxCox()`, `step_log()`
+
+]
+
+---
+
+# Multicolinearidade
+
+.pull-left[
+
+**o que é: **  variáveis que são muito similares confundem os modelos. Uma variável "atrapalha" a outra. Em regressão os \beta's se dividem entre as variáveis correlacionadas.
+
+**por que fazer**: 
+
+1) para evitar modelos que com redundâncias;
+
+2) para evitar problemas numéricos
+
+]
+
+.pull-right[
+
+**step**: `step_corr()`, `step_lincomb()`
+
+]
+
+---
+
+# Categorias novas
+
+.pull-left[
+**o que é: ** são categorias que não estavam presente na hora do ajuste do modelo.
+
+**por que fazer**: 
+
+1) para o modelo não se negar a criar predições; 
+
+
+]
+
+.pull-right[
+
+**step**: `step_novel()`
+
+]
+
+---
+
+# Categorias raras
+
+.pull-left[
+
+**o que é: ** são categorias com baixa frequência na hora do ajuste do modelo.
+
+**por que fazer**: 
+
+1) para evitar criar colunas com pouca informação (overfitting);
+
+2) para não haver problemas no momento da validação cruzada;
+
+]
+
+.pull-right[
+
+**step**: `step_other()`, `step_nzv()`, `step_zv()`
+
+]
+
+---
+
+# Dummy
+
+.pull-left[
+
+**o que é: ** Muitos modelos só sabem lidar com números. Categorias precisam virar números, explicitamente ou por trás dos panos. Uma variável binária do tipo "Sim" ou "Não"; "A" ou "B" etc precisa virar uma coluna 1 ou 0.
+
+**por que fazer**: 
+
+1) para ter mais clareza sobre o passo a passo da modelagem;
+
+2) porque alguns modelos só trabalham dessa forma;
+
+]
+
+.pull-right[
+
+**step**: `step_dummy()`
+
+]
+
+---
+
+# One-hot
+
+.pull-left[
+
+**o que é: ** Muitos modelos só sabem lidar com números. Categorias precisam virar números, explicitamente ou por trás dos panos. Uma variável categorizada do tipo "Sim", "Não" ou "Talvez"; "A", "B" ou "C" etc precisa virar duas ou mais colunas de 1 e 0.
+
+
+**por que fazer**: 
+
+1) para ter mais clareza sobre o passo a passo da modelagem;
+
+2) porque alguns modelos só trabalham dessa forma;
+
+]
+
+.pull-right[
+
+**step**: `step_dummy()`
+
+&lt;img src="static/img/one-hot-encoding.png" width="1352" /&gt;
+
+]
+
+---
+
+# Workflow
+
+&lt;img src="static/img/workflow.png" width="700" /&gt;
+
+---
+
+# Workflow
+
+Workflows resumem várias etapas em um único código, tornando mais simples ajustar, reajustar e colocar modelos em produção.
+
+
+```r
+preparacao &lt;- recipe(resposta  ~ explicativa, data = dados_brutos) %&gt;% 
+  step_naomit() %&gt;% 
+  step_scale(all_numeric())
+
+modelo_linear &lt;- logistic_reg() 
+
+fluxo_modelagem &lt;- workflow() %&gt;% 
+  add_recipe(preparacao) %&gt;% 
+  add_model(modelo_linear)
+
+fit(fluxo_modelagem, dados_brutos)
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
