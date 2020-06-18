@@ -1,5 +1,4 @@
 dados
-scripts_feito_em_aula
 exemplos
 gabaritos
 exercicios
