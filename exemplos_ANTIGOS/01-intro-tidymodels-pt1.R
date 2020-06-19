@@ -64,8 +64,6 @@ ggplot() +
 
 # Como quantificar a qualidade de um modelo?
 
-# Us ----------------------------------------------------------------------
-
 library(yardstick)
 
 # Métricas de erro
@@ -77,29 +75,3 @@ mape(dados1_com_previsao, truth = y, estimate = y_e)
 mae(dados1_com_previsao, truth = y, estimate = y_e)
 mase(dados1_com_previsao, truth = y, estimate = y_e)
 
-# You ---------------------------------------------------------------------
-
-# Exercícios
-
-# Estude o resultado dos modelo que você fez nos exercícios anteriores na base Hitters1
-
-Hitters1 <- readRDS("dados/Hitters1.rds")
-View(Hitters1)
-help(Hitters)
-
-# 1. Defina uma especificação de f que caracterize uma árvore de regressão com o número de observações por nó valendo 5 (min_n).
-
-especificacao_arvore <- decision_tree(min_n = 5) %>%
-  set_engine("rpart") %>% 
-  set_mode("regression")
-
-# 2. Usando a base Hitters1, ajuste o modelo de árvore do exercício 1 para os Home Runs de cada jogador em 1986 (HmRuns),
-#    usando como variável explicativa o número de Home Runs que ele fez na vida (CHmRuns).
-
-
-
-# Se tiver dúvidas sobre a base, digite help(Hitters)
-# 3. Calcule RMSE, MAPE, MAE e MASE do modelo que você ajustou.
-# 4. [Extra] Faça um gráfico comparando as suas predições e o que realmente aconteceu.
-
-vip(modelo$fit)
