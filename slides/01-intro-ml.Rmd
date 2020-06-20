@@ -381,14 +381,6 @@ __Y__ é uma variável categórica.
 
 ]
 
-
-
----
-
-# Ir para o R
-
-
-
 ---
 
 
@@ -545,7 +537,118 @@ Intuição
 Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
 ]
 
+---
 
+```{r, echo=FALSE}
+library(parsnip)
+library(ggplot2)
+# Dados -------------------------------------------------------------------
+data("diamonds")
+
+set.seed(10)
+diamondsinho <- diamonds %>%
+  filter(x > 0) %>%
+  sample_n(50)
+
+# definicao do modelo -----------------------------------------------------
+especificacao_modelo1 <- decision_tree(cost_complexity = 0.01, min_n = 5, tree_depth = 10) %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
+
+especificacao_modelo2 <- decision_tree(cost_complexity = 0, min_n = 2, tree_depth = 29) %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
+
+
+# ajuste do modelo --------------------------------------------------------
+ajuste_modelo1 <- especificacao_modelo1 %>% fit(price ~ x, data = diamondsinho)
+ajuste_modelo2 <- especificacao_modelo2 %>% fit(price ~ x, data = diamondsinho)
+
+
+# predicoes ---------------------------------------------------------------
+diamondsinho_com_previsao <- diamondsinho %>% 
+  mutate(
+    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho)$.pred,
+    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho)$.pred
+  )
+
+# qualidade dos ajustes e graficos ----------------------------------------
+# Métricas de erro
+diamondsinho_com_previsao_longo <- diamondsinho_com_previsao %>%
+  tidyr::pivot_longer(
+    cols = starts_with("price_pred"), 
+    names_to = "modelo", 
+    values_to = "price_pred"
+  ) 
+
+set.seed(3)
+# "dados novos chegaram..."
+diamondsinho_novos <- diamonds %>%
+  filter(x > 0, x < 8) %>%
+  sample_n(20)
+
+# predicoes ---------------------------------------------------------------
+diamondsinho_novos_com_previsao <- diamondsinho_novos %>% 
+  mutate(
+    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho_novos)$.pred,
+    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho_novos)$.pred
+  )
+```
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+set.seed(3)
+pt1 <- diamondsinho_com_previsao %>%
+  sample_n(20, weigth = x) %>%
+  ggplot() + 
+  geom_point(aes(x, price), size = 4, alpha = 0.2) +
+  ylim(c(0, 15000)) +
+  xlim(c(4.5,8))
+pt1
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+pt2 <- pt1 +
+  geom_step(aes(x, price_pred2, color = 'modelo2'), size = 1, show.legend = FALSE) 
+pt2
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+pt3 <- pt1 +
+  geom_step(aes(x, price_pred1, color = 'modelo1'), size = 1, show.legend = FALSE) 
+pt3
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+set.seed(4)
+dt <- diamondsinho_novos_com_previsao %>% filter(x < 8) %>% ungroup() %>% sample_n(20)
+pt4 <- pt3 +
+  geom_step(aes(x, price_pred2, color = 'modelo2'), size = 1, show.legend = FALSE) +
+  geom_point(aes(x, price), size = 4, data = dt, colour = "red", alpha = 0.5)+
+  geom_point(aes(x, price), size = 1, data = dt, colour = "red", alpha = 1)
+pt4
+```
+
+---
+
+# Ir para o R
 
 ---
 
@@ -588,16 +691,6 @@ initial_split(dados, prop=3/4) # 3/4 da base será de treino
 
 A base de teste que só será tocada quando a modelagem terminar. Ela nunca deverá influenciar as decisões que tomamos no período da modelagem.
 
-### 2) Criar bases de reamostragem na base de treino para "estimar" o erro de teste.
-
-```{r, eval = FALSE, echo=TRUE}
-
-mc_cv(dados_treino)
-vfold_cv(dados_treino) # cross-validation: a mais popular.
-bootstraps(dados_treino)
-# etc.
-```
-
 
 ---
 
@@ -623,7 +716,6 @@ decision_tree(tree_depth = 2)
 arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(maxdepth = 2))
 arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 ```
-
 
 ]
 
@@ -663,13 +755,12 @@ background-size: contain
 
 # Resumo dos conceitos
 
-
-
 ---
 
 # Cross-validation (validação cruzada)
 
-**Objetivo da Validação cruzada:** estimar melhor o erro de predição.
+**O que Validação cruzada faz:** estima (muito bem) o erro de predição.
+**Objetivo da Validação cruzada:** encontrar o melhor conjunto de hiperparâmetros.
 
 ## Estratégia
 
@@ -690,7 +781,8 @@ background-size: contain
 
 ---
 
-## Validação Cruzada
+# Cross-validation (validação cruzada)
+
 
 ```{r, eval = FALSE}
 vfold_cv(cars, v = 5)
@@ -699,7 +791,7 @@ vfold_cv(cars, v = 5)
 ```{r, echo = FALSE}
 library(rsample)
 set.seed(1)
-cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
+cars_cv <- rsample::vfold_cv(cars, v = 3) %>%
   mutate(
     n_treino = map_dbl(splits, ~nrow(as.data.frame(.x))),
     n_teste = map_dbl(splits, ~nrow(assessment(.x))),
@@ -714,14 +806,11 @@ cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
 cars_cv
 ```
 
-ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{10}\sum_{i=1}^{10}RMSE_{Fold_i}} = 15,01$$
+ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{3}\sum_{i=1}^{3}RMSE_{Fold_i}} = 4,0$$
 
 ---
 
-# Cross-validation (validação cruzada)
-
-Ir para o R
-
+# Ir para o R
 
 ---
 
