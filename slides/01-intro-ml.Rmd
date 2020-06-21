@@ -748,15 +748,6 @@ arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 
 ---
 
-class: inverse
-background-image: url(static/img/ml_101.png)
-background-position: left 140px
-background-size: contain
-
-# Resumo dos conceitos
-
----
-
 # Cross-validation (validação cruzada)
 
 **O que Validação cruzada faz:** estima (muito bem) o erro de predição.
@@ -812,6 +803,17 @@ ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{3}\sum_{i=1}^{3}RMSE_{
 
 # Ir para o R
 
+
+---
+
+class: inverse
+background-image: url(static/img/ml_101.png)
+background-position: left 140px
+background-size: contain
+
+# Resumo dos conceitos
+
+
 ---
 
 # Regressão Linear
@@ -853,7 +855,7 @@ grafico_da_reta
 
 ### No R:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo=TRUE}
 linear_reg() %>% 
   fit(dist ~ speed, data=cars)
 ```
@@ -880,7 +882,7 @@ $$
 ### Exemplo: 
 
 $$
-disp = \beta_0 + \beta_1wt + \beta_2mpg
+mpg = \beta_0 + \beta_1wt + \beta_2disp
 $$
 
 ]
@@ -919,7 +921,7 @@ fig
 
 ### No R:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo=TRUE}
 linear_reg() %>% 
   fit(disp ~ wt + mpg, data=mtcars)
 ```
