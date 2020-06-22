@@ -45,6 +45,8 @@ set.seed(1)
 
 # inspecao da tunagem -----------------------------------------------------
 # autoplot(...)
+# collect_metrics(...)
+# show_best(...)
 
 # seleciona o melhor conjunto de hiperparametros --------------------------
 # extraia o conjunto de hiperparametros que apresentou o melhor rmse de 
@@ -89,5 +91,5 @@ set.seed(1)
 # rpart.plot::rpart.plot(...$fit)
 
 # guardar o modelo para usar depois ---------------------------------------
-# saveRDS(..., file = "diamonds_fit.rds")
+# saveRDS(..., file = "diamonds_final_model.rds")
 

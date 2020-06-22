@@ -38,7 +38,7 @@ diamonds_resamples <- vfold_cv(diamonds_train, v = 5)
 # OBS: a variável resposta é 'price' e a variável explicativa é 'x'.
 # use tune_grid().
 diamonds_tune_grid <- tune_grid(
-  especificacao_modelo,
+  diamonds_model,
   price ~ x, 
   resamples = diamonds_resamples,
   grid = 5,
@@ -48,6 +48,8 @@ diamonds_tune_grid <- tune_grid(
 
 # inspecao da tunagem -----------------------------------------------------
 # autoplot(...)
+# collect_metrics(...)
+# show_best(...)
 
 # seleciona o melhor conjunto de hiperparametros --------------------------
 # extraia o conjunto de hiperparametros que apresentou o melhor rmse de 
@@ -81,11 +83,11 @@ diamonds_final_model <- diamonds_model %>% fit(price ~ x, diamonds)
 # use mutate(), predict()$.pred
 diamonds_com_previsao <- diamonds %>% 
   mutate(
-    price_pred = predict(diamonds_fit, new_data = .)$.pred
+    price_pred = predict(diamonds_final_model, new_data = .)$.pred
   )
 
 # rpart.plot::rpart.plot(...$fit)
 
 # guardar o modelo para usar depois ---------------------------------------
-# saveRDS(..., file = "diamonds_fit.rds")
+# saveRDS(..., file = "diamonds_final_model.rds")
 

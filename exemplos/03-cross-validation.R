@@ -29,8 +29,8 @@ diamonds_resamples <- vfold_cv(diamonds_train, v = 5)
 
 # tunagem de hiperparametros ----------------------------------------------
 diamonds_tune_grid <- tune_grid(
-  especificacao_modelo,
   price ~ x, 
+  diamonds_model,
   resamples = diamonds_resamples,
   grid = 10,
   metrics = metric_set(rmse, rsq),
@@ -39,6 +39,8 @@ diamonds_tune_grid <- tune_grid(
 
 # inspecao da tunagem -----------------------------------------------------
 autoplot(diamonds_tune_grid)
+collect_metrics(diamonds_tune_grid)
+show_best(diamonds_tune_grid)
 
 # seleciona o melhor conjunto de hiperparametros
 diamonds_best_hiperparams <- select_best(diamonds_tune_grid, "rmse")
@@ -60,9 +62,9 @@ diamonds_final_model <- diamonds_model %>% fit(price ~ x, diamonds)
 # predicoes ---------------------------------------------------------------
 diamonds_com_previsao <- diamonds %>% 
   mutate(
-    price_pred = predict(diamonds_fit, new_data = .)$.pred
+    price_pred = predict(diamonds_final_model, new_data = .)$.pred
   )
 
 # guardar o modelo para usar depois ---------------------------------------
-saveRDS(diamonds_fit, file = "diamonds_fit.rds")
+saveRDS(diamonds_final_model, file = "diamonds_final_model.rds")
 

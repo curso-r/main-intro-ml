@@ -1,12 +1,11 @@
 # Pacotes ------------------------------------------------------------------
 
 library(tidymodels)
-library(parsnip)
 library(ISLR)
 
 # Me ----------------------------------------------------------------------
 
-Auto
+glimpse(Auto)
 
 help(Auto)
 
