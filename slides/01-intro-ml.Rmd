@@ -937,6 +937,22 @@ Fonte: [sthda.com/impressive-package-for-3d](http://www.sthda.com/english/wiki/i
 
 Queremos a reta que **erre menos**.
 
+Modelo: $y = b + m x$
+
+![](static/img/0_D7zG46WrdKx54pbU.gif)
+
+.footnote[
+
+Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
+
+]
+
+---
+
+# Regressão Linear - "Melhor Reta"
+
+Queremos a reta que **erre menos**.
+
 Uma medida de erro: RMSE
 
 $$
