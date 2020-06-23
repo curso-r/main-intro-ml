@@ -68,7 +68,14 @@ diamonds_final_lr_model <- diamonds_lr_model %>% fit(price ~ ., diamonds)
 # guardar o modelo para usar depois ---------------------------------------
 # saveRDS(diamonds_final_lr_model, file = "diamonds_final_lr_model.rds")
 
-# 3. [desafio] Ajuste uma árvore de decisão, agora com todas as variáveis, 
+# 3. Ajuste agora com mixture = 0. (regressão RIDGE)
+# e compare:
+# (a) se as variáveis mais importantes são as mesmas.
+# (a) se a quantidade de variáveis explicativa que ficaram no modelo é maior.
+# (b) se o desempenho supera o do LASSO em termos de RMSE.
+# Dica: reutilize os códigos anteriores! (03-cross-validation.R por exemplo)
+
+# 4. [desafio] Ajuste uma árvore de decisão, agora com todas as variáveis, 
 # e compare:
 # (a) se as variáveis mais importantes são as mesmas.
 # (b) se o desempenho da árvore supera o do LASSO em termos de RMSE.
