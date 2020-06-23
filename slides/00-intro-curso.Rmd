@@ -128,6 +128,20 @@ class: middle, center
 
 ---
 
+# Não falaremos...
+
+- Deploy em produção
+
+- Redes Neurais/Deep Learning
+
+- Séries Temporais
+
+- Provas de Teoremas
+
+- Shiny
+
+---
+
 ## Extras
 
 - Teremos monitoria duas vezes por semana, sempre 1 hora antes do início das aulas (ter e qui, das 18h às 19h)
@@ -135,4 +149,6 @@ class: middle, center
 - Além das aulas, teremos alguns conteúdos extras, tanto em texto quanto em vídeo.
 
 - A gravação das aulas ficará disponível no Google Classroom por 1 ano após o final do curso.
+
+- discourse.curso-r.com 
 

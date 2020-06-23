@@ -1135,8 +1135,11 @@ $$
 log\left\(\frac{p}{1-p}\right\) = \beta_0 + \beta_1x
 $$
 
-em que $p = P(Y = 1|x)$.
+em que $p = P(Y = 1|x)$. Ou...
 
+$$
+p = \frac{1}{1 + e^{-(\beta_0 + \beta_1x)}}
+$$
 
 ]
 
@@ -1172,9 +1175,8 @@ email %>%
 
 ### No R:
 
-```{r, eval = FALSE}
-logistic_reg() %>% 
-  fit(dist ~ speed, data=Default)
+```{r, eval = FALSE, echo = TRUE}
+logistic_reg() %>% fit(dist ~ speed, data=Default)
 ```
 
 
@@ -1202,6 +1204,75 @@ email %>%
   ) +
   scale_y_continuous(breaks = c(0, 1), labels = c("Y = 0", "Y = 1")) +
   theme(axis.title.y = element_blank())
+```
+
+
+---
+
+# Regressão Logística
+
+```{r, fig.height=6, fig.align="center", fig.width=8, echo=FALSE}
+set.seed(5)
+x1 <- runif(40)
+x2 <- runif(40)
+y <- rbinom(40, 1, prob = 1/(1 + exp(-4 + 4*x1 + 4*x2)))
+xxy <- data.frame(x1, x2, y)
+xxy$x1x2 <- ifelse(x1 + x2 > 1, 0, 1)
+# Compute the linear regression (z = ax + by + d)
+fit <- glm(y ~ x1 + x2, family = "binomial")
+# predict values on regular xy grid
+grid.lines = 26
+x1.pred <- seq(min(x1), max(x1), length.out = grid.lines)
+x2.pred <- seq(min(x2), max(x2), length.out = grid.lines)
+xx <- expand.grid( x1 = x1.pred, x2 = x2.pred)
+y.pred <- matrix(predict(fit, newdata = xx, type = "response"), 
+                 nrow = grid.lines, ncol = grid.lines)
+library(plotly)
+fig <- plot_ly(data = xxy) %>% 
+  add_trace(x = ~x1, y = ~x2, z = ~y, color = ~x1x2,
+            type = "scatter3d", mode = "markers",
+            opacity = .8) %>%
+  add_trace(z = y.pred,
+            x = x1.pred,
+            y = x2.pred,
+            type = "surface",
+            opacity = .9)
+fig
+```
+
+
+---
+
+# Árvore de Decisão
+
+```{r, fig.height=6, fig.align="center", fig.width=8, echo=FALSE}
+library(rpart)
+set.seed(6)
+x1 <- runif(600)
+x2 <- runif(600)
+y <- rbinom(600, 1, prob = 1/(1 + exp(-4 + 4*x1 + 4*x2)))
+xxy <- data.frame(x1, x2, y)
+xxy$x1x2 <- ifelse(x1 + x2 > 1, 0, 1)
+# Compute the linear regression (z = ax + by + d)
+fit <- rpart::rpart(y ~ x1 + x2, data = xxy, control = rpart.control(cp = 0.03, minsplit = 2))
+# predict values on regular xy grid
+grid.lines = 26
+x1.pred <- seq(min(x1), max(x1), length.out = grid.lines)
+x2.pred <- seq(min(x2), max(x2), length.out = grid.lines)
+xx <- expand.grid( x1 = x1.pred, x2 = x2.pred)
+y.pred <- matrix(predict(fit, newdata = xx), 
+                 nrow = grid.lines, ncol = grid.lines)
+library(plotly)
+fig <- plot_ly(data = xxy[1:40,]) %>% 
+  add_trace(x = ~x1, y = ~x2, z = ~y, color = ~x1x2,
+            type = "scatter3d", mode = "markers",
+            opacity = .8) %>%
+  add_trace(z = y.pred,
+            x = x1.pred,
+            y = x2.pred,
+            type = "surface",
+            opacity = .9)
+fig
 ```
 
 
@@ -1338,11 +1409,9 @@ $$
 &   & \\\\
 \mbox{precision} & = & \frac{TP}{TP + FP}\\\\
 &   & \\\\
-\mbox{recall}    & = & \frac{TP}{TP + FN} \\\\
+\mbox{recall/TPR}    & = & \frac{TP}{TP + FN} \\\\
 &   & \\\\
 \mbox{F1 score}       & =& \frac{2}{1/\mbox{precision} + 1/\mbox{recall}}\\\\
-&   & \\\\
-\mbox{TPR}    & = & \frac{TP}{TP + FN} \\\\
 &   & \\\\
 \mbox{FPR}    & = & \frac{FP}{FP + TN}
 \end{array}
