@@ -5,6 +5,7 @@ library(ISLR)
 library(tidyverse)
 library(modeldata)
 library(pROC)
+library(vip)
 
 # PASSO 0) CARREGAR AS BASES -----------------------------------------------
 data("credit_data")
@@ -85,6 +86,10 @@ credit_lr_last_fit <- last_fit(
   Status ~ .,
   credit_initial_split
 )
+
+# Variáveis importantes
+credit_lr_last_fit_model <- credit_lr_last_fit$.workflow[[1]]$fit$fit
+vip(credit_lr_last_fit_model)
 
 # PASSO 7) GUARDA TUDO ---------------------------------------------------------
 write_rds(credit_lr_last_fit, "credit_lr_last_fit.rds")

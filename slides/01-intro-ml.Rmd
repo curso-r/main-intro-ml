@@ -1033,6 +1033,34 @@ o RMSE é a nossa **Função de Custo** e pode ser diferente da **Métrica** que
 
 ---
 
+
+## Qual o valor ótimo para $\beta_0$ e $\beta_1$?
+
+No nosso exemplo, a nossa **HIPÓTESE** é de que 
+
+$$
+dist = \beta_0 + \beta_1speed
+$$
+
+Então podemos escrever o RMSE
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1speed)})^2} 
+$$
+.pull-left[
+Método mais utilizado para otimizar modelos com parâmetros: **Gradient Descent**
+
+Ver [Wikipedia do Gradient Descent](https://en.wikipedia.org/wiki/Gradient_descent)
+
+]
+
+.pull-right[
+<img src = "static/img/gradient_descent.png" width = 65%>
+]
+
+
+---
+
 ## Qual o valor ótimo para $\beta_0$ e $\beta_1$?
 
 No nosso exemplo, a nossa **HIPÓTESE** é de que 
@@ -1047,7 +1075,7 @@ $$
 RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1speed)})^2} 
 $$
 
-Com ajuda do Cálculo é possível mostrar que os valores ótimos para $\beta_0$ e $\beta_1$ são
+Curiosidade: com ajuda do Cálculo é possível mostrar que os valores ótimos para $\beta_0$ e $\beta_1$ são
 
 $\hat{\beta}_1 = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sum(x_i - \bar{x})^2}$
 
@@ -1109,9 +1137,8 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 ---
 
-## Regularização - LASSO
+## Ir para o R
 
-Ir para o R
 
 
 
@@ -1536,3 +1563,7 @@ $$
 [An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
 ]
 
+
+---
+
+## Ir para o R
