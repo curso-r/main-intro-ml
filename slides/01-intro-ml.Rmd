@@ -33,16 +33,34 @@ options(htmltools.dir.version = FALSE)
 # Referências
 
 .pull-left[
-<a href = "https://r4ds.had.co.nz/">
-<img src="static/img/r4ds.png" style=" display: block; margin-left: auto; margin-right: auto;"></img>
-</a>
-]
-
-.pull-right[
 <a href = "http://www-bcf.usc.edu/~gareth/ISL/">
 <img src="static/img/islr.png" style=" display: block; margin-left: auto; margin-right: auto;"></img>
 </a>
 ]
+
+.pull-right[
+<a href = "https://web.stanford.edu/~hastie/Papers/ESLII.pdf">
+<img src="static/img/esl.jpg" width = 58% style=" display: block; margin-left: auto; margin-right: auto;"></img>
+</a>
+]
+
+
+---
+
+# Referências
+
+.pull-left[
+<a href = "https://r4ds.had.co.nz/">
+<img src="static/img/r4ds.png"  style=" display: block; margin-left: auto; margin-right: auto;"></img>
+</a>
+]
+
+.pull-right[
+<a href = "https://www.tidymodels.org/">
+<img src="static/img/tidymodels.png" width = 75% style=" display: block; margin-left: auto; margin-right: auto;"></img>
+</a>
+]
+
 
 ---
 
@@ -346,6 +364,16 @@ Por exemplo:
 
 Neste curso, vamos falar principalmente sobre **predição**.
 
+---
+
+background-image: url(static/img/usos_do_ml.png)
+background-position: left 140px
+background-size: contain
+
+
+# Por que ajustar uma f?
+
+
 
 ---
 
@@ -433,6 +461,24 @@ $$
 Ou seja, nosso **objetivo** é
 
 ## Encontrar $f(x)$ que nos retorne o ~menor~ RMSE.
+
+
+
+---
+
+# Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a reta que **erre menos**.
+
+Exemplo: Modelo de regressão linear $y = b + m x$.
+
+![](static/img/0_D7zG46WrdKx54pbU.gif)
+
+.footnote[
+
+Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
+
+]
 
 
 ---
@@ -692,6 +738,7 @@ initial_split(dados, prop=3/4) # 3/4 da base será de treino
 A base de teste que só será tocada quando a modelagem terminar. Ela nunca deverá influenciar as decisões que tomamos no período da modelagem.
 
 
+
 ---
 
 # Hiperparâmetros
@@ -767,8 +814,12 @@ arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
 
 .pull-right[
 <img src="static/img/k-fold-cv.png">
+
+
 ---------------------------------> linhas
 ]
+
+
 
 ---
 
@@ -782,7 +833,7 @@ vfold_cv(cars, v = 5)
 ```{r, echo = FALSE}
 library(rsample)
 set.seed(1)
-cars_cv <- rsample::vfold_cv(cars, v = 3) %>%
+cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
   mutate(
     n_treino = map_dbl(splits, ~nrow(as.data.frame(.x))),
     n_teste = map_dbl(splits, ~nrow(assessment(.x))),
@@ -797,7 +848,19 @@ cars_cv <- rsample::vfold_cv(cars, v = 3) %>%
 cars_cv
 ```
 
-ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{3}\sum_{i=1}^{3}RMSE_{Fold_i}} = 4,0$$
+ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{5}\sum_{i=1}^{5}RMSE_{Fold_i}} = 3,88$$
+
+---
+
+# Cross-validation (validação cruzada)
+
+### Esquema das divisões de bases:
+
+<img src="static/img/resampling.svg" width = 75%>
+
+.footnote[
+Fonte: [bookdown.org/max/FES/resampling.html](https://bookdown.org/max/FES/resampling.html)
+]
 
 ---
 

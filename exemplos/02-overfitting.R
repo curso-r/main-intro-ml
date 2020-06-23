@@ -97,7 +97,7 @@ diamondsinho_com_previsao_g3
 ############################################################################
 ############################################################################
 ############################################################################
-# Agora vamos fingir que estamos em produção!
+# Agora vamos fingir que estamos em produção! (pontos vermelhos do slide)
 
 set.seed(3)
 # "dados novos chegaram..."

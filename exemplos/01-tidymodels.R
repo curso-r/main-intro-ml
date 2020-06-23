@@ -4,7 +4,6 @@ library(ggplot2)
 library(skimr)
 library(tidymodels)
 
-
 # Dados -------------------------------------------------------------------
 data("diamonds")
 
