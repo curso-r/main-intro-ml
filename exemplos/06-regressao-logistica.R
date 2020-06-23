@@ -86,6 +86,10 @@ credit_lr_last_fit <- last_fit(
   credit_initial_split
 )
 
+# PASSO 7) GUARDA TUDO ---------------------------------------------------------
+write_rds(credit_lr_last_fit, "credit_lr_last_fit.rds")
+write_rds(credit_lr_model, "credit_lr_model.rds")
+
 collect_metrics(credit_lr_last_fit)
 
 credit_test_preds <- credit_lr_last_fit$.predictions[[1]]
@@ -115,9 +119,10 @@ credit_test_preds %>%
   coord_flip()
 
 # gráfico sobre os da classe "bad"
+percentis = 20
 credit_test_preds %>%
   mutate(
-    score = factor(ntile(.pred_bad, 10))
+    score = factor(ntile(.pred_bad, percentis))
   ) %>%
   filter(Status == "bad") %>%
   group_by(score) %>%
@@ -126,11 +131,10 @@ credit_test_preds %>%
     media = mean(.pred_bad)
   ) %>%
   mutate(p = n/sum(n)) %>%
-  ggplot(aes(x = score, y = p)) +
+  ggplot(aes(x = p, y = score)) +
   geom_col() +
   geom_label(aes(label = scales::percent(p))) +
-  coord_flip()
-
+  geom_vline(xintercept = 1/percentis, colour = "red", linetype = "dashed", size = 1)
 
 # PASSO 7) MODELO FINAL -----------------------------------------------------
 credit_final_lr_model <- credit_lr_model %>% fit(Status ~ ., credit_data)
