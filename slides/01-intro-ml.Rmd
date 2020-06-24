@@ -1308,7 +1308,56 @@ fig
 # Regressão Logística - Custo e Regularização
 A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
 
-$$D = \frac{1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
+$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
+
+
+---
+
+# Regressão Logística - Custo e Regularização
+A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
+
+$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
+
+Para cada linha da base de dados seria assim...
+
+$$D_i = \begin{cases} -\log(\hat{y}_i) & \text{quando} \space y_i = 1 \\\\ -\log(1-\hat{y}_i) & \text{quando} \space y_i = 0 \end{cases}$$
+
+```{r, fig.width=7, fig.height=3, fig.retina=TRUE}
+y1 = ggplot(tibble(y_hat = c(1, 0.001)), aes(x = y_hat)) +
+  stat_function(fun = ~-log(.), size = 2) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(y = "D", x = bquote(hat(y)), title = "Quando y = 1") +
+  theme_minimal(16) +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(colour = "black", size = 1.5),
+    axis.text = element_text(colour = "black", size = 16)
+  )
+
+y2 = ggplot(tibble(y_hat = 1-c(1, 0.001)), aes(x = y_hat)) +
+  stat_function(fun = ~-log(1-.), size = 2) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(y = "D", x = bquote(hat(y)), title = "Quando y = 0") +
+  theme_minimal(16) +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(colour = "black", size = 1.5),
+    axis.text = element_text(colour = "black", size = 16)
+  )
+library(patchwork)
+y1+y2
+```
+
+
+
+
+---
+
+# Regressão Logística - Custo e Regularização
+
+A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
+
+$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
 
 Regularizar é analogo a Regressão Linear.
 
@@ -1563,6 +1612,14 @@ $$
 [An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
 ]
 
+---
+
+# Curva ROC - Playground
+
+
+<a href = "http://arogozhnikov.github.io/2015/10/05/roc-curve.html">
+<img src="static/img/roc_curve.gif" style=" display: block; margin-left: auto; margin-right: auto;"></img>
+</a>
 
 ---
 
