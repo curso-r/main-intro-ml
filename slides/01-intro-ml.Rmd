@@ -566,6 +566,46 @@ R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royal
 $$
 ]
 
+---
+
+## Um pouco sobre R-quadrado ( $R^2$ )
+
+$$
+R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royalblue}{\bar{y}})^2} = 1 - \frac{\color{salmon}{SQR}}{\color{royalblue}{SQT}}
+$$
+
+.pull-left[
+
+```{r, fig.align="center", fig.asp=0.5, warning=FALSE}
+grafico_cars <- ggplot(cars, aes(x = speed, y = dist)) + 
+  geom_point(size = 5, alpha = 0.1) + 
+  geom_abline(
+    intercept = melhor_reta$coefficients[1], 
+    slope =     melhor_reta$coefficients[2], 
+    size = 2,
+    colour = "salmon"
+  ) 
+grafico_cars +
+  geom_smooth(method = "lm", formula = y ~ 1, se = FALSE, size = 2) +
+  annotate("text", label = expression(bar(y)), y = mean(cars$dist), x = 5, vjust = -0.6, hjust = 2, size = 9, colour = "royalblue")
+```
+
+]
+
+.pull-right[
+
+$R^2 \approx 1 \rightarrow \color{salmon}{SQR} << \color{royalblue}{SQT}$.
+$R^2 \approx 0 \rightarrow \color{salmon}{reta} \text{ em cima da } \color{royalblue}{reta}$.
+
+$R^2$ pode ser calculado para qualquer tipo de modelo.
+
+]
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 68 (Assessing the Accuracy of the Model).
+]
+
 
 ---
 
@@ -646,12 +686,33 @@ diamondsinho_novos_com_previsao <- diamondsinho_novos %>%
 ```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
 # Pontos observados + curva da f
 set.seed(3)
-pt1 <- diamondsinho_com_previsao %>%
-  sample_n(20, weigth = x) %>%
+dfzim <- diamondsinho_com_previsao %>%
+  sample_n(20, weigth = x)
+setinha <- annotate(
+    geom = "curve",
+    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
+    colour = "grey",
+    x = dfzim$x[5],
+    y = dfzim$price[5] + 650,
+    xend = 5.3,
+    yend = 13000
+  )
+rotulozinho <- annotate(
+    "text",
+    size = 6,
+    x = 5.3,
+    y = 13000,
+    hjust = 1.01,
+    label = "base de treino",
+    colour = "grey"
+  )
+pt1 <- dfzim %>%
   ggplot() + 
   geom_point(aes(x, price), size = 4, alpha = 0.2) +
   ylim(c(0, 15000)) +
-  xlim(c(4.5,8))
+  xlim(c(4.5,8)) +
+  setinha +
+  rotulozinho
 pt1
 ```
 
@@ -685,10 +746,29 @@ pt3
 # Pontos observados + curva da f
 set.seed(4)
 dt <- diamondsinho_novos_com_previsao %>% filter(x < 8) %>% ungroup() %>% sample_n(20)
+setinha_vermelha <- annotate(
+    geom = "curve",
+    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
+    colour = "red", alpha = 0.5,
+    x = dt$x[18],
+    y = dt$price[18] + 650,
+    xend = 5.0,
+    yend = 9000
+  )
+rotulozinho_vermelho <- annotate(
+    "text",
+    size = 6,
+    x = 5.0,
+    y = 9000,
+    hjust = 1.01,
+    label = "base de teste\n(dados novos)", colour = "red", alpha = 0.5
+  )
 pt4 <- pt3 +
   geom_step(aes(x, price_pred2, color = 'modelo2'), size = 1, show.legend = FALSE) +
   geom_point(aes(x, price), size = 4, data = dt, colour = "red", alpha = 0.5)+
-  geom_point(aes(x, price), size = 1, data = dt, colour = "red", alpha = 1)
+  geom_point(aes(x, price), size = 1, data = dt, colour = "red", alpha = 1) +
+  setinha_vermelha+
+  rotulozinho_vermelho
 pt4
 ```
 
@@ -1086,6 +1166,102 @@ OBS: Já que vieram do EQM, eles são chamados de **Estimadores de Mínimos Quad
 
 ---
 
+## Depois de estimar...
+
+$$
+\hat{y} = \hat{\beta}_0 + \hat{\beta}_1x
+$$
+
+### Exemplo:
+
+$$
+\hat{dist} = \hat{\beta}_0 + \hat{\beta}_1speed
+$$
+
+Colocamos um $\hat{}$ em cima dos termos para representar "estimativas". Ou seja, $\hat{y}_i$ é uma estimativa de $y_i$.
+
+No nosso exemplo, 
+
+- $\hat{\beta}_0$ é uma estimativa de $\beta_0$ e vale `-17.579`.
+- $\hat{\beta}_1$ é uma estimativa de $\beta_1$ e vale `3.932`.
+- $\hat{dist}$ é uma estimativa de $dist$ e vale `-17.579 + 3.932 x speed`.
+
+```{r, echo=TRUE}
+# Exercício: se speed for 15 m/h, quanto que 
+# seria a distância dist esperada?
+```
+
+---
+
+## Interpretação dos parâmetros
+
+.pull-left[
+
+```{r}
+grafico_cars <- ggplot(cars, aes(x = speed, y = dist)) + 
+  geom_point(size = 5, alpha = 0.1) + 
+  geom_abline(
+    intercept = melhor_reta$coefficients[1], 
+    slope =     melhor_reta$coefficients[2], 
+    size = 2,
+    colour = "salmon"
+  ) 
+
+grafico_cars+
+  coord_cartesian(xlim = c(-4, 26), ylim = c(-25, 126)) +
+  annotate("segment", 
+           y = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
+           yend = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
+           x = 15,
+           xend = 19,
+           size = 2,
+           colour = "darkgreen") +
+  annotate("segment", 
+           y = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
+           yend = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 19,
+           x = 19,
+           xend = 19,
+           size = 2,
+           colour = "darkgreen") +
+  annotate("segment", 
+           y = melhor_reta$coefficients[1],
+           yend = 0,
+           x = 0,
+           xend = 0,
+           size = 2,
+           colour = "darkblue") +
+  geom_vline(xintercept = 0, colour = "grey20") +
+  geom_hline(yintercept = 0, colour = "grey20") +
+  theme_minimal(24)
+```
+
+$$
+y = \color{darkgblue}{\beta_0} + \color{darkgreen}{\beta_1}x
+$$
+
+]
+
+.pull-right[
+
+### Interpretações matemáticas
+
+$\color{darkgblue}{\beta_0}$ é o lugar em que a reta cruza o eixo Y.
+
+$\color{darkgreen}{\beta_1}$ é a derivada de Y em relação ao X. É quanto Y varia quando X varia em 1 unidade.
+
+### Interpretações estatísticas
+
+$\color{darkgblue}{\beta_0}$ é a distância percorrida esperada quando o carro está parado (X = 0).
+
+$\color{darkgreen}{\beta_1}$ é o efeito médio na distância por variar 1 ml/h na velocidade do carro.
+
+
+]
+
+---
+
+
+
 ## Regularização - LASSO
 
 Relembrando o nossa **função de custo** RMSE.
@@ -1111,20 +1287,6 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 ## Regularização - LASSO
 
-Conforme aumentamos o $\color{red}{\lambda}$, forçamos os $\beta's$ a serem cada vez menores.
-
-
-![scatter_eqm](static/img/betas.png)
-
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 219 (The LASSO).
-]
-
----
-
-## Regularização - LASSO
-
 Existe um $\color{red}{\lambda}$ que retorna o menor erro de cross-validation.
 
 
@@ -1137,8 +1299,37 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 ---
 
+## Regularização - LASSO
+
+Conforme aumentamos o $\color{red}{\lambda}$, forçamos os $\beta's$ a serem cada vez menores.
+
+
+![scatter_eqm](static/img/betas.png)
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 219 (The LASSO).
+]
+
+---
+
 ## Ir para o R
 
+---
+
+## Principais problemas dos modelos lineares
+
+- Escala das variáveis explicativas
+
+- Relação não-linear entre X e Y
+
+- Correlação entre os erros
+
+- Variância dos erros não constantes (heterocedasticidade)
+
+- Outliers/Pontos de alavanca
+
+- Multicolinearidade
 
 
 
