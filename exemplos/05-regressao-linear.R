@@ -15,12 +15,20 @@ help(Auto)
 # GGally::ggpairs(Auto %>% select(-name))
 # qplot(x, mpg, data = Auto)
 
+Auto %>%
+  ggplot(aes(x = log(displacement), y = log(mpg))) +
+  geom_point()
+
 # data prep (ainda vamos ver como usar o recipes!) ------------------------
 auto <- ISLR::Auto %>%
   mutate(
     origin = factor(origin)
   ) %>%
-  select(-name)
+  select(-name) %>%
+  mutate(
+    mpg = (mpg),
+    across(cylinders:year, log, .names = "log_{col}")
+  )
 
 # base treino e teste -----------------------------------------------------
 set.seed(1)
@@ -68,8 +76,16 @@ collect_predictions(auto_last_fit) %>%
   geom_point()
 
 collect_predictions(auto_last_fit) %>%
-  ggplot(aes(.pred, mpg-.pred)) +
-  geom_point()
+  mutate(
+    mpg = (mpg)^2,
+    .pred = (.pred)^2
+  ) %>%
+  rmse(mpg, .pred)
+
+collect_predictions(auto_last_fit) %>%
+  ggplot(aes(.pred, ((mpg)^2-(.pred)^2))) +
+  geom_point() +
+  geom_smooth(se = FALSE)
 # auto_last_fit_model <- auto_last_fit$.workflow[[1]]
 # vip(auto_last_fit_model)
 
