@@ -20,7 +20,7 @@ auto <- ISLR::Auto %>%
   mutate(
     origin = factor(origin)
   ) %>%
-  select(-name, -origin)
+  select(-name)
 
 # base treino e teste -----------------------------------------------------
 set.seed(1)
@@ -31,7 +31,8 @@ auto_test <- testing(auto_initial_split)
 
 # definicao do modelo -----------------------------------------------------
 auto_model <- linear_reg(
-  penalty = tune()
+  penalty = tune(),
+  mixture = 1 # LASSO
 ) %>% 
   set_engine("glmnet") %>%
   set_mode("regression")
@@ -41,8 +42,8 @@ auto_resamples <- vfold_cv(auto_train, v = 5)
 
 # tunagem de hiperparametros ----------------------------------------------
 auto_tune_grid <- tune_grid(
-  auto_model
-  mpg ~ ., ,
+  auto_model,
+  mpg ~ ., 
   resamples = auto_resamples,
   grid = 100,
   metrics = metric_set(rmse),
@@ -66,6 +67,9 @@ collect_predictions(auto_last_fit) %>%
   ggplot(aes(.pred, mpg)) +
   geom_point()
 
+collect_predictions(auto_last_fit) %>%
+  ggplot(aes(.pred, mpg-.pred)) +
+  geom_point()
 # auto_last_fit_model <- auto_last_fit$.workflow[[1]]
 # vip(auto_last_fit_model)
 

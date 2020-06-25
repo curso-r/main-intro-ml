@@ -9,12 +9,10 @@ W1 <- 0.9
 W2 <- 0.5
 B <- 0.1
 
-y <- B + W1 * x1 + W2 * x2 + rnorm(n, 0, 0.1)
+y <- B + W1 * x1 + W2 * x2 + rnorm(n, 0, 0.001)
 
 
 # Model definition ---------------------------------------------
-
-# x1 <- x1/sd(x1)
 
 model <- function(w1, w2, b, x1, x2) {
   w1 * x1 + w2 * x2 + b
@@ -52,16 +50,18 @@ dyhat_db <- function(b) {
 }
 
 # escreva o laço que faz a estimativa de todos os parametros w1, w2 e b.
-gamma = 0.8
+gamma = 0.5
 lambda = 0.0
 
 w1 <- runif(1)
 w2 <- runif(1)
 b <- 0
-for(i in 1:10000) {
-  w1 <- S(w1 - gamma * mean(dyhat_dw1(x1)*dl_dyhat(model(w1, w2, b, x1, x2))), lambda, gamma)
-  w2 <- S(w2 - gamma * mean(dyhat_dw2(x2)*dl_dyhat(model(w1, w2, b, x1, x2))), lambda, gamma)
-  b  <- b  - gamma * mean(dyhat_db(b)*dl_dyhat(model(w1, w2, b, x1, x2)))
+h <- numeric(100)
+for(i in 1:100) {
+  y_hat <- model(w1, w2, b, x1, x2)
+  w1 <- S(w1 - gamma * mean(dyhat_dw1(x1)*dl_dyhat(y_hat)), lambda, gamma)
+  w2 <- S(w2 - gamma * mean(dyhat_dw2(x2)*dl_dyhat(y_hat)), lambda, gamma)
+  b  <- b  - gamma * mean(dyhat_db(b)*dl_dyhat(y_hat))
 }
 
 w1;w2;b
