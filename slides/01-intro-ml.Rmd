@@ -19,6 +19,7 @@ library(ggplot2)
 library(magrittr)
 library(knitr)
 library(tidyverse)
+library(ISLR)
 library(kableExtra)
 theme_set(theme_minimal(14))
 options(htmltools.dir.version = FALSE)
@@ -1317,22 +1318,345 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 ---
 
+## Preditores Categóricos
+
+### Preditor com apenas 2 categorias
+
+Saldo médio no cartão de crédito é diferente entre homens e mulheres?
+
+```{r, fig.height=1.5}
+Credit %>%
+  ggplot(aes(x = Gender, y = Balance, fill = Gender)) +
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  labs(y = "Saldo médio no cartão de crédito (USD)", x = "")
+```
+
+```{r, echo = TRUE, eval = FALSE}
+summary(lm(Balance ~ Gender, data = Credit))
+# Coefficients:
+#              Estimate  Std.Error  t value Pr(>|t|)    
+# (Intercept)    509.80  33.13      15.389   <2e-16 ***
+# GenderFemale    19.73  46.05       0.429    0.669   
+```
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 84 (Predictors with Only Two Levels).
+]
+
+
+---
+
+## Preditores Categóricos
+
+### Preditor com apenas 2 categorias
+
+Saldo médio no cartão de crédito é diferente entre homens e mulheres?
+
+```{r, fig.height=1.5}
+Credit %>%
+  ggplot(aes(x = Gender, y = Balance, fill = Gender)) +
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  labs(y = "Saldo médio no cartão de crédito (USD)", x = "")
+```
+
+
+$$
+y_i = \beta_0 + \beta_1x_i \space\space\space\space\space\space \text{em que}\space\space\space\space\space\space x_i = \Bigg\\{\begin{array}{ll}1&\text{se a i-ésima pessoa for }\texttt{female}\\\\
+0&\text{se a i-ésima pessoa for } \texttt{male}\end{array}
+$$
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 84 (Predictors with Only Two Levels).
+]
+
+
+---
+
+## Preditores Categóricos
+
+### Preditor com 3 ou mais categorias
+
+.pull-left[
+
+```{r, fig.height=4}
+Credit %>%
+  ggplot(aes(x = Ethnicity, y = Balance, fill = Ethnicity)) +
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  labs(y = "Saldo (USD)", x = "") +
+  theme_minimal(22)
+```
+
+
+```{r, echo=TRUE, eval=FALSE}
+summary(lm(Balance ~ Ethnicity, data = Credit))
+#                    Estimate  Std.Error t value Pr(>|t|)    
+# (Intercept)          531.00  46.32     11.464   <2e-16 ***
+# EthnicityAsian       -18.69  65.02     -0.287    0.774    
+# EthnicityCaucasian   -12.50  56.68     -0.221    0.826  
+```
+
+
+]
+
+.pull-right[
+
+Modelo
+
+$$y_i = \beta_0 + \beta_1x_{1i} + \beta_2x_{2i}$$
+
+Em que
+
+
+$x_{1i} = \Bigg \{ \begin{array}{ll} 1 & \text{se for }\texttt{Asian}\\0&\text{caso contrário}\end{array}$
+
+$x_{2i} = \Bigg \{ \begin{array}{ll} 1 & \text{se for }\texttt{Caucasian}\\0&\text{caso contrário}\end{array}$
+
+]
+
+
+---
+
+## Preditores Categóricos
+
+### Preditor com 3 ou mais categorias
+
+"One hot enconding" ou "Dummies" ou "Indicadores".
+
+```{r}
+Credit %>% slice(1:8) %>% select(Ethnicity) %>%
+  cbind(model.matrix(~Ethnicity, data = .)) %>%
+  knitr::kable(format = "html")
+```
+
+steps: `step_dummy()`
+
+---
+
+## Preditores Categóricos
+
+### Preditor com 3 ou mais categorias
+
+Interpretação dos parâmetros:
+
+$y_{i} = \left\{ \begin{array}{ll} \beta_0 & \text{se for }\texttt{Afro American}\\ \beta_0 + \beta_1&\text{se for } \texttt{Asian}\\ \beta_0 + \beta_2&\text{se for } \texttt{Caucasian}\end{array}\right.$
+
+```{r, echo = TRUE}
+# interprete cada um dos três parâmetros individualmente.
+```
+
+
+---
+
 ## Principais problemas dos modelos lineares
 
-- Escala das variáveis explicativas
+### Vamos estudar nesse curso
+
+- Escala das variáveis explicativas (apenas LASSO sofre) 
 
 - Relação não-linear entre X e Y
 
-- Correlação entre os erros
-
-- Variância dos erros não constantes (heterocedasticidade)
-
 - Outliers/Pontos de alavanca
 
-- Multicolinearidade
+### Não vamos estudar nesse curso
+
+- Heterocedasticidade: Variância dos erros não constantes
+
+- Multicolinearidade (LASSO resolve)
+
+- Correlação entre os erros (séries temporais, por ex.)
+
+---
+
+## Transformações Não Lineares dos Preditores
+
+### Exemplo: log
+
+.pull-left[
+Modelo real: $y = 10 + 0.5log(x)$ 
+]
+
+.pull-right[
+Modelo proposto: $\small y = \beta_0 + \beta_1log(x)$ 
+]
+```{r}
+set.seed(1)
+y_x <- tibble(
+  x = runif(60),
+  y = 10 + 0.5*log(x) + rnorm(30, sd = 0.1)
+) 
+
+grafico_y_x <- y_x %>%
+  ggplot(aes(x = x, y = y)) + 
+  geom_point( size = 3) 
 
 
+grafico_y_x_curvas <- grafico_y_x +
+  geom_smooth(aes(colour = "y ~ x"), method = "lm", se = FALSE, formula = y ~ x) +
+  geom_smooth(aes(colour = "y ~ log(x)"), method = "lm", se = FALSE, formula = y ~ log(x)) +
+  labs(colour = "Modelo") +
+  theme(legend.position = "left") 
 
+grafico_y_x_log <- grafico_y_x + scale_x_log10() + labs(x = "x (escala logarítmica)")
+```
+
+```{r, fig.width=9, fig.height=3, fig.align="center", dpi=300}
+grafico_y_x_curvas + grafico_y_x_log
+```
+
+Outras transformações comuns: raíz quadrada, Box-Cox.
+
+steps: `step_log()`, `step_BoxCox()`, `step_sqrt()`
+
+---
+
+## Transformações Não Lineares dos Preditores
+
+### Exemplo: Regressão Polinomial
+
+.pull-left[
+Modelo real: $y = 500 + 0.4(x-10)^3$ 
+]
+
+.pull-right[
+Modelo proposto: $y = \beta_0 + \beta_1x + \beta_2x^2 + \beta_3x^3$ 
+]
+
+
+```{r, fig.height=4, fig.width=11, dpi=300}
+set.seed(1)
+y_x_poly <- tibble(
+  x = runif(30, 0, 20),
+  y = 500 + 0.4 * (x-10)^3 + rnorm(30, sd = 50)
+)
+
+
+grafico_y_x_poly <- y_x_poly %>%
+  ggplot(aes(x = x, y = y)) + 
+  geom_point( size = 3) 
+
+
+grafico_y_x_poly_curvas <- grafico_y_x_poly +
+  geom_smooth(aes(colour = "y ~ x"), method = "lm", se = FALSE, formula = y ~ x) +
+  geom_smooth(aes(colour = "y ~ poly(x, 2)"), method = "lm", se = FALSE, formula = y ~ poly(x, 2)) +
+  geom_smooth(aes(colour = "y ~ poly(x, 3)"), method = "lm", se = FALSE, formula = y ~ poly(x, 3)) +
+  labs(colour = "Modelo") 
+grafico_y_x_poly + grafico_y_x_poly_curvas
+```
+
+Outras expansões comuns: b-splines, natural splines.
+
+steps: `step_poly()`, `step_bs()`, `step_ns`
+
+---
+
+## Interações
+
+Modelo proposto (Matemático): Seja `Sepal.Width` o $y$ e `Sepal.Length` o $x$,
+
+$$\small \begin{array}{l} y = \beta_0 + \beta_1x + \beta_2I_{versicolor} + \beta_3I_{virginica} + \beta_4\color{red}{xI_{versicolor}} + \beta_5\color{red}{xI_{virginica}}\end{array}$$
+
+
+```{r, out.height=180, out.height=260, fig.height=2, fig.width=4, fig.align="center", dpi=300}
+iris %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(colour = Species)) +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
+  geom_smooth(method = "lm", aes(colour = Species), se = FALSE) +
+  theme_minimal(10)
+```
+
+
+step: `step_interact(terms = ~ Sepal.Length:Species)`
+
+
+---
+
+## Outliers
+
+```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
+cars_com_predicoes_outliers <- cars_com_predicoes %>%
+  mutate(outlier = 13 == 1:nrow(.),
+         .resid = ifelse(outlier, 130, .resid)) 
+
+graf_outlier <-cars_com_predicoes_outliers %>%
+  ggplot(aes(x = speed, y = .resid)) +
+  coord_cartesian(ylim = c(-50, 135)) +
+  geom_point(size = 6, colour = "red", data = cars_com_predicoes_outliers %>% filter(outlier), alpha = 0.6) +
+  labs(x = "Valores preditos", y = "Resíduos", title = "Erro grande")+
+  geom_point(size = 2) +
+  theme_minimal(18) +
+  xlim(c(4, 29))
+
+cars_com_predicoes_alavanca <- cars_com_predicoes %>%
+  mutate(outlier = 13 == 1:nrow(.),
+         .resid = ifelse(outlier, 130, .resid),
+         speed = ifelse(outlier, 28, speed),
+         dist = ifelse(outlier, 150, dist)) 
+
+graf_alavanca <-cars_com_predicoes_alavanca %>%
+  ggplot(aes(x = speed, y = .resid)) +
+  coord_cartesian(ylim = c(-50, 135)) +
+  geom_point(size = 6, colour = "red", data = cars_com_predicoes_alavanca %>% filter(outlier), alpha = 0.6) +
+  labs(x = "Valores preditos", y = "Resíduos", title = "Alavanca")+
+  geom_point(size = 2) +
+  theme_minimal(18) +
+  xlim(c(4, 29))
+
+graf_outlier / graf_alavanca
+```
+
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
+]
+
+---
+
+## Outliers
+
+```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
+graf_alavanca1 <- cars_com_predicoes_alavanca %>%
+  ggplot(aes(x = speed, y = dist)) +
+  geom_point(size = 2, alpha = 0) +
+  geom_point(size = 2, data = cars_com_predicoes) +
+  geom_abline(
+    intercept = melhor_reta$coefficients[1], 
+    slope =     melhor_reta$coefficients[2], 
+    size = 1,
+    colour = "salmon"
+  ) +
+  theme_minimal(18)
+graf_alavanca1
+```
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
+]
+
+---
+
+## Outliers
+
+```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
+graf_alavanca1 +
+  geom_abline(
+    intercept = melhor_reta$coefficients[1] - 9, 
+    slope =     melhor_reta$coefficients[2] + 1.2, 
+    size = 1,
+    colour = "royalblue"
+  ) +
+  geom_point(size = 6, colour = "red", data = cars_com_predicoes_alavanca %>% dplyr::filter(outlier), alpha = 0.6) +
+  geom_point(size = 2, colour = "black", data = cars_com_predicoes_alavanca %>% dplyr::filter(outlier))
+```
+
+.footnote[
+Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
+]
 
 ---
 class: inverse, center, middle
