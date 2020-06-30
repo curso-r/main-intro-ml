@@ -11,7 +11,6 @@ B <- 0.1
 
 y <- B + W1 * x1 + W2 * x2 + rnorm(n, 0, 0.001)
 
-
 # Model definition ---------------------------------------------
 
 model <- function(w1, w2, b, x1, x2) {

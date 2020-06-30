@@ -16,8 +16,8 @@ dados <- x %>%
 
 # receita (dataprep) ------------------------------------------------------
 receita <- recipe(y ~ ., data = dados) %>%
-  step_center(all_predictors()) %>%
-  step_scale(all_predictors()) %>%
+  # step_center(all_predictors()) %>%
+  # step_scale(all_predictors()) %>%
   step_zv(all_predictors())
 
 # modelos -----------------------------------------------------------------

@@ -1682,6 +1682,10 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 
 ---
+
+## Ir para o R
+
+---
 class: inverse, center, middle
 
 # CLASSIFICAÇÃO
