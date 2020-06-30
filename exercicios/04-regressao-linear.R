@@ -21,7 +21,9 @@ diamonds_initial_split <- diamonds %>% initial_split(8/10)
 diamonds_train <- training(diamonds_initial_split)
 diamonds_test <- testing(diamonds_initial_split)
 
-# data prep (ainda vamos falar mais de como usar o recipes!) ------------------------
+# data prep --------------------------------------------------
+# [opcional] Experimente criar step_log(), step_interact(), etc
+# para ver se melhora o modelo.
 diamonds_recipe <- recipe(price ~ ., data = diamonds_train) %>%
   step_novel(all_nominal()) %>%
   step_dummy(all_nominal()) %>%
