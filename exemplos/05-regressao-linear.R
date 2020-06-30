@@ -13,45 +13,46 @@ help(Auto)
 # glimpse(Auto)
 # skim(Auto)
 # GGally::ggpairs(Auto %>% select(-name))
-# qplot(x, mpg, data = Auto)
+# qplot(displacement, mpg, data = Auto)
 
-Auto %>%
-  ggplot(aes(x = log(displacement), y = log(mpg))) +
-  geom_point()
-
-# data prep (ainda vamos ver como usar o recipes!) ------------------------
-auto <- ISLR::Auto %>%
-  mutate(
-    origin = factor(origin)
-  ) %>%
-  select(-name) %>%
-  mutate(
-    mpg = (mpg),
-    across(cylinders:year, log, .names = "log_{col}")
-  )
 
 # base treino e teste -----------------------------------------------------
 set.seed(1)
-auto_initial_split <- auto %>% initial_split(3/4)
+auto_initial_split <- Auto %>% initial_split(3/4)
 
 auto_train <- training(auto_initial_split)
 auto_test <- testing(auto_initial_split)
+
+# data prep (ainda vamos falar mais de como usar o recipes!) ------------------------
+auto_recipe <- recipe(mpg ~ ., data = auto_train) %>%
+  step_rm(name, skip = TRUE) %>%
+  step_num2factor(origin, levels = c("American", "European", "Japanese")) %>%
+  step_novel(all_nominal()) %>%
+  step_log(all_numeric(), -all_outcomes()) %>%
+  step_dummy(all_nominal()) %>%
+  step_zv(all_predictors()) 
+
+prep(auto_recipe)
+juice(prep(auto_recipe))
 
 # definicao do modelo -----------------------------------------------------
 auto_model <- linear_reg(
   penalty = tune(),
   mixture = 1 # LASSO
 ) %>% 
-  set_engine("glmnet") %>%
-  set_mode("regression")
+  set_engine("glmnet")
+
+# workflow ----------------------------------------------------------------
+auto_wf <- workflow() %>% 
+  add_model(auto_model) %>%
+  add_recipe(auto_recipe)
 
 # reamostragem com cross-validation ---------------------------------------
 auto_resamples <- vfold_cv(auto_train, v = 5)
 
 # tunagem de hiperparametros ----------------------------------------------
 auto_tune_grid <- tune_grid(
-  auto_model,
-  mpg ~ ., 
+  auto_wf, 
   resamples = auto_resamples,
   grid = 100,
   metrics = metric_set(rmse),
@@ -65,10 +66,10 @@ show_best(auto_tune_grid, "rmse")
 
 # seleciona o melhor conjunto de hiperparametros
 auto_best_hiperparams <- select_best(auto_tune_grid, "rmse")
-auto_model <- auto_model %>% finalize_model(auto_best_hiperparams)
+auto_wf <- auto_wf %>% finalize_workflow(auto_best_hiperparams)
 
 # desempenho do modelo final ----------------------------------------------
-auto_last_fit <- auto_model %>% last_fit(mpg ~ ., split = auto_initial_split)
+auto_last_fit <- auto_wf %>% last_fit(split = auto_initial_split)
 
 collect_metrics(auto_last_fit)
 collect_predictions(auto_last_fit) %>%
@@ -77,25 +78,25 @@ collect_predictions(auto_last_fit) %>%
 
 collect_predictions(auto_last_fit) %>%
   mutate(
-    mpg = (mpg)^2,
-    .pred = (.pred)^2
+    mpg = (mpg),
+    .pred = (.pred)
   ) %>%
   rmse(mpg, .pred)
 
 collect_predictions(auto_last_fit) %>%
-  ggplot(aes(.pred, ((mpg)^2-(.pred)^2))) +
+  ggplot(aes(.pred, ((mpg)-(.pred)))) +
   geom_point() +
   geom_smooth(se = FALSE)
-# auto_last_fit_model <- auto_last_fit$.workflow[[1]]
-# vip(auto_last_fit_model)
+
+vip(auto_last_fit$.workflow[[1]]$fit$fit)
 
 # modelo final ------------------------------------------------------------
-auto_final_model <- auto_model %>% fit(mpg ~ ., auto)
+auto_final_model <- auto_wf %>% fit(data = Auto)
 
 # importancia das variaveis -----------------------------------------------
-vip::vip(auto_final_model)
+vip::vip(auto_final_model$fit$fit)
 
-vip::vi(auto_final_model) %>%
+vip::vi(auto_final_model$fit$fit) %>%
   mutate(
     abs_importance = abs(Importance),
     Variable = fct_reorder(Variable, abs_importance)
@@ -104,15 +105,15 @@ vip::vi(auto_final_model) %>%
   geom_col()
 
 # coisas especiais do glmnet e regressão LASSO ----------------------------
-auto_final_model$fit %>% plot
+auto_final_model$fit$fit$fit %>% plot
 
 # só para fins didáticos
-auto_final_model$fit$beta %>%
+auto_final_model$fit$fit$fit$beta %>%
   as.matrix() %>%
   t() %>%
   as.tibble() %>%
   mutate(
-    lambda = auto_final_model$fit$lambda
+    lambda = auto_final_model$fit$fit$fit$lambda
   ) %>%
   pivot_longer(
     c(-lambda),
@@ -121,12 +122,12 @@ auto_final_model$fit$beta %>%
   ) %>%
   ggplot(aes(x = lambda, y = peso, colour = variavel)) +
   geom_line(size = 1) +
-  geom_vline(xintercept = auto_final_model$spec$args$penalty, colour = "red", linetype = "dashed") +
+  geom_vline(xintercept = auto_final_model$fit$fit$spec$args$penalty, colour = "red", linetype = "dashed") +
   scale_x_log10() +
   theme_minimal()
 
 # predicoes ---------------------------------------------------------------
-auto_com_previsao <- auto %>% 
+auto_com_previsao <- Auto %>% 
   mutate(
     mpg_pred = predict(auto_final_model, new_data = .)$.pred
   )
