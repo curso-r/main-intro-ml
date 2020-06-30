@@ -1659,6 +1659,29 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 ]
 
 ---
+
+## Outliers
+
+### Diagnóstico
+
+- Visualização univariada (histograma, boxplot);
+
+- Comparação do valor com o desvio padrão;
+
+### Tratamentos
+
+- Transformações log(), etc;
+
+- Categorização;
+
+- Remover os valores extremos (raramente boa ideia);
+
+- Usar Random Forest/XGBoost;
+
+- Usar MAE em vez de RMSE;
+
+
+---
 class: inverse, center, middle
 
 # CLASSIFICAÇÃO
