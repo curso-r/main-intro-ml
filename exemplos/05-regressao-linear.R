@@ -10,11 +10,27 @@ library(skimr)
 help(Auto)
 
 # EAD ---------------------------------------------------------------------
-# glimpse(Auto)
-# skim(Auto)
+glimpse(Auto)
+skim(Auto)
 # GGally::ggpairs(Auto %>% select(-name))
-# qplot(displacement, mpg, data = Auto)
+library(patchwork)
 
+qplot(log(horsepower), log(mpg), data = Auto) / qplot(horsepower, mpg, data = Auto)
+
+Auto %>%
+  ggplot(aes(x = log(horsepower))) +
+  geom_histogram()
+
+Auto %>%
+  select(where(is.numeric), mpg) %>%
+  pivot_longer(c(-mpg, -origin)) %>%
+  ggplot(aes(x = value, y = mpg, colour = factor(origin))) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~name, scales = "free_x")
+
+set.seed(1)
+runif(1)
 
 # base treino e teste -----------------------------------------------------
 set.seed(1)
@@ -28,9 +44,10 @@ auto_recipe <- recipe(mpg ~ ., data = auto_train) %>%
   step_rm(name, skip = TRUE) %>%
   step_num2factor(origin, levels = c("American", "European", "Japanese")) %>%
   step_novel(all_nominal()) %>%
-  step_log(all_numeric(), -all_outcomes()) %>%
+  step_log(all_numeric()) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
   step_dummy(all_nominal()) %>%
-  step_zv(all_predictors()) 
+  step_zv(all_predictors())
 
 prep(auto_recipe)
 juice(prep(auto_recipe))
