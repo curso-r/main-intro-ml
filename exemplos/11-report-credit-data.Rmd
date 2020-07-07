@@ -1,0 +1,186 @@
+---
+title: "Credit Data - Modelo"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(tidyverse)
+library(tidymodels)
+library(vip)
+credit_final_lr_model <- read_rds("credit_final_lr_model.rds")
+credit_lr_last_fit <- read_rds("credit_lr_last_fit.rds")
+credit_lr_last_fit_model <- read_rds("credit_lr_last_fit_model.rds")
+
+credit_test_preds <- collect_predictions(credit_lr_last_fit)
+
+
+```
+
+Column {data-width=50}
+-----------------------------------------------------------------------
+
+
+### Variável Resposta
+
+```{r}
+valueBox("Inadimplência")
+```
+
+### Linhas da base de treino/teste
+
+```{r}
+
+count_treino <- credit_lr_last_fit$splits[[1]] %>% training() %>% nrow()
+count_teste <- credit_lr_last_fit$splits[[1]] %>% testing() %>% nrow()
+valueBox(paste(count_treino , count_teste, sep = "/"))
+```
+
+### Proporção Inad
+
+```{r}
+count_status <- credit_lr_last_fit$splits[[1]][[1]] %>% count(Status)
+valueBox(scales::percent(count_status$n[1]/sum(count_status$n)))
+```
+
+
+
+### Variáveis testadas
+
+```{r}
+valueBox(223)
+```
+
+### Variáveis importantes
+
+```{r}
+valueBox(21)
+```
+
+### Algoritmo
+
+```{r}
+valueBox("Reg. Logística LASSO")
+```
+
+### KS REF/NOVO
+
+```{r}
+valueBox(paste(scales::percent(0.66), "/", scales::percent(0.75), "(+ 13%)"), color = "green")
+```
+
+### AUROC REF/NOVO
+
+```{r}
+valueBox(paste(scales::percent(0.76), "/", scales::percent(0.87), "(+ 14%)"), color = "green")
+```
+
+
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Curva ROC
+
+```{r}
+credit_roc_curve <- credit_test_preds %>% roc_curve(Status, .pred_bad)
+autoplot(credit_roc_curve) %>% ggplotly()
+
+```
+
+### Variáveis Importantes
+
+```{r}
+vip_ok <- read_rds("vip_ok.rds") +
+  theme_minimal(16)
+
+
+
+ggplotly(vip_ok)
+```
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Risco por faixa (%)
+
+```{r}
+# risco por faixa de score
+risco_por_faixa_n <- credit_test_preds %>%
+  mutate(
+    score =  factor(ntile(.pred_bad, 10))
+  ) %>%
+  count(score, Status) %>%
+  ggplot(aes(x = score, y = n, fill = Status)) +
+  geom_col(position = "fill") +
+  geom_label(aes(label = n), position = "fill") +
+  coord_flip() +
+  theme_minimal() 
+risco_por_faixa_n %>%
+  ggplotly()
+```
+
+
+### Risco por faixa ($)
+
+```{r}
+# risco por faixa de score
+risco_por_faixa_d <- credit_test_preds %>%
+  bind_cols(testing(credit_lr_last_fit$splits[[1]])) %>%
+  mutate(
+    score =  factor(ntile(.pred_bad, 10))
+  ) %>%
+  rename(
+    Status = Status...7,
+  ) %>%
+  group_by(score, Status) %>%
+  summarise(
+    `Montante` = sum(Amount, na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = score, y = Montante, fill = Status)) +
+  geom_col(position = "fill") +
+  geom_label(aes(label = scales::dollar(Montante, 0, prefix = "R$")), position = "fill") +
+  coord_flip() +
+  theme_minimal() 
+risco_por_faixa_d %>%
+  ggplotly()
+```
+
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Montante Inadimplente (Recall)
+
+```{r}
+# gráfico sobre os da classe "bad"
+percentis = 20
+recall_n <- credit_test_preds %>%
+  bind_cols(testing(credit_lr_last_fit$splits[[1]])) %>%
+  rename(
+    Status = Status...7,
+  ) %>%
+  mutate(
+    score = factor(ntile(.pred_bad, percentis))
+  ) %>%
+  filter(Status == "bad") %>%
+  group_by(score) %>%
+  summarise(
+    n = n(),
+    `Montante` = sum(Amount, na.rm = TRUE),
+    media = mean(.pred_bad)
+  ) %>%
+  mutate(p = Montante/sum(Montante)) %>%
+  ggplot(aes(x = p, y = score)) +
+  geom_col(fill = "royalblue") +
+  geom_label(aes(label = scales::percent(p))) +
+  geom_vline(xintercept = 1/percentis, colour = "orange", linetype = "dashed", size = 1) +
+  theme_minimal()
+
+recall_n %>% ggplotly()
+```
+
