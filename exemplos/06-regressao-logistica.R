@@ -39,7 +39,7 @@ credit_test  <- testing(credit_initial_split)
 # 
 # GGally::ggpairs(credit_data %>% select(where(~!is.numeric(.))))
 
-r# PASSO 3) DATAPREP --------------------------------------------------------
+# PASSO 3) DATAPREP --------------------------------------------------------
 credit_receita <- recipe(Status ~ ., data = credit_train) %>%
   step_modeimpute(Home, Marital, Job) %>%
   step_medianimpute(Debt) %>%
@@ -48,7 +48,7 @@ credit_receita <- recipe(Status ~ ., data = credit_train) %>%
   step_normalize(all_numeric()) %>%
   step_dummy(all_nominal(), -all_outcomes()) %>%
   step_interact(~ starts_with("Seniority"):starts_with("Records")) %>%
-  step_interact(~ starts_with("Amount"):starts_with("Records"))
+  step_interact(~ starts_with("Amount"):starts_with("Records")) 
 
 
 ok <-juice(prep(credit_receita))
@@ -97,6 +97,7 @@ credit_lr_tune_grid <- tune_grid(
 collect_metrics(credit_lr_tune_grid)
 
 collect_metrics(credit_lr_tune_grid) %>%
+  filter(penalty < 00.01) %>%
   ggplot(aes(x = penalty, y = mean)) +
   geom_point() +
   geom_errorbar(aes(ymin = mean - std_err, ymax = mean + std_err)) +
@@ -124,7 +125,7 @@ write_rds(credit_lr_last_fit, "credit_lr_last_fit.rds")
 write_rds(credit_lr_last_fit_model, "credit_lr_last_fit_model.rds")
 
 collect_metrics(credit_lr_last_fit)
-
+credit_test_preds <- collect_predictions(credit_lr_last_fit)
 # roc
 credit_roc_curve <- credit_test_preds %>% roc_curve(Status, .pred_bad)
 autoplot(credit_roc_curve)
@@ -194,13 +195,13 @@ comparacao_de_modelos <- collect_predictions(credit_lr_last_fit) %>%
   ) 
 
 # KS no ggplot2 -------
-densidade_acumulada <- collect_predictions(credit_lr_last_fit) %>%
+densidade_acumulada <- credit_test_preds %>%
   ggplot(aes(x = .pred_bad, colour = Status)) +
   stat_ecdf(size = 1) +
   theme_minimal()  +
   labs(title = "Densidade Acumulada")
 
-densidade <- collect_predictions(credit_lr_last_fit) %>%
+densidade <- credit_test_preds %>%
   ggplot(aes(x = .pred_bad, colour = Status)) +
   stat_density(size = 0.5, aes(fill = Status), alpha = 0.2 , position = "identity") +
   theme_minimal() +
