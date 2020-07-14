@@ -355,7 +355,7 @@ telco_wf <- workflow() %>%
 
 telco_last_fit <- telco_wf %>% 
   last_fit(
-    splits = telco_initial_split,
+    split = telco_initial_split,
     control = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = TRUE),
     metrics = metric_set(roc_auc, f_meas)
   )
@@ -370,7 +370,7 @@ telco_last_fit %>%
   vip::vip(num_features = 20)
 
 #### Curva ROC
-final_model %>% 
+telco_last_fit %>% 
     collect_predictions() %>% 
     roc_curve(Churn, .pred_Yes) %>% 
     autoplot()
