@@ -4,9 +4,6 @@ library(tidymodels)
 library(rpart)
 library(rpart.plot)
 
-# Me ----------------------------------------------------------------------
-
-# PASSO 0) CARREGAR AS BASES
 credit_data <- read_rds("dados/credit_data.rds") %>% na.omit()
 
 credit_tree_model <- decision_tree(min_n = 31, tree_depth = 5) %>% set_mode("classification")
