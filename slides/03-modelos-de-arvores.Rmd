@@ -218,7 +218,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 .pull-right[
 
-<img src="static/img/arvore_hiperparam01.png" style="width: 100%;"/>
+<img src="static/img/arvore_hiperparam02.png" style="width: 100%;"/>
 
 ]
 
@@ -240,7 +240,7 @@ Fonte: [spark.apache.org/docs/1.3.0/mllib-decision-tree.html]()
 
 .pull-right[
 
-<img src="static/img/arvore_hiperparam02.png" style="width: 100%;"/>
+<img src="static/img/arvore_hiperparam01.png" style="width: 100%;"/>
 
 ]
 
@@ -310,7 +310,8 @@ ajuste <- tune_grid(
   y ~ x, 
   modelo, 
   resamples = vfold_cv(dados, 5),
-  grid = params
+  grid = params,
+  metrics = metric_set(rmse)
 )
 
 collect_metrics(ajuste) %>%

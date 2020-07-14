@@ -55,7 +55,7 @@ Muitas vezes os dados brutos precisam passar por várias transformações até c
 
 Por exemplo, é conveniente tratar os valores omissos.
 
-O pacote `recipes` fornece uma maneira de organizar esse passo transformação dos dados brutos.
+O pacote `recipes` fornece uma maneira de organizar essa transformação dos dados brutos.
 
 ```{r, eval = FALSE}
 library(recipes)
@@ -66,9 +66,14 @@ receita <- recipes(resposta ~ variavel_dependente1 + variavel_dependente2,
 ```
 
 
-Podemos selecionar as variávels nas quais queremos mexer escrevendo os nomes delas ou usando as funções `all_numeric()`,  `all_nominal()` entre outras.
+Podemos selecionar as variávels nas quais queremos mexer escrevendo os nomes delas ou usando as funções `all_numeric()`,  `all_nominal()`, `all_predictors()`, `àll_outcomes()`, entre outras.
 
 Você pode ver o resultado com `receita %>% prep() %>% juice()`.
+
+---
+
+# prep(), bake() e juice()
+
 ---
 
 

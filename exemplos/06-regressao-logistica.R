@@ -10,25 +10,25 @@ library(skimr)
 library(naniar)
 
 # PASSO 0) CARREGAR AS BASES -----------------------------------------------
-data("credit_data")
-help(credit_data)
-glimpse(credit_data) # German Risk 
+adult <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult.rds")
+help(adult)
+glimpse(adult) # German Risk 
 
-credit_data %>% count(Status)
+adult %>% count(Status)
 
 # PASSO 1) BASE TREINO/TESTE -----------------------------------------------
 set.seed(1)
-credit_initial_split <- initial_split(credit_data, strata = "Status", p = 0.75)
+adult_initial_split <- initial_split(adult, strata = "Status", p = 0.75)
 
-credit_train <- training(credit_initial_split)
-credit_test  <- testing(credit_initial_split)
+adult_train <- training(adult_initial_split)
+adult_test  <- testing(adult_initial_split)
 
 # PASSO 2) EXPLORAR A BASE -------------------------------------------------
 
-# vis_miss(credit_data)
-# skim(credit_data)
-# GGally::ggpairs(credit_train %>% select(where(is.numeric)) %>% mutate_all(log))
-# credit_data %>% 
+# vis_miss(adult)
+# skim(adult)
+# GGally::ggpairs(adult_train %>% select(where(is.numeric)) %>% mutate_all(log))
+# adult %>% 
 #   filter(Assets > 100) %>%
 #   select(where(is.numeric), Status, Records) %>%
 #   pivot_longer(where(is.numeric)) %>%
@@ -37,10 +37,10 @@ credit_test  <- testing(credit_initial_split)
 #   facet_wrap(~name, scales = "free_y") +
 #   scale_y_log10()
 # 
-# GGally::ggpairs(credit_data %>% select(where(~!is.numeric(.))))
+# GGally::ggpairs(adult %>% select(where(~!is.numeric(.))))
 
 # PASSO 3) DATAPREP --------------------------------------------------------
-credit_receita <- recipe(Status ~ ., data = credit_train) %>%
+adult_receita <- recipe(Status ~ ., data = adult_train) %>%
   step_modeimpute(Home, Marital, Job) %>%
   step_medianimpute(Debt) %>%
   step_bagimpute(Income, Assets) %>%
@@ -51,7 +51,7 @@ credit_receita <- recipe(Status ~ ., data = credit_train) %>%
   step_interact(~ starts_with("Amount"):starts_with("Records")) 
 
 
-ok <-juice(prep(credit_receita))
+ok <-juice(prep(adult_receita))
 
 # PASSO 4) MODELO ----------------------------------------------------------
 # Definição de 
@@ -60,15 +60,15 @@ ok <-juice(prep(credit_receita))
 # c) hiperparametros que queremos tunar: penalty = tune()
 # d) hiperparametros que não queremos tunar: mixture = 1 # LASSO
 # e) o motor que queremos usar: glmnet
-credit_lr_model <- logistic_reg(penalty = tune(), mixture = 1) %>%
+adult_lr_model <- logistic_reg(penalty = tune(), mixture = 1) %>%
   set_mode("classification") %>%
   set_engine("glmnet")
 
 
 # workflow ----------------------------------------------------------------
-credit_wf <- workflow() %>%
-  add_model(credit_lr_model) %>%
-  add_recipe(credit_receita)
+adult_wf <- workflow() %>%
+  add_model(adult_lr_model) %>%
+  add_recipe(adult_receita)
 
 
 # PASSO 5) TUNAGEM DE HIPERPARÂMETROS --------------------------------------
@@ -77,11 +77,11 @@ credit_wf <- workflow() %>%
 # c) tune_grid()
 # d) escolha das métricas (rmse, roc_auc, etc)
 # d) collect_metrics() ou autoplot() para ver o resultado
-credit_resamples <- vfold_cv(credit_train, v = 5)
+adult_resamples <- vfold_cv(adult_train, v = 5)
 
-credit_lr_tune_grid <- tune_grid(
-  credit_wf,
-  resamples = credit_resamples,
+adult_lr_tune_grid <- tune_grid(
+  adult_wf,
+  resamples = adult_resamples,
   metrics = metric_set(
     accuracy, 
     kap, # KAPPA 
@@ -94,9 +94,9 @@ credit_lr_tune_grid <- tune_grid(
 )
 
 # minha versão do autoplot()
-collect_metrics(credit_lr_tune_grid)
+collect_metrics(adult_lr_tune_grid)
 
-collect_metrics(credit_lr_tune_grid) %>%
+collect_metrics(adult_lr_tune_grid) %>%
   filter(penalty < 00.01) %>%
   ggplot(aes(x = penalty, y = mean)) +
   geom_point() +
@@ -108,30 +108,30 @@ collect_metrics(credit_lr_tune_grid) %>%
 # a) extrai melhor modelo com select_best()
 # b) finaliza o modelo inicial com finalize_model()
 # c) ajusta o modelo final com todos os dados de treino (bases de validação já era)
-credit_lr_best_params <- select_best(credit_lr_tune_grid, "roc_auc")
-credit_wf <- credit_wf %>% finalize_workflow(credit_lr_best_params)
+adult_lr_best_params <- select_best(adult_lr_tune_grid, "roc_auc")
+adult_wf <- adult_wf %>% finalize_workflow(adult_lr_best_params)
 
-credit_lr_last_fit <- last_fit(
-  credit_wf,
-  credit_initial_split
+adult_lr_last_fit <- last_fit(
+  adult_wf,
+  adult_initial_split
 )
 
 # Variáveis importantes
-credit_lr_last_fit_model <- credit_lr_last_fit$.workflow[[1]]$fit$fit
-vip(credit_lr_last_fit_model)
+adult_lr_last_fit_model <- adult_lr_last_fit$.workflow[[1]]$fit$fit
+vip(adult_lr_last_fit_model)
 
 # PASSO 7) GUARDA TUDO ---------------------------------------------------------
-write_rds(credit_lr_last_fit, "credit_lr_last_fit.rds")
-write_rds(credit_lr_last_fit_model, "credit_lr_last_fit_model.rds")
+write_rds(adult_lr_last_fit, "adult_lr_last_fit.rds")
+write_rds(adult_lr_last_fit_model, "adult_lr_last_fit_model.rds")
 
-collect_metrics(credit_lr_last_fit)
-credit_test_preds <- collect_predictions(credit_lr_last_fit)
+collect_metrics(adult_lr_last_fit)
+adult_test_preds <- collect_predictions(adult_lr_last_fit)
 # roc
-credit_roc_curve <- credit_test_preds %>% roc_curve(Status, .pred_bad)
-autoplot(credit_roc_curve)
+adult_roc_curve <- adult_test_preds %>% roc_curve(Status, .pred_bad)
+autoplot(adult_roc_curve)
 
 # confusion matrix
-credit_test_preds %>%
+adult_test_preds %>%
   mutate(
     Status_class = factor(if_else(.pred_bad > 0.6, "bad", "good"))
   ) %>%
@@ -140,7 +140,7 @@ credit_test_preds %>%
 # gráficos extras!
 
 # risco por faixa de score
-credit_test_preds %>%
+adult_test_preds %>%
   mutate(
     score =  factor(ntile(.pred_bad, 10))
   ) %>%
@@ -152,7 +152,7 @@ credit_test_preds %>%
 
 # gráfico sobre os da classe "bad"
 percentis = 20
-credit_test_preds %>%
+adult_test_preds %>%
   mutate(
     score = factor(ntile(.pred_bad, percentis))
   ) %>%
@@ -169,8 +169,8 @@ credit_test_preds %>%
   geom_vline(xintercept = 1/percentis, colour = "red", linetype = "dashed", size = 1)
 
 # PASSO 7) MODELO FINAL -----------------------------------------------------
-credit_final_lr_model <- credit_lr_model %>% fit(Status ~ ., credit_data)
-write_rds(credit_final_lr_model, "credit_final_lr_model.rds")
+adult_final_lr_model <- adult_lr_model %>% fit(Status ~ ., adult)
+write_rds(adult_final_lr_model, "adult_final_lr_model.rds")
 
 
 
@@ -184,7 +184,7 @@ ks_vec <- function(truth, estimate) {
   ks_test$statistic
 }
 
-comparacao_de_modelos <- collect_predictions(credit_lr_last_fit) %>%
+comparacao_de_modelos <- collect_predictions(adult_lr_last_fit) %>%
   summarise(
     auc = roc_auc_vec(Status, .pred_bad),
     acc = accuracy_vec(Status, .pred_class),
@@ -195,13 +195,13 @@ comparacao_de_modelos <- collect_predictions(credit_lr_last_fit) %>%
   ) 
 
 # KS no ggplot2 -------
-densidade_acumulada <- credit_test_preds %>%
+densidade_acumulada <- adult_test_preds %>%
   ggplot(aes(x = .pred_bad, colour = Status)) +
   stat_ecdf(size = 1) +
   theme_minimal()  +
   labs(title = "Densidade Acumulada")
 
-densidade <- credit_test_preds %>%
+densidade <- adult_test_preds %>%
   ggplot(aes(x = .pred_bad, colour = Status)) +
   stat_density(size = 0.5, aes(fill = Status), alpha = 0.2 , position = "identity") +
   theme_minimal() +
@@ -211,7 +211,7 @@ library(patchwork)
 densidade / densidade_acumulada
 
 # KS "na raça" ---------
-ks_na_raca_df <- collect_predictions(credit_lr_last_fit) %>%
+ks_na_raca_df <- collect_predictions(adult_lr_last_fit) %>%
   mutate(modelo = "Regressao Logistica",
          pred_prob = .pred_bad) %>%
   mutate(score_categ = cut_interval(pred_prob, 1000)) %>%
@@ -256,7 +256,7 @@ ks_na_raca_df %>%
 
 
 # ignorar
-vip_ok <- vi(credit_lr_last_fit_model) %>%
+vip_ok <- vi(adult_lr_last_fit_model) %>%
   mutate(Variable = fct_reorder(Variable, abs(Importance))) %>%
   ggplot(aes(x = abs(Importance), y = Variable, fill = Sign)) +
   geom_col()

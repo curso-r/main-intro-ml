@@ -55,6 +55,12 @@ valueBox(scales::percent(count_status$n[1]/sum(count_status$n)))
 valueBox(223)
 ```
 
+### Variáveis importantes
+
+```{r}
+valueBox(21)
+```
+
 ### Algoritmo
 
 ```{r}
@@ -124,9 +130,12 @@ risco_por_faixa_n %>%
 ```{r}
 # risco por faixa de score
 risco_por_faixa_d <- credit_test_preds %>%
-  bind_rows(testing(credit_lr_last_fit$splits[[1]])) %>%
+  bind_cols(testing(credit_lr_last_fit$splits[[1]])) %>%
   mutate(
     score =  factor(ntile(.pred_bad, 10))
+  ) %>%
+  rename(
+    Status = Status...7,
   ) %>%
   group_by(score, Status) %>%
   summarise(
@@ -145,12 +154,16 @@ risco_por_faixa_d %>%
 Column {data-width=300}
 -----------------------------------------------------------------------
 
-### Inadimplentes (Recall)
+### Montante Inadimplente (Recall)
 
 ```{r}
 # gráfico sobre os da classe "bad"
 percentis = 20
 recall_n <- credit_test_preds %>%
+  bind_cols(testing(credit_lr_last_fit$splits[[1]])) %>%
+  rename(
+    Status = Status...7,
+  ) %>%
   mutate(
     score = factor(ntile(.pred_bad, percentis))
   ) %>%
@@ -158,9 +171,10 @@ recall_n <- credit_test_preds %>%
   group_by(score) %>%
   summarise(
     n = n(),
+    `Montante` = sum(Amount, na.rm = TRUE),
     media = mean(.pred_bad)
   ) %>%
-  mutate(p = n/sum(n)) %>%
+  mutate(p = Montante/sum(Montante)) %>%
   ggplot(aes(x = p, y = score)) +
   geom_col(fill = "royalblue") +
   geom_label(aes(label = scales::percent(p))) +
