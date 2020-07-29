@@ -1,5 +1,5 @@
 library(tidymodels)
-library(embed) # steps para "continualizar" variaveis categoricas
+library(embed) # steps para transformar variaveis categoricas em variaveis continuas
 library(textrecipes) # steps para mexer com textos
 library(timetk) # steps para mexer com series temporais
 library(janitor) # funcoes auxiliares
@@ -7,7 +7,8 @@ library(janitor) # funcoes auxiliares
 data("diamonds")
 
 # workflow
-wf <- workflow() %>% add_model(linear_reg(penalty = 0, mixture = 1) %>% set_engine("glmnet"))
+modelo <- linear_reg(penalty = 0, mixture = 1) %>% set_engine("glmnet")
+wf <- workflow() %>% add_model(modelo)
 
 # dados
 diamonds_com_problemas_a_mais <- diamonds %>%
@@ -219,3 +220,5 @@ juice(prep(rec3)) %>% glimpse()
 # steps de datas ----------------------------------------------------------
 # step_holiday()
 # step_date()
+
+
