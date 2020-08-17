@@ -139,7 +139,7 @@ juice(prep(rec3)) %>% glimpse()
 
 
 # steps de transformacao de N para N colunas ------------------------------
-# step_pca()
+# step_pca() # cp1 = a*x1 + b*x2 + c*x3 
 # step_ica()
 # step_isomap()
 # step_umap()
