@@ -1,0 +1,884 @@
+---
+title: "Desafio Intro ML - Curso-R"
+author: "Ricardo Mattos"
+date: "12/07/2020"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
+    number_sections: yes
+---
+
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidymodels)
+library(ggplot2)
+library(skimr)
+library(RCurl)
+library(kableExtra)
+library(gridExtra)
+library(glue)
+library(forcats)
+library(DataExplorer)
+library(e1071)
+```
+
+# Objetivo
+
+O objetivo desse notebook é efetuar todo o processo de modelagem da base de dados `adult`, disponibilizada para o desafio do curso de introdução ao Machine Learning da Curso-R, utilizando o framework `tidymodels`. Ou seja, explorar, tratar, preparar, tunnar e escolher o modelo que melhor se ajusta aos dados disponibilizados.
+
+
+# Leitura da base
+
+## Informações preliminares
+
+```{r}
+adult <- read_rds("adult.rds")
+
+# head(adult) 
+
+# glimpse(adult)
+skim(adult)
+
+```
+
+
+
+<br> As variáveis parecem estar com formatos corretos. Ponto de atenção para as variáveis `wokclass`, `occupation` e `native_country`, que apresentam valores missing.  </br>
+
+
+# AED 
+
+<br> Agora vamos analisar o comportamento das variáveis para definirmos como tratar os nossos dados para o modelo. </br>
+
+## Parte 1 {.tabset}
+
+```{r,results='asis', echo=TRUE, message=FALSE, warning=FALSE}
+
+
+# DataExplorer::create_report(adult)
+
+devtools::source_url("https://raw.githubusercontent.com/ricardomattos05/functions/master/function_AED_bivariada.R")
+# 
+# 
+adult2 <- adult %>%
+            select(-id) %>% 
+            mutate(resposta = if_else(resposta == ">50K", 1, 0))
+# 
+# 
+
+# names(adult2)
+for (i in 1:(length(adult2)-1) ) {
+  
+  df <- adult2[,c(i,15)]
+  cat("### ",names(df[,1]),"\n") 
+  print(AED_biv(df,glue("resposta"),"Pre"))
+  cat('\n\n')
+}
+
+
+
+```
+
+
+## {-}
+
+Observações:
+
+* `education` : é possível visualizar que quanto maior o grau de escolaridade, maior a proporção de pessoas com salarios acima de 50k. E que as categorias abaixo de HS-grad, `1th-4th` até `12th`além de serem pouco representativas, possuem baixa proporção, vamos então criar uma categoria uma nova consolidando elas `HS-not-grad`.
+
+* `marital_status` : aqui iremos agrupar os campos `Married-AF-spouse` e `Married-civ-spouse`, criando a categoria `Married`, baseado na similaridade entre elas com relação a variável resposta e considerando a descrição delas.
+
+* `native_country` : É um campo com pouca variabilidade, onde `r (adult %>% select(native_country) %>% filter(native_country == "United-States") %>% count() / count(adult)) %>% as.numeric() %>% percent()` dos dados estão atribuídos como "Estados Unidos". Sendo assim, poderia considerar apenas Estados Unidos e agrupar o restante como outros, mas vamos manter o máximo de informação e reduzir as categorias para 3, agrupando todos os países que obtiveram proporção maior que a média, manter o valor mais representativo e uma categoria com os países abaixo da média.
+
+* `relationship` : campo contém os campos `husband` e `wife`, aparentemente poderiamos agrupa-los, vamos analisar mais afundo.
+
+* `capital_loss` e `capital_gain` : Aparentemente tanto quem ganha quanto quem perde algum valor apresentam maiores probabilidades de ter salario >50k. Vamos então avaliar a correlação entre elas.
+
+* `workclass` : Categorias com baixa representatividade como `Never-worked`e `Without-pay` não possuem classificação com a resposta de interesse ">50k", vamos dar um zoom nessa variável e analisar os NA's que identificamos também.
+
+## Parte 2 {.tabset}
+
+### occupation
+
+```{r}
+
+ggplot(adult, aes(x = occupation, fill = resposta)) + 
+  geom_bar(position="fill") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("occupation")
+
+```
+
+<br> É possível ver que não faria sentido atribuir os NAs de forma modal, uma vez que nosso objetivo é obter o maior poder preditivo possível, logo, não queremos perder informação. Sendo assim, não vamos diluir os NAs na categoria com maior representatividade `Prof-specialty`, vamos atribuir à uma categoria com proporções similares e que possui uma boa representatividade, `Farming-fishing`. </br>
+
+
+### relationship
+```{r}
+
+ggplot(adult, aes(x = relationship)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("relationship")
+
+ggplot(adult, aes(x = relationship, fill = resposta)) + 
+  geom_bar(position="fill") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("relationship")
+
+ggplot(adult, aes(x = relationship, fill = sex)) + 
+  geom_bar(position="fill") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("relationship")
+
+```
+
+Vamos então balancear o gênero agrupando as categorias Wife e Husband, criando a categoria `Married`.
+
+### Capital Gain and Loss
+
+
+```{r, echo = TRUE}
+
+ggplot(adult, aes(x= capital_gain, y= capital_loss)) +
+  geom_point()
+```
+
+
+
+```{r}
+sum(adult$capital_loss > 0 & adult$capital_gain > 0)
+```
+Sendo assim, podemos soma-las e criar a variável `capital_total` sem medo de perder informação.
+
+### Worclass
+
+```{r}
+
+ggplot(adult, aes(x = workclass)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("Workclass")
+
+ggplot(adult, aes(x = workclass, fill = resposta)) + 
+  geom_bar(position="fill") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ggtitle("Workclass")
+
+```
+
+Pelo visto a catgoria NA possui relação com a variável resposta distinta de todas as outras categorias, vamos então gerar uma nova categoria `not-identify` para atribuir os valores NA.
+
+
+### native_country
+
+```{r}
+
+med <- (adult %>% 
+          select(resposta) %>%
+          filter(resposta == ">50K") %>% 
+          count() %>% 
+          as.numeric())/nrow(adult)
+         
+
+tb_country<- adult %>% 
+                select(native_country, resposta) %>% 
+                group_by(native_country) %>% 
+                count(resposta) %>% 
+                mutate(prop = prop.table(n)) %>% 
+                filter(resposta == ">50K") %>% 
+                mutate( class = case_when( native_country == "United-States" ~ "United-States",
+                                           prop > med ~ ">mean",
+                                           prop <= med ~ "<=mean" )  )
+
+tb_country %>% 
+  select(native_country,class) %>% 
+  group_by(class) %>% 
+  count()
+
+
+
+```
+
+
+Ficamos então com 21 países com proporções abaixo da méda, 18 acima e "United-States" como as 3 categorias restantes.
+
+
+```{r, echo=FALSE}
+
+# tb_country %>%
+#         filter(class == "<=mean") %>%
+#         select(native_country) %>%
+#         as.factor()
+
+
+adult2<- adult2 %>%
+    mutate(class_country = case_when(native_country %in% c("Cambodia", "Canada", "China", "Cuba", "England", "France", "Germany", "Greece", "Hong", "India", "Iran", "Italy", "Japan", "Philippines", "Scotland", "Taiwan", "Yugoslavia", NA)  ~ ">mean",
+                             native_country == "United-States" ~ "United-States",
+                             TRUE ~ "<=mean") )     
+
+# adult2 %>% 
+#   filter(class == ">mean") %>% 
+#   select(native_country) %>% 
+#   group_by(native_country) %>% 
+#   count()
+
+ggplot(adult2, aes(x = class_country)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) +
+  geom_text(stat = "count", 
+            aes(label = round((..count..)/sum(..count..), 2), y = ..prop.. + 0.02))+
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_y_continuous(labels=percent)+ ylab("prop")+
+  ggtitle("class_country")
+
+ggplot(adult2, aes(x = class_country, fill = as.factor(resposta) )) + 
+  geom_bar(position="fill") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_y_continuous(labels=percent)+
+  ggtitle("class_country")
+    
+    
+```
+
+<br>A distribuição ficou com 5% para países acima da média e 5% para países abaixo da média.</br>
+
+# Modelagem
+
+Com nossa a análise exploratória concluída, vamos dar início as estapas da modelagem utilizando o framework do `tidymodels`.
+
+## Amostragem
+
+Fazendo a separação dos dados em treino e teste, estratificando pela variável resposta para a modelagem.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+set.seed(32)
+
+adult_split <- initial_split(adult, prop = 0.8, strata = resposta)
+
+adult_train <- training(adult_split)
+adult_test <- testing(adult_split)
+
+```
+
+
+## Data Prep
+
+Os tratamentos necessários observados na AED, que foi feita utilizando o pacote `DataExplorer` e a função [`AED_biv`](https://github.com/ricardomattos05/functions/blob/master/function_AED_bivariada.R) que gerei para entender o comportamento das variáveis com relação a variável resposta, serão armazenados utilizando o recipes para ser utilizado tanto para treinar os modelos como para testar posteriormente.
+
+
+```{r}
+
+adult_recipe <- 
+  recipe(resposta ~ ., data = adult_train) %>% 
+  step_mutate(
+    
+    occupation = case_when(
+      is.na(occupation) ~ "Farming-fishing",
+      TRUE ~ as.character(occupation)),
+    
+    workclass = case_when(
+      is.na(workclass) ~ "Not-identify",
+      TRUE ~ as.character(workclass)),
+    
+    class_country = case_when(native_country %in% c("Cambodia", "Canada", "China", "Cuba", "England", "France", "Germany", "Greece", "Hong", "India", "Iran", "Italy", "Japan", "Philippines", "Scotland", "Taiwan", "Yugoslavia", NA) ~ "greater_mean",
+                             native_country == "United-States" ~ "United-States",
+                             TRUE ~ "smaller_mean")
+    ,
+    
+    capital_total = capital_gain + capital_loss
+    , 
+    
+    marital_status = case_when(
+      marital_status %in% c("Married-AF-spouse" , "Married-civ-spouse") ~ "Married",
+      TRUE ~ as.character(marital_status))
+    ,
+    
+    education = case_when(education %in% c("1st-4th", "5th-6th", "7th-8th", "9th", "10th", "11th", "12th") ~ "HS-not-grad",
+                          TRUE ~ as.character(education))
+    ,
+    
+    relationship = case_when(  relationship %in% c("Husband","Wife") ~ "Married",
+                               TRUE ~ as.character(relationship))
+    
+  ) %>% 
+  step_rm(id, capital_gain, capital_loss, native_country)%>% 
+  step_string2factor(all_nominal()) %>%
+  step_normalize(all_numeric()) %>% 
+  step_zv(all_predictors()) %>%
+  step_novel(all_nominal(), -all_outcomes()) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+ # bake(prep(adult_recipe), adult_train)
+
+
+adult_wf <- 
+  workflow() %>% 
+  add_recipe(adult_recipe)
+```
+
+
+
+## Cross-Validation
+
+Especificando a validação cruzada:
+
+```{r}
+set.seed(32)
+adult_vfold <- vfold_cv(adult_train, v = 5, strata = resposta)
+adult_vfold
+```
+
+## Modelos {.tabset}
+
+Os modelos que serão ajustados:
+
+  * Decision tree
+  * Random Forest
+  * Xgboost
+  
+Obs: Os valores dos hiperparâmetros foram obtidos a partir da tunagem e inseridos apenas para otimizar o tempo de renderização do script.
+  
+### Decision tree
+
+Especificando modelo:
+
+```{r}
+adult_tree <- 
+  decision_tree(
+    min_n = 19,
+    cost_complexity = 1.069415e-09, 
+    tree_depth = 8) %>%
+  set_mode("classification") %>%
+  set_engine("rpart")
+ #1.069415e-09	8	19	Model04
+adult_tree
+```
+Workflow para decision tree:
+
+```{r}
+
+workflow_adult_tree <- 
+  adult_wf %>% 
+  add_model(adult_tree)
+
+
+```
+
+Parâmentros:
+
+```{r}
+# hiperparams <- parameters(
+#  adult_tree
+# )
+# hiperparams
+```
+
+Grid:
+
+```{r}
+# set.seed(32)
+# tree_grid <- grid_max_entropy(hiperparams, size = 10)
+# tree_grid
+
+```
+
+
+Efetuando tunagem de hiperparâmetros:
+
+```{r, echo= TRUE, results="hide",include=FALSE}
+
+# tree_tune <- 
+#   workflow_adult_tree %>% 
+#   tune_grid(
+#     resamples = adult_vfold,
+#     grid = tree_grid,
+#     control = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = F),
+#     metrics = metric_set(roc_auc)
+#   )
+
+```
+
+
+```{r}
+# autoplot(tree_tune)
+# show_best(tree_tune, "roc_auc")
+# 
+# tree_best_hiperparams <- select_best(tree_tune) #1.069415e-09	8	19	Model04 (roc_auc = 0.8993608)
+# tree_best_hiperparams
+
+
+```
+
+Finalizando WF:
+
+```{r}
+workflow_tree_final <- finalize_workflow(
+  workflow_adult_tree,
+  #tree_best_hiperparams
+  parameters(workflow_adult_tree)
+)
+
+workflow_tree_final
+```
+
+
+Verificando importância dos atributos:
+
+```{r}
+workflow_tree_final %>%
+  fit(adult_train) %>%
+  pull_workflow_fit() %>%
+  vip::vip(geom = "col")
+```
+
+
+Modelo final:
+
+```{r}
+
+tree_final <- last_fit(workflow_tree_final, adult_split)
+collect_metrics(tree_final)
+
+```
+
+
+
+### Random Forest
+
+Especificando modelo:
+
+```{r}
+adult_rf <- 
+  rand_forest(
+    min_n = 21,
+    mtry = 23,
+    trees = 1715) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+# 23  1715    21
+adult_rf
+```
+
+Workflow para random forest:
+
+```{r}
+
+workflow_adult_rf <- 
+  adult_wf %>% 
+  add_model(adult_rf)
+
+
+```
+
+
+Grid:
+
+```{r}
+# set.seed(32)
+# 
+# rf_grid <- parameters(adult_rf) %>% 
+#   finalize(bake(prep(adult_recipe), adult_train)) %>% 
+#   grid_max_entropy(size = 10)
+# 
+# rf_grid
+```
+
+Efetuando tunagem de hiperparâmetros:
+
+```{r}
+
+# library(doParallel)
+# library("doFuture")
+# 
+# all_cores <- parallel::detectCores(logical = FALSE) - 1
+# registerDoFuture()
+# cl <- makeCluster(all_cores)
+# plan(future::cluster, workers = cl)
+# getDoParWorkers()
+# 
+# set.seed(123)
+# rf_tune<- 
+#   workflow_adult_rf %>% 
+#   tune_grid(
+#     resamples = adult_vfold,
+#     grid = rf_grid,
+#     control = control_grid(save_pred = TRUE, verbose = FALSE, allow_par = T),
+#     metrics = metric_set(roc_auc)
+#   )
+
+```
+
+```{r}
+# autoplot(rf_tune)
+# show_best(rf_tune,"roc_auc")
+# 
+# rf_best_hiperparams <- select_best(rf_tune) 
+# rf_best_hiperparams 
+
+##    mtry trees min_n .config
+##   <int> <int> <int> <chr>  
+## 1    23  1715    21 Model01
+```
+
+Finalizando WF:
+
+```{r}
+workflow_rf_final <- finalize_workflow(
+  workflow_adult_rf,
+  #rf_best_hiperparams
+  parameters(workflow_adult_rf)
+)
+
+workflow_rf_final
+```
+
+Verificando importância dos atributos:
+
+```{r}
+workflow_rf_final %>%
+  fit(adult_train) %>%
+  pull_workflow_fit() %>%
+  vip::vip(geom = "col")
+
+```
+
+
+Modelo final:
+
+```{r}
+
+rf_final <- last_fit(workflow_rf_final, adult_split)
+collect_metrics(rf_final) #roc_auc = 0.9094242
+
+```
+
+### Xgboost
+
+Como o Xgboost possui muitos parâmetros, optei pora não tunnar os parâmetros `loss_reduction` e `samples_size` nesse primeiro momento. Sendo assim os valores default da enginee `xgboost` são atribuídos à esses parâmetros, loss_reduction = 0 e sample_size = 1.
+
+```{r}
+adult_xgb <- 
+  boost_tree(
+   mtry = 34, 
+  trees = 1309, 
+  min_n = 5, 
+  tree_depth = 10,
+  # loss_reduction = tune(), 
+  learn_rate = 0.0106, 
+  # sample_size = tune()
+  ) %>%
+  set_mode("classification") %>%
+  set_engine("xgboost")
+
+##    mtry trees min_n tree_depth learn_rate .config
+##   <int> <int> <int>      <int>      <dbl> <chr>  
+## 1    34  1309     5         10     0.0106 Model13
+
+adult_xgb
+```
+
+Workflow para Xgboost:
+
+```{r}
+
+workflow_adult_xgb <- 
+  adult_wf %>% 
+  add_model(adult_xgb)
+
+workflow_adult_xgb
+```
+
+Grid:
+
+```{r}
+# set.seed(32)
+# 
+# xgb_grid <- parameters(adult_xgb) %>%
+#     finalize(bake(prep(adult_recipe),adult_train)) %>%
+#     grid_max_entropy(size = 20)
+# 
+# xgb_grid
+
+
+```
+
+<br>Efetuando tunagem de hiperparâmetros:</br>
+
+```{r}
+# library(doFuture)
+# all_cores <- parallel::detectCores(logical = FALSE) - 1
+# 
+# registerDoFuture()
+# cl <- makeCluster(all_cores)
+# plan(future::cluster, workers = cl)
+# getDoParWorkers()
+# 
+# # grid search
+# ini <- Sys.time()
+# xgb_tune <-
+#   workflow_adult_xgb %>%
+#     tune_grid(
+#         resamples = adult_vfold,
+#         grid = xgb_grid,
+#         control = control_grid(verbose = FALSE),
+#         metrics = metric_set(roc_auc)
+#     )
+# Sys.time()- ini #Time difference of 39.9844 mins(parallel)
+# 
+# foreach::registerDoSEQ()
+```
+
+
+```{r}
+# autoplot(xgb_tune)
+# show_best(xgb_tune,"roc_auc")
+# 
+# xgb_best_hiperparams <- select_best(xgb_tune)
+# xgb_best_hiperparams 
+
+##    mtry trees min_n tree_depth learn_rate .config
+##   <int> <int> <int>      <int>      <dbl> <chr>  
+## 1    34  1309     5         10     0.0106 Model13
+
+```
+Finalizando WF:
+
+```{r}
+workflow_xgb_final <- finalize_workflow(
+  workflow_adult_xgb,
+  #xgb_best_hiperparams
+  parameters(workflow_adult_xgb)
+)
+
+workflow_xgb_final
+```
+
+
+Verificando importância dos atributos:
+
+```{r, message=FALSE, warning=FALSE}
+workflow_xgb_final %>%
+  fit(adult_train) %>%
+  pull_workflow_fit() %>%
+  vip::vip(geom = "col")
+```
+
+Modelo final:
+
+```{r}
+
+xgb_final <- last_fit(workflow_xgb_final, adult_split)
+collect_metrics(xgb_final) #0.9246310
+
+```
+
+### Xgboost2
+
+Agora vamos inserir os valores identificados na tunagem para os parâmetros e efetuar o tuning para os parâmetros que `sample_size` e `loss_reduction`:
+
+```{r}
+adult_xgb2 <- 
+  boost_tree(
+   mtry = 34, 
+  trees = 1309, 
+  min_n = 5, 
+  tree_depth = 10,
+  loss_reduction = 0.000127,#tune(),
+  learn_rate = 0.0106445, 
+  sample_size = 0.989,#tune()
+  ) %>%
+  set_mode("classification") %>%
+  set_engine("xgboost")
+
+##   loss_reduction sample_size .config
+##            <dbl>       <dbl> <chr>  
+## 1       0.000127       0.989 Model09
+
+adult_xgb2
+
+``` 
+
+Workflow para Xgboost:
+
+```{r}
+
+workflow_adult_xgb2 <- 
+  adult_wf %>% 
+  add_model(adult_xgb2)
+
+```
+
+Grid:
+
+```{r}
+# set.seed(32)
+# 
+# xgb_grid2 <- parameters(adult_xgb2) %>%
+#     grid_max_entropy(size = 20)
+# 
+# xgb_grid2
+
+
+```
+
+Efetuando tunagem de hiperparâmetros:
+
+```{r}
+
+# all_cores <- parallel::detectCores(logical = FALSE) - 1
+# 
+# registerDoFuture()
+# cl <- makeCluster(all_cores)
+# plan(future::cluster, workers = cl)
+# getDoParWorkers()
+# 
+# # grid search
+# ini <- Sys.time()
+# xgb_tune2 <-
+#   workflow_adult_xgb2 %>%
+#     tune_grid(
+#         resamples = adult_vfold,
+#         grid = xgb_grid2,
+#         control = control_grid(verbose = FALSE),
+#         metrics = metric_set(roc_auc)
+#     )
+# Sys.time()- ini
+# 
+# foreach::registerDoSEQ()
+```
+
+
+```{r}
+# autoplot(xgb_tune2)
+# show_best(xgb_tune2,"roc_auc")
+# 
+# xgb2_best_hiperparams <- select_best(xgb_tune2)
+# xgb2_best_hiperparams 
+
+```
+Finalizando WF:
+
+```{r}
+workflow_xgb_final2 <- finalize_workflow(
+  workflow_adult_xgb2,
+  # xgb2_best_hiperparams
+  parameters(workflow_adult_xgb2)
+)
+
+workflow_xgb_final2
+```
+
+Verificando importância dos atributos:
+
+```{r}
+
+workflow_xgb_final2 %>%
+  fit(adult_train) %>%
+  pull_workflow_fit() %>%
+  vip::vip(geom = "col")
+
+```
+
+Modelo final:
+
+```{r}
+
+xgb2_final <- last_fit(workflow_xgb_final2, adult_split)
+collect_metrics(xgb2_final) #0.9243285
+
+```
+
+# Comparando os modelos
+
+```{r}
+bind_rows(
+ tree_final %>%
+  collect_predictions() %>% 
+  mutate(id = "Decision tree")
+  ,
+ rf_final %>%
+  collect_predictions() %>%
+  mutate(id = "Random Forest")
+ ,
+  xgb_final %>%
+  collect_predictions() %>%
+  mutate(id = "xgboost")
+  ,
+  xgb2_final %>%
+  collect_predictions() %>%
+  mutate(id = "xgboost2")
+) %>% 
+  group_by(id) %>% 
+  nest() %>% 
+  ungroup() %>% 
+  mutate(roc = map(data, ~roc_curve(.x, truth = resposta, `.pred_<=50K`)),
+         auc = map_dbl(data, ~roc_auc(.x, truth = resposta, `.pred_<=50K`) %>% 
+                         pull(.estimate) %>% round(3)),
+         id = paste0(id, " auc: ", auc)) %>% 
+  select(-data) %>% 
+  unnest(cols = c(roc)) %>% 
+  ggplot() +
+  aes(x = 1 - specificity, y = sensitivity, color = id) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  ggtitle("Curva Roc")
+
+
+```
+
+Podemos ver a partir da curva roc que o xgboost obteve melhor perfomance que o random forest e a árvore de decisão. 
+Interessante que o xgboost sem tunar os hiperparâmetros `loss_reduction` e `sample_size` se saiu discretamente melhor que o xgboost2 onde efetuamos o tuning desses dois hiperparâmetros. Sendo assim nosso modelo final será o **xgb_final**.
+
+# Scoragem para submeter resultado
+
+Vamos então finalizar nosso modelo campeão e scorar a base de validação para efetuar a submissão:
+
+```{r}
+
+adult_val <- readr::read_rds("adult_val.rds")
+
+xgboost_modelo_final <- adult_xgb #%>% 
+    # finalize_model(xgb_best_hiperparams)
+
+adult_fit <- 
+  fit(xgboost_modelo_final,
+    formula = resposta ~ .,  
+    data = bake(prep(adult_recipe), new_data = adult))
+
+adult_val$more_than_50k <- 
+  predict(adult_fit, 
+          bake(prep(adult_recipe), new_data = adult_val),
+          type = "prob")$`.pred_>50K`
+```
+
+Matriz de confusão:
+
+```{r}
+
+adult_val %>% 
+  transmute(resposta = factor(resposta, levels = c(">50K", "<=50K")), 
+            more_than_50k = ifelse(more_than_50k > 0.5, ">50K", "<=50K") %>% 
+              factor(levels = c(">50K", "<=50K"))) %>% 
+  table() %>% 
+  caret::confusionMatrix()
+
+
+```
+
+
+Selecionando campos no formato da submissão:
+
+```{r}
+submissao <- adult_val %>% select(id, more_than_50k)
+write_csv(submissao, "submissao.csv")
+```
+
+
+
+
+
