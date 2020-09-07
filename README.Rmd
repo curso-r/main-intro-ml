@@ -1,0 +1,64 @@
+---
+output: github_document
+---
+
+# Introdução ao Machine Learning
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Repositório principal do curso Introdução ao Machine Learning.
+
+Inscreva-se no curso: https://www.curso-r.com/cursos/intro-machine-learning
+
+**Acesse o material completo do curso escolhendo uma das turmas abaixo**.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+knitr::kable(CursoR:::listar_turmas_recentes("intro-ml"))
+```
+
+# Ementa
+
+- **O que é Machine Learning**
+  - História
+  - O que é modelagem preditiva
+  - Definições e Nomenclaturas
+  - Por que e quando usar
+  - Métricas e Funções de Custo
+- **Conceitos Centrais**
+  - Overfitting
+  - Hiperparâmetros
+  - Bases de Treino/Teste/Validação
+  - Cross-Validation
+  - Relação Viés-Variância
+- **Modelos de Regressão**
+  - Regressão Linar
+  - RMSE, MAPE, R2.
+  - Gradient Descent
+  - Estimadores e estimativas
+  - Regularização LASSO
+  - Principais cuidados com os dados
+- **Modelos de Classificação**
+  - Regressão Logística
+  - Binary Cross-entropy (Deviance)
+  - Probabilidades vs Classes
+  - Matriz de Confusão
+  - Curva ROC
+  - Acurácia, recall, precisão, F1, AUROC.
+- **Modelos de Árvores**
+  - Árvores de decisão
+  - GINI e Entropia
+  - Ganho de Informação
+  - Random Forest
+  - Gradient Boosting (XGBoost)
+- **Tidymodels**
+  - O que é
+  - Como usar no R
+  - Pacotes {workflows} e {recipes}
+
