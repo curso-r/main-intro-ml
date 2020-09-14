@@ -12,9 +12,9 @@ library(plotly)
 library(tidyverse)
 library(tidymodels)
 library(vip)
-credit_final_lr_model <- read_rds("credit_final_lr_model.rds")
-credit_lr_last_fit <- read_rds("credit_lr_last_fit.rds")
-credit_lr_last_fit_model <- read_rds("credit_lr_last_fit_model.rds")
+credit_final_lr_model <- read_rds("../dados/credit_final_lr_model.rds")
+credit_lr_last_fit <- read_rds("../dados/credit_lr_last_fit.rds")
+credit_lr_last_fit_model <- read_rds("../dados/credit_lr_last_fit_model.rds")
 
 credit_test_preds <- collect_predictions(credit_lr_last_fit)
 
@@ -95,7 +95,7 @@ autoplot(credit_roc_curve) %>% ggplotly()
 ### Variáveis Importantes
 
 ```{r}
-vip_ok <- read_rds("vip_ok.rds") +
+vip_ok <- read_rds("../dados/vip_ok.rds") +
   theme_minimal(16)
 
 

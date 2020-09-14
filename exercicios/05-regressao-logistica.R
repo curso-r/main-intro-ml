@@ -58,7 +58,7 @@ titanic_recipe <- recipe(Survived ~ ., data = titanic_train) %>%
   step_dummy(all_nominal(), -all_outcomes())
 
 # para ficar checando o resultado do recipe
-# juice(prep(titanic_recipe))
+# bake(prep(titanic_recipe), new_data = NULL)
 
 # PASSO 4) MODELO ----------------------------------------------------------
 # f(x) modo engine

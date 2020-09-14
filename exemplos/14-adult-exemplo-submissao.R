@@ -1,8 +1,9 @@
 # Pacotes ------------------------------------------------------------------
+library(tidyverse)
 library(tidymodels)
 
 # CARREGAR A BASE ----------------------------------------------------------
-adult <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult.rds")
+adult <- read_rds("dados/adult.rds")
 
 # modelo nulo --------------------------------------------------------------
 adult_recipe <- recipe(resposta ~ ., adult)
@@ -11,7 +12,7 @@ adult_wf <- workflow() %>% add_model(adult_model) %>% add_recipe(adult_recipe)
 adult_fit <- adult_wf %>% fit(adult)
 
 # ESCORA BASE DE VALIDACAO -------------------------------------------------
-adult_val <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult_val.rds")
+adult_val <- read_rds("dados/adult_val.rds")
 
 adult_val_sumbissao <- adult_val %>%
   mutate(

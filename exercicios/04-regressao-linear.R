@@ -30,7 +30,7 @@ diamonds_recipe <- recipe(price ~ ., data = diamonds_train) %>%
   step_zv(all_predictors()) 
 
 # prep(diamonds_recipe)
-# juice(prep(diamonds_recipe))
+# bake(prep(diamonds_recipe), new_data = NULL)
 
 # definicao do modelo -----------------------------------------------------
 # Defina um modelo de regressão linear usando glmnet e 
