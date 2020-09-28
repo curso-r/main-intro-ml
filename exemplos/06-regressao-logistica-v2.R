@@ -26,9 +26,18 @@ credit_test  <- testing(credit_initial_split)
 
 ## veremos mais pra frente!
 
+skimr::skim(credit_train)
+
 # PASSO 3) DATAPREP --------------------------------------------------------
 
 ## veremos mais pra frente!
+
+credit_recipe <- recipe(Status ~ ., data = credit_train) %>%
+  step_normalize(all_numeric()) %>%
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_zv(all_predictors()) 
+
+bake(prep(credit_recipe), new_data = NULL)
 
 # PASSO 4) MODELO ----------------------------------------------------------
 # Definição de 
@@ -41,6 +50,8 @@ credit_lr_model <- logistic_reg(penalty = tune(), mixture = 1) %>%
   set_mode("classification") %>%
   set_engine("glmnet")
 
+credit_wf <- workflow() %>% add_model(credit_lr_model) %>% add_recipe(credit_recipe)
+
 # PASSO 5) TUNAGEM DE HIPERPARÂMETROS --------------------------------------
 # a) bases de reamostragem para validação: vfold_cv()
 # b) (opcional) grade de parâmetros: parameters() %>% update() %>% grid_regular()
@@ -50,8 +61,7 @@ credit_lr_model <- logistic_reg(penalty = tune(), mixture = 1) %>%
 credit_resamples <- vfold_cv(credit_train, v = 5)
 
 credit_lr_tune_grid <- tune_grid(
-  credit_lr_model,
-  Status ~ .,
+  credit_wf,
   resamples = credit_resamples,
   metrics = metric_set(
     accuracy, 
