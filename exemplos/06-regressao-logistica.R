@@ -10,37 +10,40 @@ library(skimr)
 library(naniar)
 
 # PASSO 0) CARREGAR AS BASES -----------------------------------------------
-adult <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult.rds")
+adult <- read_rds("dados/adult.rds")
 help(adult)
 glimpse(adult) # German Risk 
 
-adult %>% count(Status)
+adult %>% count(resposta)
 
 # PASSO 1) BASE TREINO/TESTE -----------------------------------------------
 set.seed(1)
-adult_initial_split <- initial_split(adult, strata = "Status", p = 0.75)
+adult_initial_split <- initial_split(adult, strata = "resposta", p = 0.75)
 
 adult_train <- training(adult_initial_split)
 adult_test  <- testing(adult_initial_split)
 
+adult_test %>% count(resposta)
+adult_train %>% count(resposta)
+
 # PASSO 2) EXPLORAR A BASE -------------------------------------------------
 
-# vis_miss(adult)
-# skim(adult)
-# GGally::ggpairs(adult_train %>% select(where(is.numeric)) %>% mutate_all(log))
-# adult %>% 
-#   filter(Assets > 100) %>%
-#   select(where(is.numeric), Status, Records) %>%
-#   pivot_longer(where(is.numeric)) %>%
-#   ggplot(aes(x = Records, y = value, fill = Status)) +
-#   geom_boxplot() +
-#   facet_wrap(~name, scales = "free_y") +
-#   scale_y_log10()
+vis_miss(adult)
+skim(adult)
+GGally::ggpairs(adult_train %>% select(where(is.numeric)) %>% mutate_all(log))
+adult %>%
+  filter(Assets > 100) %>%
+  select(where(is.numeric), Status, Records) %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = Records, y = value, fill = Status)) +
+  geom_boxplot() +
+  facet_wrap(~name, scales = "free_y") +
+  scale_y_log10()
 # 
-# GGally::ggpairs(adult %>% select(where(~!is.numeric(.))))
+GGally::ggpairs(adult %>% select(where(~!is.numeric(.))))
 
 # PASSO 3) DATAPREP --------------------------------------------------------
-adult_receita <- recipe(Status ~ ., data = adult_train) %>%
+adult_receita <- recipe(resposta ~ ., data = adult_train) %>%
   step_modeimpute(Home, Marital, Job) %>%
   step_medianimpute(Debt) %>%
   step_bagimpute(Income, Assets) %>%
