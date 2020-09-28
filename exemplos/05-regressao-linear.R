@@ -44,7 +44,7 @@ auto_recipe <- recipe(mpg ~ ., data = auto_train) %>%
   step_rm(name, skip = TRUE) %>%
   step_num2factor(origin, levels = c("American", "European", "Japanese")) %>%
   step_novel(all_nominal()) %>%
-  step_log(all_numeric()) %>%
+  step_log(all_numeric(), -all_outcomes()) %>%
   step_normalize(all_numeric(), -all_outcomes()) %>%
   step_dummy(all_nominal()) %>%
   step_zv(all_predictors())
