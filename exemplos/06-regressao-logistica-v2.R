@@ -11,7 +11,7 @@ library(vip)
 data("credit_data")
 help(credit_data)
 credit_data <- credit_data %>% na.omit()
-glimpse(credit_data) # German Risk 
+glimpse(credit_data) # German Risk
 
 credit_data %>% count(Status)
 
