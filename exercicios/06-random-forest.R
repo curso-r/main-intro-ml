@@ -10,11 +10,8 @@ library(skimr)
 library(naniar)
 
 # Exercício de Random Forest #########################################
-# Objetivo: fazer um modelo preditivo usando regressão logística para prever
+# Objetivo: fazer um modelo preditivo usando random forest para prever
 # sobreviventes no desastre do Titanic (variável 'Survived').
-#
-# A meta é bater o resultado da regressão logística que você ajustou 
-# no exercício 05-regressao-logistica.R
 
 
 # PASSO 0) CARREGAR AS BASES -----------------------------------------------
