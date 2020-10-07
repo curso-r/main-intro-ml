@@ -85,7 +85,7 @@ adult_wf <- workflow() %>%
 # c) tune_grid()
 # d) escolha das métricas (rmse, roc_auc, etc)
 # d) collect_metrics() ou autoplot() para ver o resultado
-adult_resamples <- vfold_cv(adult_train, v = 5)
+adult_resamples <- vfold_cv(adult_train, v = 5, strata = "resposta")
 
 adult_lr_tune_grid <- tune_grid(
   adult_wf,
