@@ -10,7 +10,8 @@ library(skimr)
 library(naniar)
 
 # PASSO 0) CARREGAR AS BASES -----------------------------------------------
-adult <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult.rds")
+httr::GET("https://github.com/curso-r/main-intro-ml/raw/master/dados/adult.rds", httr::write_disk("adult.rds", overwrite = TRUE))
+adult <- read_rds("adult.rds")
 help(adult)
 glimpse(adult) # German Risk 
 
@@ -20,18 +21,10 @@ adult %>% count(resposta)
 set.seed(1)
 adult_initial_split <- initial_split(adult, strata = "resposta", p = 0.75)
 
-data_adult_treino <- training(adult_initial_split)
+adult_train <- training(adult_initial_split)
 adult_test  <- testing(adult_initial_split)
 
 # PASSO 2) EXPLORAR A BASE -------------------------------------------------
-adult_recipe <- recipe(
-  resposta ~., data = data_adult_treino
-) %>% 
-  step_rm(id, skip = TRUE) %>%
-  step_zv(all_numeric()) %>%
-  step_medianimpute(all_numeric()) %>%
-  step_dummy(native_country, -resposta)  %>%
-  step_modeimpute(native_country, -resposta)
 
 prep(adult_recipe)
 glimpse(juice(prep(adult_recipe)))
@@ -85,7 +78,7 @@ adult_wf <- workflow() %>%
 # c) tune_grid()
 # d) escolha das métricas (rmse, roc_auc, etc)
 # d) collect_metrics() ou autoplot() para ver o resultado
-adult_resamples <- vfold_cv(adult_train, v = 5, strata = "resposta")
+adult_resamples <- vfold_cv(adult_train, v = 5)
 
 adult_lr_tune_grid <- tune_grid(
   adult_wf,
@@ -141,7 +134,10 @@ adult_test_preds %>%
 adult_modelo_final <- adult_wf %>% fit(adult)
 
 # PASSO 8: ESCORA BASE DE VALIDACAO ------------------------------------------------
-adult_val <- read_rds("curso-r-introduo-ao-machine-learning-com-r/adult_val.rds")
+# PASSO 0) CARREGAR AS BASES -----------------------------------------------
+httr::GET("https://github.com/curso-r/main-intro-ml/raw/master/dados/adult_val.rds", httr::write_disk("adult_val.rds", overwrite = TRUE))
+adult_val <- read_rds("adult_val.rds")
+
 
 adult_val_sumbissao <- adult_val %>%
   mutate(
