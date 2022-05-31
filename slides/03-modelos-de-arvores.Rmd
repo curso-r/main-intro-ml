@@ -12,6 +12,7 @@ output:
       highlightLines: true
       countIncrementalSlides: false
       ratio: "16:9"
+knit: pagedown::chrome_print
 ---
 
 ```{r setup, include=FALSE}
@@ -307,8 +308,8 @@ params <- parameters(modelo) %>%
   grid_regular(levels = 20)
 
 ajuste <- tune_grid(
-  y ~ x, 
-  modelo, 
+  modelo,
+  y ~ x,
   resamples = vfold_cv(dados, 5),
   grid = params,
   metrics = metric_set(rmse)
