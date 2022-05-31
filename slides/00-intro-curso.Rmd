@@ -100,32 +100,43 @@ class: middle, center
 
 - Os exercícios não serão avaliações, portanto não terão prazo nem nota. O objetivo deles será gerar dúvidas em vocês, para que os professores possam melhor orientá-las(los) durante o curso.
 
-- O certificado será emitido mediante uma **entrega final** (Kaggle InClass) e pelo menos 50% dos  exercícios. O prazo da entrega final será de 30 dias após o fim do curso.
+- O certificado será emitido mediante uma **entrega final** (Kaggle InClass). O prazo da entrega final será de 30 dias após o fim do curso.
 
 ---
 
 # Programa do curso
 
+.pull-left[
+
+### Capítulo 1
+
 - Introdução ao Machine Learning
-
-- Estratégias gerais: separação da base de dados, reamostragem, tuning de modelos, métricas de performance
-
 - Tidymodels
+- Regressão linear, Regularização
+- Overfitting
+- Validação cruzada e estratégias
 
-- Regressão linear, Regularização (LASSO)
+### Capítulo 2
 
 - Regressão logística, regressão vs classificação
+- Data prep
+- Métricas de performance para classificação: ROC, Acurácia
+
+]
+
+.pull-right[
+### Capítulo 3
 
 - Árvores de Decisão
-
 - Random Forest 
-
 - Boosting - XGBoost
 
-- Matriz X
+### Capítulo 4
 
+- Data prep parte II: Matriz X
 - Estudo de Caso
 
+]
 ---
 
 # Não falaremos...
@@ -141,14 +152,32 @@ class: middle, center
 - Shiny
 
 ---
+# Tirando dúvidas
+
+ - **Sintam-se a vontade em fazer perguntas durante a exposição ao vivo.**.
+ 
+ - Fora do horário de aula ou monitoria:
+     - perguntas gerais sobre o curso deverão ser feitas no Classroom.
+     
+     - perguntas sobre R, principalmente as que envolverem código, deverão ser enviadas no [nosso discourse](https://discourse.curso-r.com/).
+
+---
+# Por que usar o discourse?
+
+- Muito melhor para escrever textos que possuem códigos. Com ele, podemos usar o pacote `{reprex}`!
+
+- Saber pesquisar sobre erros e fazer a pergunta certa é essencial para aprender e resolver problemas de programação.
+
+- No discourse, teremos mais pessoas acompanhando e respondendo as dúvidas.
+
+- Em um ambiente aberto, as suas dúvidas vão contribuir com a comunidade.
+
+### https://discourse.curso-r.com/
+
+---
 
 ## Extras
 
-- Teremos monitoria duas vezes por semana, sempre 1 hora antes do início das aulas (ter e qui, das 18h às 19h)
-
-- Além das aulas, teremos alguns conteúdos extras, tanto em texto quanto em vídeo.
+- Teremos monitoria duas vezes por semana, sempre 30 minutos antes do início das aulas (seg e qui, das 18h30 às 19h)
 
 - A gravação das aulas ficará disponível no Google Classroom por 1 ano após o final do curso.
-
-- discourse.curso-r.com 
-

@@ -2,69 +2,123 @@
 
 library(ggplot2)
 library(tidymodels)
+library(ISLR2)
+
 
 # Dados -------------------------------------------------------------------
-data("diamonds")
+data("Hitters")
+#Hitters <- na.omit(Hitters)
 
 # base treino e teste -----------------------------------------------------
-set.seed(1)
-diamonds_initial_split <- diamonds %>% initial_split(3/4)
+set.seed(123)
+hitters_initial_split <- Hitters %>% initial_split(3/4)
 
-diamonds_train <- training(diamonds_initial_split)
-diamonds_test <- testing(diamonds_initial_split)
+hitters_train <- training(hitters_initial_split)
+#hitters_test <- testing(hitters_initial_split)
+
+# Dataprep ----------------------------------------------------------------
+
+hitters_recipe <- recipe(Salary ~ ., data = hitters_train) %>%
+  step_naomit(everything(), skip = TRUE) %>%
+  step_rm(all_nominal()) %>%
+  themis::
+  step_normalize(all_numeric_predictors())
+
+# dar uma olhada no resultado da receita.
+hitters_recipe %>%
+  prep() %>%
+  bake(new_data = hitters_train) %>%
+  glimpse()
+
 
 # definicao do modelo -----------------------------------------------------
-# OBS: repare que agora colocamos "tune()" nos hiperparâmetros para os quais 
+
+# OBS: repare que agora colocamos "tune()" nos hiperparâmetros para os quais
 # queremos encontrar o melhor valor.
-diamonds_model <- decision_tree(
-  cost_complexity = tune(),
-  min_n = 2, 
-  tree_depth = 10
-) %>% 
-  set_engine("rpart") %>%
+hitters_model <- linear_reg(
+  penalty = tune(),
+  mixture = tune()
+) %>%
+  set_engine("glmnet") %>%
   set_mode("regression")
 
-# reamostragem com cross-validation ---------------------------------------
-diamonds_resamples <- vfold_cv(diamonds_train, v = 5)
+# Criando o workflow ------------------------------------------------------
+
+hitters_wflow <- workflow() %>%
+  add_recipe(hitters_recipe) %>%
+  add_model(hitters_model)
 
 # tunagem de hiperparametros ----------------------------------------------
-diamonds_tune_grid <- tune_grid(
-  price ~ x, 
-  diamonds_model,
-  resamples = diamonds_resamples,
-  grid = 10,
+
+# reamostragem com cross-validation ---------------------------------------
+hitters_resamples <- vfold_cv(hitters_train, v = 10)
+
+hitters_grid <- grid_regular(
+  penalty(c(-1, 2)),
+  levels = 10
+)
+
+hitters_tune_grid <- tune_grid(
+  hitters_wflow,
+  resamples = hitters_resamples,
+  grid = hitters_grid,
   metrics = metric_set(rmse, rsq),
   control = control_grid(verbose = TRUE, allow_par = FALSE)
 )
 
 # inspecao da tunagem -----------------------------------------------------
-autoplot(diamonds_tune_grid)
-collect_metrics(diamonds_tune_grid)
-show_best(diamonds_tune_grid)
+autoplot(hitters_tune_grid)
+collect_metrics(hitters_tune_grid) %>%
+  ggplot(aes(x = penalty, y = mean)) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(ymin = mean - 1.9*std_err, ymax = mean + 1.9*std_err)) +
+  facet_wrap(~.metric, scales = "free_y") +
+  scale_x_log10()
+show_best(hitters_tune_grid, n = 1)
 
 # seleciona o melhor conjunto de hiperparametros
-diamonds_best_hiperparams <- select_best(diamonds_tune_grid, "rmse")
-diamonds_model <- diamonds_model %>% finalize_model(diamonds_best_hiperparams)
-  
-# desempenho do modelo final ----------------------------------------------
-diamonds_last_fit <- diamonds_model %>% last_fit(price ~ x, split = diamonds_initial_split)
+hitters_best_hiperparams <- select_best(hitters_tune_grid, "rmse")
+hitters_wflow <- hitters_wflow %>% finalize_workflow(hitters_best_hiperparams)
 
-collect_metrics(diamonds_last_fit)
-collect_predictions(diamonds_last_fit) %>%
-  ggplot(aes(.pred, price)) +
-  geom_point()
+# desempenho do modelo final ----------------------------------------------
+
+
+hitters_model_train <- hitters_wflow %>% fit(data = hitters_train)
+
+pred <- predict(hitters_model_train, hitters_test)
+bind_cols(pred, hitters_test) %>% rmse(truth = Salary, estimate = .pred)
+
+pred <- predict(hitters_model_train, hitters_train)
+bind_cols(pred, hitters_train) %>% rmse(truth = Salary, estimate = .pred)
+
+hitters_last_fit <- hitters_wflow %>%
+  last_fit(split = hitters_initial_split)
+
+collect_metrics(hitters_last_fit)
+collect_predictions(hitters_last_fit) %>%
+  ggplot(aes(.pred, Salary)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
 
 # modelo final ------------------------------------------------------------
-diamonds_final_model <- diamonds_model %>% fit(price ~ x, diamonds)
-
-# rpart.plot::rpart.plot(diamonds_final_model$fit)
+hitters_final_model <- hitters_wflow %>% fit(data = Hitters)
 
 # predicoes ---------------------------------------------------------------
-diamonds_com_previsao <- diamonds %>% 
+
+hitters_com_previsao <- Hitters %>%
   mutate(
-    price_pred = predict(diamonds_final_model, new_data = .)$.pred
+    salary_pred = predict(hitters_final_model, new_data = .)$.pred
   )
 
-# guardar o modelo para usar depois ---------------------------------------
-saveRDS(diamonds_final_model, file = "diamonds_final_model.rds")
+predict(hitters_final_model, new_data = Hitters)
 
+hitters_final_model %>%
+  extract_fit_engine() %>%
+  coef(s = 21.5)
+
+# guardar o modelo para usar depois ---------------------------------------
+saveRDS(hitters_final_model, file = "hitters_final_model.rds")
+
+modelo <- readRDS("hitters_final_model.rds")
+predict(modelo, Hitters)

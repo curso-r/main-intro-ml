@@ -1,12 +1,14 @@
 ---
-title: "Introdução ao Machine Learning com R"
+title: "Introdução ao Machine Learning"
+subtitle: "Definição e Estratégias"
 author: "<img src = 'https://d33wubrfki0l68.cloudfront.net/9b0699f18268059bdd2e5c21538a29eade7cbd2b/67e5c/img/logo/cursor1-5.png' width = '40%'>"
 date: "`r paste(lubridate::month(Sys.Date(), label = TRUE, abbr = FALSE), 'de', lubridate::year(Sys.Date()))`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: ["default", "default-fonts", "static/css/custom.css"]
+    css: ["default", "default-fonts", "static/css/custom.css", "static/css/xaringan-themer.css"]
     nature:
+      ratio: '16:9'
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
@@ -27,21 +29,21 @@ options(htmltools.dir.version = FALSE)
 
 # Ciência de dados
 
-<img src="static/img/ciclo-ciencia-de-dados.png" style = "display: block; margin-left: auto; margin-right: auto;">
+<img src="static/img/ciclo-ciencia-de-dados.png" style = "display: block; margin-left: auto; margin-right: auto;" width = 70%>
 
 ---
 
 # Referências
 
 .pull-left[
-<a href = "http://www-bcf.usc.edu/~gareth/ISL/">
+<a href = "https://web.stanford.edu/~hastie/ISLRv2_website.pdf">
 <img src="static/img/islr.png" style=" display: block; margin-left: auto; margin-right: auto;"></img>
 </a>
 ]
 
 .pull-right[
 <a href = "https://web.stanford.edu/~hastie/Papers/ESLII.pdf">
-<img src="static/img/esl.jpg" width = 58% style=" display: block; margin-left: auto; margin-right: auto;"></img>
+<img src="static/img/esl.jpg" width = 44% style=" display: block; margin-left: auto; margin-right: auto;"></img>
 </a>
 ]
 
@@ -57,11 +59,21 @@ options(htmltools.dir.version = FALSE)
 ]
 
 .pull-right[
-<a href = "https://www.tidymodels.org/">
-<img src="static/img/tidymodels.png" width = 75% style=" display: block; margin-left: auto; margin-right: auto;"></img>
+<a href = "https://www.tmwr.org/">
+<img src="static/img/tidymodels.png" width = 55% style=" display: block; margin-left: auto; margin-right: auto;"></img>
 </a>
 ]
 
+
+---
+
+# Referências
+
+- [Feature Engineering and Selection: A Practical Approach for Predictive Models](http://www.feat.engineering/)
+
+- [Aprendizado De Máquina](http://www.rizbicki.ufscar.br/AME.pdf)
+
+- [Forecasting: Principles and Practice](https://otexts.com/fpp3/)
 
 ---
 
@@ -88,28 +100,55 @@ class: middle, center, inverse
 
 ## Exemplos
 
-<img src="https://user-images.githubusercontent.com/4706822/45316589-db1b4580-b50d-11e8-8e53-33950d5c4c07.jpg" style="position: fixed; width: 40%; top: 250px; left: 300px;">
+.pull-left[
 
---
+- Previsão de churn
 
-<img src="http://pennachio.wpengine.com/wp-content/uploads/2017/02/diabetic-retinopathy_comparison-1024x469.jpg" style="position: fixed; width: 40%; top: 100px; left: 100px;">
+- Previsão de inadimplência
 
---
+- Previsão de demanda
 
-<img src="https://www.extremetech.com/wp-content/uploads/2014/09/self-driving-head-640x353.jpg" style="position: fixed;  width: 40%; top: 100px; left: 500px;">
+- Previsão de preço
 
---
+- Previsão meteorológica
 
-<img src="https://i2.wp.com/www.yaabot.com/wp-content/uploads/2016/11/yaabot_algo2.jpg?resize=759%2C500&ssl=1" style="position: fixed; width: 40%; top: 400px; left: 500px;">
+- Diagnóstico em imagem médica
 
---
+- Carro autônomo
 
-<img src="https://5.imimg.com/data5/NT/NK/MY-38742550/life-insurance-health-insurance-and-general-insurance-250x250.png" style="position: fixed; width: 20%; top: 200px; left: 100px;">
+- Projeção da taxa de desemprego
+ 
+]
+
+.pull-right[
+
+- Teste A/B
+
+- Teste clínico
+
+- Eficácia de vacinas
+
+- Impactos de políticas públicas
+
+- Impactos de campanha publicitária
+
+- Curvas epidemiológicas
+
+- Projeção do PIB
+
+- ...
+
+]
 
 
+ 
 ---
 
-<img src="https://wordstream-files-prod.s3.amazonaws.com/s3fs-public/styles/simple_image/public/images/machine-learning1.png?Q_SmWhhhAEOO_32HNjPhcxsPhreWV26o&itok=yjEJbEKD" style="display: block; margin-left: auto; margin-right: auto;"></img>
+<img src="https://wordstream-files-prod.s3.amazonaws.com/s3fs-public/styles/simple_image/public/images/machine-learning1.png?Q_SmWhhhAEOO_32HNjPhcxsPhreWV26o&itok=yjEJbEKD" style="display: block; margin-left: auto; margin-right: auto;" width=70%></img>
+
+.footnote[
+ fonte: [business2community](https://www.business2community.com/trends-news/10-companies-using-machine-learning-cool-ways-01889944)
+]
 
 ---
 
@@ -143,7 +182,7 @@ adv_ok %>%
   facet_wrap(~midia, scales = "free")
 ```
 
-* PERGUNTA: Como investimento em propaganda influencia nas vendas?
+* PERGUNTA: Quantas vendas terão se eu investir X? Em qual mídia eu escolho alocar meu orçamento?
 
 ---
 
@@ -162,7 +201,141 @@ adv_ok %>%
   facet_wrap(~midia, scales = "free")
 ```
 
-* PERGUNTA: Como investimento em propaganda influencia nas vendas?
+* PERGUNTA: Quantas vendas terão se eu investir X? Em qual mídia eu escolho alocar meu orçamento?
+
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+set.seed(1)
+inadimplencia <- tibble::tibble(
+  tipo_de_contrato = rep(c("revol", "padrao", "price"), each = 1000),
+  valor_da_parcela = round(runif(3000, min = 500, max = 3000), digits = 0),
+  atrasou = rbinom(3000, 1, prob = 1/(1 + exp(-1*(
+    -9 + 
+      1.5 * (tipo_de_contrato == "revol") + 
+      -1.5 * (tipo_de_contrato == "padrao") + 
+      0.005 * (valor_da_parcela) + 
+      1 * (valor_da_parcela > 1500)
+    ))))
+)
+
+inad_curva <- inadimplencia %>% 
+  ggplot(aes(x = valor_da_parcela, y = atrasou))  +
+  facet_wrap(~tipo_de_contrato, scales = "free") +
+  xlim(c(400, 3100))
+
+inad_curva + 
+  geom_point()
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+inad_curva + 
+  geom_point() +
+  geom_smooth(se = FALSE, method = "glm", method.args = list(family = "binomial"))
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+inad_curva +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 7, geom = "bar", fill = "royalblue", fun = function(x) 1) +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 7, geom = "bar", fill = "red") +
+  stat_summary_bin(size = 2, alpha = 1, colour = "purple", bins = 7, geom = "point") + 
+  geom_point() +
+  geom_smooth(se = FALSE, method = "glm", method.args = list(family = "binomial"))
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+inad_curva +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 12, geom = "bar", fill = "royalblue", fun = function(x) 1) +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 12, geom = "bar", fill = "red") +
+  stat_summary_bin(size = 2, alpha = 1, colour = "purple", bins = 12, geom = "point")+ 
+  geom_point() +
+  geom_smooth(se = FALSE, method = "glm", method.args = list(family = "binomial"))
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+inad_curva +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 100, geom = "bar", fill = "royalblue", fun = function(x) 1) +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 100, geom = "bar", fill = "red") +
+  stat_summary_bin(size = 2, alpha = 1, colour = "purple", bins = 100, geom = "point")+ 
+  geom_point() +
+  geom_smooth(se = FALSE, method = "glm", method.args = list(family = "binomial"))
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
+---
+
+# Motivação - outro exemplo
+
+
+Somos da área de inadimplência e precisamos agir para assessorar clientes em situação iminente de atraso.
+
+Obtivemos o seguinte banco de dados
+
+```{r, fig.width = 10, fig.height = 4}
+inad_curva +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 1000, geom = "bar", fill = "royalblue", fun = function(x) 1) +
+  stat_summary_bin(size = 1, alpha = 0.1, colour = "white", bins = 1000, geom = "bar", fill = "red") +
+  stat_summary_bin(size = 2, alpha = 1, colour = "purple", bins = 1000, geom = "point")+ 
+  geom_point() +
+  geom_smooth(se = FALSE, method = "glm", method.args = list(family = "binomial"))
+```
+
+* PERGUNTA: Qual a probabilidade do contrato 123 atrasar a próxima fatura no mês que vem?
+
 
 ---
 
@@ -172,6 +345,53 @@ Matematicamente, queremos encontrar uma função $f()$ tal que:
 
 <img src="static/img/y_fx.png" style="position: fixed; width: 40%; top: 250px; left: 300px;">
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+Nos exemplos:
+
+$vendas = f(midia, investimento)$
+
+$inadimplência = f(valor da parcela, tipo de contrato)$
+
+
+
+---
+
+# Modo - Regressão e Classificação
+
+Existem dois principais tipos de problemas em Machine Learning:
+
+.pull-left[
+
+## Regressão
+
+__Y__ é uma variável contínua.
+
+- Volume de vendas
+- Peso
+- Temperatura
+- Valor de Ações
+
+]
+
+.pull-right[
+
+## Classificação
+
+__Y__ é uma variável categórica.
+
+- Fraude/Não Fraude
+- Pegou em dia/Não pagou
+- Cancelou assinatura/Não cancelou
+- Gato/Cachorro/Cavalo/Outro
+
+]
 
 
 ---
@@ -203,8 +423,9 @@ grafico_curva_arvore <- grafico_sem_curva +
 ```
 
 ```{r, fig.width = 12, fig.height = 5}
-grafico_sem_curva + 
+grafico_curva_regressao_linear <- grafico_sem_curva + 
   geom_step(aes(y = regressao_linear, colour = "Regressão Linear"), size = 2)
+grafico_curva_regressao_linear
 ```
 
 ---
@@ -212,46 +433,59 @@ grafico_sem_curva +
 # Exemplos de f(x)
 
 ```{r, fig.width = 12, fig.height = 5}
-grafico_curva_arvore
+grafico_curva_arvore 
+```
+
+
+
+---
+
+# Exemplos de f(x)
+
+```{r, fig.width = 12, fig.height = 5}
+arvore_inad <- rpart::rpart(atrasou ~ valor_da_parcela + tipo_de_contrato, control = rpart::rpart.control(cp = 0.005), data = inadimplencia)
+regressao_linear_inad <- glm(atrasou ~ valor_da_parcela * tipo_de_contrato, data = inadimplencia, family = "binomial")
+inadimplencia <- inadimplencia %>%
+  dplyr::mutate(
+    arvore = predict(arvore_inad, newdata = .),
+    regressao_logistica = predict(regressao_linear_inad, newdata = ., type = "response"),
+  )
+grafico_sem_curva_inad <- inadimplencia %>% 
+  ggplot(aes(x = valor_da_parcela, y = atrasou)) + 
+  geom_point() +
+  facet_wrap(~tipo_de_contrato, scales = "free") +
+  labs(colour = "f(x):") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+
+grafico_curva_arvore_inad <- grafico_sem_curva_inad +
+  geom_line(aes(y = arvore, colour = "Árvore de Decisão"), size = 2)
+```
+
+```{r, fig.width = 12, fig.height = 5}
+grafico_curva_regressao_linear_inad <- grafico_sem_curva_inad + 
+  geom_step(aes(y = regressao_logistica, colour = "Regressão Logística"), size = 2)
+grafico_curva_regressao_linear_inad
 ```
 
 ---
 
-# Flexibilidade ou Interpretabilidade da f(x)
+# Exemplos de f(x)
 
-```{r}
-#![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+```{r, fig.width = 12, fig.height = 5}
+grafico_curva_arvore_inad
 ```
 
-```{r, fig.width=11, fig.height=7}
-library(ggrepel)
-set.seed(1)
-tribble(
-  ~modelo, ~Flexibilidade, ~Interpretabilidade,
-  "Regressão Linear", 0, 3,
-  "Regressão Logística", 0, 3, 
-  "LASSO", 0.3, 2.7,
-  "Árvore de Decisão", 1, 2.2,
-  "Generalized Additive Models", 1.5, 1.5,
-  "Redes Neurais, Deep Learning", 3, 1,
-  "Bagging, Boosting", 3.2, 0.8,
-  "SVM", 2.6, 0.5
-) %>%
-  ggplot(aes(x = Flexibilidade, y = Interpretabilidade)) +
-  geom_text_repel(aes(label = modelo), size = 7) +
-  theme_minimal(24) +
-  scale_x_continuous(breaks = c(0, 3.2), labels = c("Baixo", "Alto")) +
-  scale_y_continuous(breaks = c(0, 3.5), labels = c("Baixo", "Alto"))
 
 
-```
 
 
 ---
 
 # Definições e Nomenclaturas
 
-### A tabela por trás
+### A tabela por trás (do excel, do sql, etc.)
 
 ```{r}
 set.seed(1)
@@ -287,7 +521,7 @@ adv_ok %>%
 
 # Definições e Nomenclaturas
 
-## Observado VERSUS Esperado
+### **Observado** *versus* **Esperado**
 
 - __Y__ é um valor **observado** (ou verdade ou *truth*)
 - __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
@@ -295,7 +529,7 @@ adv_ok %>%
 
 Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
 
-```{r, fig.width = 12, fig.height = 5}
+```{r, fig.width = 15, fig.height = 4, out.width=750}
 ponto_predito = tibble::tribble(
    ~investimento,   ~yend, ~midia,
              150,    0, "TV",
@@ -305,31 +539,225 @@ ponto_predito = tibble::tribble(
   mutate(
     vendas = predict(arvore, .)
   )
-
+seta_first <- arrow(ends = "first", type = "closed", angle = 20, length = unit(20, "pt"))
+seta_last <- arrow(ends = "last", type = "closed", angle = 20, length = unit(20, "pt"))
 grafico_curva_arvore +
-  geom_segment(aes(xend = investimento, yend = yend), data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
-  geom_segment(aes(xend = 0, yend = vendas), data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = investimento, yend = yend), arrow = seta_first, data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = 0, yend = vendas), arrow =seta_last, data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
   geom_point(data = ponto_predito, colour = "purple", size = 5) +
   theme_minimal(20)  +
-  theme(legend.position = "bottom",
+  theme(legend.position = "left",
         legend.text = element_text(size = 22),
         legend.title = element_text(size = 30))
 ```
+
 
 ---
 
 # Definições e Nomenclaturas
 
-### A tabela por trás
+### **Observado** *versus* **Esperado**
+
+- __Y__ é um valor **observado** (ou verdade ou *truth*)
+- __Ŷ__ é um valor **esperado** (ou predição ou estimado ou *fitted*). 
+- __Y__ - __Ŷ__ é o resíduo (ou erro)
+
+Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
+
+```{r, fig.width = 15, fig.height = 4, out.width=750}
+ponto_predito = tibble::tribble(
+   ~investimento,   ~yend, ~midia,
+             150,    0, "TV",
+              35,    0, "radio",
+              60,    0, "newspaper"
+) %>%
+  mutate(
+    vendas = predict(regressao_linear, .)
+  )
+
+grafico_curva_regressao_linear +
+  geom_segment(aes(xend = investimento, yend = yend), arrow = seta_first, data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = 0, yend = vendas), arrow = seta_last, data = ponto_predito, colour = "purple", size = 1, linetype = "dashed") +
+  geom_point(data = ponto_predito, colour = "purple", size = 5) +
+  theme_minimal(20)  +
+  theme(legend.position = "left",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+```
+
+
+---
+
+# Definições e Nomenclaturas
+
+### A tabela por trás depois das predições
 
 ```{r}
+library(kableExtra)
 set.seed(1)
 adv_ok %>%
   sample_n(8) %>%
   mutate_if(is.numeric, round, digits = 1) %>%
   select(midia, investimento, everything()) %>%
+  kable(format = "html") %>%
+  column_spec(4:5, color = "purple", bold = TRUE)
+```
+
+
+
+
+
+---
+
+# Outro Exemplo: Classificação
+
+### A tabela por trás (do excel, do sql, etc.)
+
+```{r}
+set.seed(1)
+inadimplencia %>%
+  dplyr::sample_n(8) %>%
+  dplyr::mutate_if(is.numeric, round, digits = 1) %>%
+  dplyr::select(tipo_de_contrato, valor_da_parcela, atrasou) %>%
   kable(format = "html")
 ```
+
+
+---
+
+# Outro Exemplo: Classificação
+
+* $X_1$, $X_2$, ..., $X_p$: variáveis explicativas (ou variáveis independentes ou *features* ou preditores).
+
+- $\boldsymbol{X} = {X_1, X_2, \dots, X_p}$: conjunto de todas as *features*.
+
+* __Y__: variável resposta (ou variável dependente ou *target*). 
+* __Ŷ__: valor **esperado** (ou predição ou score ou *fitted*). 
+* $f(X)$ também é conhecida também como "Modelo" ou "Hipótese".
+
+## No exemplo:
+
+- $X_1$: `tipo_de_contrato` - flags de se o contrato é padrao, price, ou revol.
+- $X_2$: `valor_da_parcela` - Valor da parcela do financiamento.
+
+* __Y__: `atrasou` - indicador de atraso maior que 30 dias na parcela.
+
+
+---
+
+# Outro Exemplo: Classificação
+
+### **Observado** *versus* **Esperado**
+
+- __Y__ é um valor **observado** (ou rótulo ou target ou verdade ou *truth*)
+- __Ŷ__ é um valor **esperado** (ou score ou probabilidade predita). 
+- __log(Ŷ)__ ou __log(1-Ŷ)__ é o resíduo (ou erro)
+
+Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
+
+```{r, fig.width = 15, fig.height = 4, out.width=750}
+ponto_predito_inad = tibble::tribble(
+   ~valor_da_parcela,   ~yend, ~tipo_de_contrato,
+             1800,    0, "padrao",
+             1800,    0, "revol",
+             1800,    0, "price"
+) %>%
+  dplyr::mutate(
+    atrasou = predict(arvore_inad, .)
+  )
+
+grafico_curva_arvore_inad +
+  geom_segment(aes(xend = valor_da_parcela, yend = yend), arrow = seta_first, data = ponto_predito_inad, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = 0, yend = atrasou), arrow = seta_last, data = ponto_predito_inad, colour = "purple", size = 1, linetype = "dashed") +
+  geom_point(data = ponto_predito_inad, colour = "purple", size = 5) +
+  theme_minimal(20)  +
+  theme(legend.position = "left",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+```
+
+
+---
+
+# Outro Exemplo: Classificação
+
+### **Observado** *versus* **Esperado**
+
+- __Y__ é um valor **observado** (ou rótulo ou target ou verdade ou *truth*)
+- __Ŷ__ é um valor **esperado** (ou score ou probabilidade predita). 
+- __log(Ŷ)__ ou __log(1-Ŷ)__ é o resíduo (ou erro)
+
+Por definição, $\hat{Y} = f(x)$ que é o valor que a função $f$ retorna. 
+
+```{r, fig.width = 15, fig.height = 4, out.width=750}
+ponto_predito_inad = tibble::tribble(
+   ~valor_da_parcela,   ~yend, ~tipo_de_contrato,
+             1800,    0, "padrao",
+             1800,    0, "revol",
+             1800,    0, "price"
+) %>%
+  dplyr::mutate(
+    atrasou = predict(regressao_linear_inad, ., type = "response")
+  )
+
+grafico_curva_regressao_linear_inad +
+  geom_segment(aes(xend = valor_da_parcela, yend = yend), arrow = seta_first, data = ponto_predito_inad, colour = "purple", size = 1, linetype = "dashed") +
+  geom_segment(aes(xend = 0, yend = atrasou), arrow = seta_last, data = ponto_predito_inad, colour = "purple", size = 1, linetype = "dashed") +
+  geom_point(data = ponto_predito_inad, colour = "purple", size = 5) +
+  theme_minimal(20)  +
+  theme(legend.position = "left",
+        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 30))
+```
+
+
+---
+
+# Outro Exemplo: Classificação
+
+### A tabela por trás depois das predições
+
+```{r}
+set.seed(1)
+inadimplencia %>%
+  dplyr::sample_n(8) %>%
+  dplyr::mutate_if(is.numeric, round, digits = 2) %>%
+  dplyr::select(tipo_de_contrato, valor_da_parcela, everything()) %>%
+  kable(format = "html") %>%
+  column_spec(4:5, color = "purple", bold = TRUE)
+```
+
+
+---
+
+## Desempenho vs Interpretabilidade da f(x)
+
+```{r}
+#![](https://user-images.githubusercontent.com/4706822/47456108-01d5c880-d7aa-11e8-899a-74804f74afc5.png)
+```
+
+```{r, fig.width=11, fig.height=7, out.width=600}
+library(ggrepel)
+set.seed(1)
+tribble(
+  ~modelo, ~`Desempenho`, ~Interpretabilidade,
+  "Regressão Linear", 0, 3,
+  "Regressão Logística", 0, 3, 
+  "Árvore de Decisão", 1, 2.2,
+  "Generalized Additive Models", 1.5, 1.5,
+  "Redes Neurais, Deep Learning", 3, 1,
+  "Bagging, Boosting", 3.2, 0.8,
+  "SVM", 2.6, 0.5
+) %>%
+  ggplot(aes(x = `Desempenho`, y = Interpretabilidade)) +
+  geom_text_repel(aes(label = modelo), size = 7) +
+  theme_minimal(24) +
+  scale_x_continuous(breaks = c(0, 3.2), labels = c("Baixo", "Alto")) +
+  scale_y_continuous(breaks = c(0, 3.5), labels = c("Baixo", "Alto"))
+
+```
+
+Características importantes: interprabilidade, custo computacional e poder preditivo.
 
 ---
 
@@ -340,11 +768,12 @@ adv_ok %>%
 
 ## Predição
 
-Em muitas situações X está disponível facilmente mas, Y não é fácil de descobrir. (Ou mesmo não é possível descobrí-lo).
-
-$$\hat{Y} = \hat{f}(X)$$
-é uma boa estimativa.
+Em muitas situações X está disponível facilmente mas, Y não é fácil de descobrir. (Ou mesmo não é possível descobrí-lo). Queremos que $\hat{Y} = \hat{f}(X)$ seja uma boa estimativa (preveja bem o futuro).
 Neste caso não estamos interessados em como é a estrutura $\hat{f}$ desde que ela apresente predições boas para $Y$.
+
+Por exemplo:
+
+* Meu cliente vai atrasar a fatura no mês que vem?
 
 ---
 
@@ -359,136 +788,27 @@ Em inferência estamos mais interessados em entender a relação entre as variá
 
 Por exemplo:
 
-* Quais são as variáveis que estão mais relacionadas com a respostas?
-* Qual a relação entre a resposta e cada um dos preditores?
+* A dose da droga é eficaz para o tratamento da doença X até quanto? 
+* **Quanto que é** o impacto nas vendas para cada real investido em TV?
 
 
-Neste curso, vamos falar principalmente sobre **predição**.
+Neste material focaremos em **predição**.
 
 ---
-
-background-image: url(static/img/usos_do_ml.png)
-background-position: left 140px
-background-size: contain
-
 
 # Por que ajustar uma f?
 
+<img src="static/img/usos_do_ml.png" style="display: block; margin-left: auto; margin-right: auto;" width=80%></img>
+
 
 
 ---
 
-# Modo - Regressão e Classificação
-
-Existem dois principais tipos de problemas em Machine Learning:
-
-.pull-left[
-
-## Regressão
-
-__Y__ é uma variável contínua.
-
-- Volume de vendas
-- Peso
-- Temperatura
-- Valor de Ações
-
-]
-
-.pull-right[
-
-## Classificação
-
-__Y__ é uma variável categórica.
-
-- Fraude/Não Fraude
-- Pegou em dia/Não pagou
-- Cancelou assinatura/Não cancelou (churn)
-- Gato/Cachorro/Cavalo/Outro
-
-
-
-]
-
----
-
-
-# Métricas
-
-Métricas: para medir o quanto a $f(x)$ está errando as previsões.
-
-.pull-left[
-
-## Regressão
-
-__Y__ é uma variável contínua.
-
-- RMSE
-- R2
-- MAE
-- MAPE
-...
-]
-
-.pull-right[
-
-## Classificação
-
-__Y__ é uma variável categórica.
-
-- Acurácia
-- AUROC
-- Precision/Recall
-- Deviance (Cross-Entropy)
-- F1
-- Kappa
-...
-]
-
-[lista de métricas no `yardstick`](https://tidymodels.github.io/yardstick/articles/metric-types.html)
-
----
-
-# Métricas - "Melhor f(x)" segundo o quê?
+## Métricas - "Melhor f(x)" segundo o quê?
 
 Queremos a $f(x)$ que **erre menos**.
 
-Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
-
-$$
-RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
-$$
-
-Ou seja, nosso **objetivo** é
-
-## Encontrar $f(x)$ que nos retorne o ~menor~ RMSE.
-
-
-
----
-
-# Métricas - "Melhor f(x)" segundo o quê?
-
-Queremos a reta que **erre menos**.
-
-Exemplo: Modelo de regressão linear $y = b + m x$.
-
-![](static/img/0_D7zG46WrdKx54pbU.gif)
-
-.footnote[
-
-Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
-
-]
-
-
----
-
-# Métricas - "Melhor f(x)" segundo o quê?
-
-Queremos a $f(x)$ que **erre menos**.
-
-Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+Exemplo de **métrica** de erro: **R**oot **M**ean **S**quared **E**rror.
 
 $$
 RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
@@ -500,7 +820,7 @@ cars_com_predicoes <- melhor_reta %>%
   broom::augment() %>%
   rename(pred_melhor_reta = .fitted) %>%
   mutate(
-    pred_reta_a_mao = 12 + 3 * speed
+    pred_reta_a_mao = 50 + 3 * speed
   )
 
 grafico_residuos_melhor_reta <- cars_com_predicoes %>%
@@ -512,7 +832,7 @@ grafico_residuos_melhor_reta <- cars_com_predicoes %>%
     size = 1,
     colour = "salmon"
   ) +
-  geom_segment(aes(xend = speed, yend = pred_melhor_reta), colour = "blue", size = 1) +
+  geom_segment(aes(xend = speed, yend = pred_melhor_reta), colour = "purple", size = 0.8) +
   labs(
     subtitle = "Resíduos da Melhor Reta",
     title = "Os segmentos azuis são os resíduos (ou o quanto o modelo errou naqueles pontos)."
@@ -522,12 +842,12 @@ grafico_residuos_reta_a_mao <- cars_com_predicoes %>%
   ggplot(aes(x = speed, y = dist)) +
   geom_point(size = 2) +
   geom_abline(
-    intercept = 12, 
+    intercept = 50, 
     slope =     3, 
     size = 1,
     colour = "orange"
   ) +
-  geom_segment(aes(xend = speed, yend = pred_reta_a_mao), colour = "blue", size = 1) +
+  geom_segment(aes(xend = speed, yend = pred_reta_a_mao), colour = "purple", size = 0.8) +
   labs(
     subtitle = "Resíduos da Reta Escolhida a Mão"
   ) 
@@ -535,13 +855,50 @@ library(patchwork)
 grafico_residuos_melhor_reta + grafico_residuos_reta_a_mao
 ```
 
+
+
 ---
 
-# Métricas - "Melhor f(x)" segundo o quê?
+## Métricas - "Melhor f(x)" segundo o quê?
 
 Queremos a $f(x)$ que **erre menos**.
 
-Exemplo de medida de erro: **R**oot **M**ean **S**quared **E**rror.
+Exemplo de métrica de erro: **R**oot **M**ean **S**quared **E**rror.
+
+$$
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+$$
+
+Ou seja, nosso **objetivo** é
+
+### Encontrar $f(x)$ que nos retorne o ~menor~ RMSE.
+
+---
+
+## Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a reta que **erre menos**.
+
+Exemplo: Modelo de regressão linear $f(x) = \beta_0 + \beta_1 x$. 
+
+<img src="static/img/0_D7zG46WrdKx54pbU.gif" style="position: fixed; width: 60%; ">
+
+
+.footnote[
+
+Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
+
+]
+
+
+
+---
+
+## Métricas - "Melhor f(x)" segundo o quê?
+
+Queremos a $f(x)$ que **erre menos**.
+
+Exemplo de métrica de erro: **R**oot **M**ean **S**quared **E**rror.
 
 $$
 RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
@@ -569,393 +926,67 @@ $$
 
 ---
 
-## Um pouco sobre R-quadrado ( $R^2$ )
+## Métricas - "Melhor f(x)" segundo o quê?
 
-$$
-R^2 = 1 - \frac{\sum(y_i - \color{salmon}{\hat{y_i}})^2}{\sum(y_i - \color{royalblue}{\bar{y}})^2} = 1 - \frac{\color{salmon}{SQR}}{\color{royalblue}{SQT}}
-$$
+Na classificação a estratégia é a mesma. Queremos a curva que **erre menos**.
+
+Exemplo: Modelo de regressão logística $f(x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}$. 
 
 .pull-left[
 
-```{r, fig.align="center", fig.asp=0.5, warning=FALSE}
-grafico_cars <- ggplot(cars, aes(x = speed, y = dist)) + 
-  geom_point(size = 5, alpha = 0.1) + 
-  geom_abline(
-    intercept = melhor_reta$coefficients[1], 
-    slope =     melhor_reta$coefficients[2], 
-    size = 2,
-    colour = "salmon"
-  ) 
-grafico_cars +
-  geom_smooth(method = "lm", formula = y ~ 1, se = FALSE, size = 2) +
-  annotate("text", label = expression(bar(y)), y = mean(cars$dist), x = 5, vjust = -0.6, hjust = 2, size = 9, colour = "royalblue")
-```
+<img src="static/img/gif_reg_logistica_otimizacao.gif" style="position: fixed; width: 35%; ">
 
 ]
 
 .pull-right[
 
-$R^2 \approx 1 \rightarrow \color{salmon}{SQR} << \color{royalblue}{SQT}$.
-$R^2 \approx 0 \rightarrow \color{salmon}{reta} \text{ em cima da } \color{royalblue}{reta}$.
+Métrica de Erro da Logística:
 
-$R^2$ pode ser calculado para qualquer tipo de modelo.
+$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
+Em que 
 
-]
+$$\hat{y}_i = f(x_i) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x_i)}}$$
 
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 68 (Assessing the Accuracy of the Model).
-]
-
-
----
-
-# Ir para o R
-
----
-
-# Overfitting (sobreajuste)
-
-Intuição
-
-![scatter_eqm](static/img/overfiting_scatter_eqm.gif)
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
 ]
 
 ---
 
-```{r, echo=FALSE}
-library(parsnip)
-library(ggplot2)
-# Dados -------------------------------------------------------------------
-data("diamonds")
+# Métricas
 
-set.seed(10)
-diamondsinho <- diamonds %>%
-  filter(x > 0) %>%
-  sample_n(50)
-
-# definicao do modelo -----------------------------------------------------
-especificacao_modelo1 <- decision_tree(cost_complexity = 0.01, min_n = 5, tree_depth = 10) %>%
-  set_engine("rpart") %>%
-  set_mode("regression")
-
-especificacao_modelo2 <- decision_tree(cost_complexity = 0, min_n = 2, tree_depth = 29) %>%
-  set_engine("rpart") %>%
-  set_mode("regression")
-
-
-# ajuste do modelo --------------------------------------------------------
-ajuste_modelo1 <- especificacao_modelo1 %>% fit(price ~ x, data = diamondsinho)
-ajuste_modelo2 <- especificacao_modelo2 %>% fit(price ~ x, data = diamondsinho)
-
-
-# predicoes ---------------------------------------------------------------
-diamondsinho_com_previsao <- diamondsinho %>% 
-  mutate(
-    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho)$.pred,
-    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho)$.pred
-  )
-
-# qualidade dos ajustes e graficos ----------------------------------------
-# Métricas de erro
-diamondsinho_com_previsao_longo <- diamondsinho_com_previsao %>%
-  tidyr::pivot_longer(
-    cols = starts_with("price_pred"), 
-    names_to = "modelo", 
-    values_to = "price_pred"
-  ) 
-
-set.seed(3)
-# "dados novos chegaram..."
-diamondsinho_novos <- diamonds %>%
-  filter(x > 0, x < 8) %>%
-  sample_n(20)
-
-# predicoes ---------------------------------------------------------------
-diamondsinho_novos_com_previsao <- diamondsinho_novos %>% 
-  mutate(
-    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho_novos)$.pred,
-    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho_novos)$.pred
-  )
-```
-
-# Overfitting (sobreajuste)
-
-```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
-# Pontos observados + curva da f
-set.seed(3)
-dfzim <- diamondsinho_com_previsao %>%
-  sample_n(20, weigth = x)
-setinha <- annotate(
-    geom = "curve",
-    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
-    colour = "grey",
-    x = dfzim$x[5],
-    y = dfzim$price[5] + 650,
-    xend = 5.3,
-    yend = 13000
-  )
-rotulozinho <- annotate(
-    "text",
-    size = 6,
-    x = 5.3,
-    y = 13000,
-    hjust = 1.01,
-    label = "base de treino",
-    colour = "grey"
-  )
-pt1 <- dfzim %>%
-  ggplot() + 
-  geom_point(aes(x, price), size = 4, alpha = 0.2) +
-  ylim(c(0, 15000)) +
-  xlim(c(4.5,8)) +
-  setinha +
-  rotulozinho
-pt1
-```
-
----
-
-# Overfitting (sobreajuste)
-
-```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
-# Pontos observados + curva da f
-pt2 <- pt1 +
-  geom_step(aes(x, price_pred2, color = 'modelo2'), size = 1, show.legend = FALSE) 
-pt2
-```
-
----
-
-# Overfitting (sobreajuste)
-
-```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
-# Pontos observados + curva da f
-pt3 <- pt1 +
-  geom_step(aes(x, price_pred1, color = 'modelo1'), size = 1, show.legend = FALSE) 
-pt3
-```
-
----
-
-# Overfitting (sobreajuste)
-
-```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
-# Pontos observados + curva da f
-set.seed(4)
-dt <- diamondsinho_novos_com_previsao %>% filter(x < 8) %>% ungroup() %>% sample_n(20)
-setinha_vermelha <- annotate(
-    geom = "curve",
-    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
-    colour = "red", alpha = 0.5,
-    x = dt$x[18],
-    y = dt$price[18] + 650,
-    xend = 5.0,
-    yend = 9000
-  )
-rotulozinho_vermelho <- annotate(
-    "text",
-    size = 6,
-    x = 5.0,
-    y = 9000,
-    hjust = 1.01,
-    label = "base de teste\n(dados novos)", colour = "red", alpha = 0.5
-  )
-pt4 <- pt3 +
-  geom_step(aes(x, price_pred2, color = 'modelo2'), size = 1, show.legend = FALSE) +
-  geom_point(aes(x, price), size = 4, data = dt, colour = "red", alpha = 0.5)+
-  geom_point(aes(x, price), size = 1, data = dt, colour = "red", alpha = 1) +
-  setinha_vermelha+
-  rotulozinho_vermelho
-pt4
-```
-
----
-
-# Ir para o R
-
----
-
-# Dados novos vs antigos
-
-- **Base de Treino** (dados antigos): a base de histórico que usamos para ajustar o modelo.
-
-- **Base de Teste** (dados novos): a base que irá simular a chegada de dados novos, "em produção".
+Métricas: para medir o quanto a $f(x)$ está errando as previsões.
 
 .pull-left[
 
-```{r, eval = FALSE, echo=TRUE}
-initial_split(dados, prop=3/4)
-```
+## Regressão
 
+__Y__ é uma variável contínua.
 
-> "Quanto mais complexo for o modelo, menor será o **erro de treino.**"
-
-> "Porém, o que importa é o **erro de teste**."
-
-]
-
-.pull-right[
-<img src="static/img/erro_treino_erro_teste.png" width = "500px">
-
-]
-
----
-
-# Dados novos vs antigos
-
-## Estratégia
-
-
-### 1) Separar inicialmente a base de dados em duas: treino e teste.
-
-```{r, eval = FALSE, echo=TRUE}
-initial_split(dados, prop=3/4) # 3/4 da base será de treino
-```
-
-A base de teste que só será tocada quando a modelagem terminar. Ela nunca deverá influenciar as decisões que tomamos no período da modelagem.
-
-
-
----
-
-# Hiperparâmetros
-
-São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
-
-Exemplo: `tree_depth` das árvores (profundidade das árvores)
-
-
-.pull-left[
-
-```
-decision_tree(tree_depth = 2)
-```
-
+- **RMSE**
+- R2
+- MAE
+- MAPE
+...
 ]
 
 .pull-right[
 
-```{r}
+## Classificação
 
-arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(maxdepth = 2))
-arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
-```
+__Y__ é uma variável categórica.
 
+- **Deviance (Cross-Entropy)**
+- Acurácia
+- AUROC
+- Precision/Recall
+- F1
+- Kappa
+...
 ]
 
-
----
-
-# Hiperparâmetros
-
-São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados "na força bruta".
-
-Exemplo: `tree_depth` das árvores (profundidade das árvores)
-
-
-.pull-left[
-
-```
-decision_tree(tree_depth = 5)
-```
-
-]
-
-.pull-right[
-
-```{r}
-arvore <- rpart::rpart(vendas ~ investimento + midia, data = adv_ok, control = rpart.control(maxdepth = 5))
-arvore %>% rpart.plot::rpart.plot(type = 2, extra = 1)
-```
-
-]
-
----
-
-# Cross-validation (validação cruzada)
-
-**O que Validação cruzada faz:** estima (muito bem) o erro de predição.
-**Objetivo da Validação cruzada:** encontrar o melhor conjunto de hiperparâmetros.
-
-## Estratégia
-
-.pull-left[
-
-1) Dividir o banco de dados em K partes. (Por ex, K = 5 como na figura)
-
-2) Ajustar o mesmo modelo K vezes, deixar sempre um pedaço de fora para servir de base de teste.
-
-3) Teremos K valores de erros de teste. Tira-se a média dos erros.
-
-]
-
-.pull-right[
-<img src="static/img/k-fold-cv.png">
-
-
----------------------------------> linhas
-]
+[lista de métricas no `yardstick`](https://tidymodels.github.io/yardstick/articles/metric-types.html)
 
 
 
----
-
-# Cross-validation (validação cruzada)
-
-
-```{r, eval = FALSE}
-vfold_cv(cars, v = 5)
-```
-
-```{r, echo = FALSE}
-library(rsample)
-set.seed(1)
-cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
-  mutate(
-    n_treino = map_dbl(splits, ~nrow(as.data.frame(.x))),
-    n_teste = map_dbl(splits, ~nrow(assessment(.x))),
-    regressao = map(splits, ~lm(dist ~ speed, data = .x)),
-    rmse_teste = map2_dbl(regressao, splits, ~ {
-      df <- rsample::assessment(.y) %>%
-        mutate(pred = predict(.x, newdata = rsample::assessment(.y)))
-      
-      round(sqrt(mean((df$dist - df$pred)^2)), 2)
-    })
-  )
-cars_cv
-```
-
-ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \sqrt{\frac{1}{5}\sum_{i=1}^{5}RMSE_{Fold_i}} = 3,88$$
-
----
-
-# Cross-validation (validação cruzada)
-
-### Esquema das divisões de bases:
-
-<img src="static/img/resampling.svg" width = 75%>
-
-.footnote[
-Fonte: [bookdown.org/max/FES/resampling.html](https://bookdown.org/max/FES/resampling.html)
-]
-
----
-
-# Ir para o R
-
-
----
-
-class: inverse
-background-image: url(static/img/ml_101.png)
-background-position: left 140px
-background-size: contain
-
-# Resumo dos conceitos
 
 
 ---
@@ -978,6 +1009,13 @@ $$
 dist = \beta_0 + \beta_1speed
 $$
 
+```{r, eval = FALSE, echo=TRUE}
+### No R:
+linear_reg() %>% 
+  fit(dist ~ speed, data=cars)
+```
+
+
 ]
 
 
@@ -995,19 +1033,16 @@ grafico_da_reta <- ggplot(cars, aes(x = speed, y = dist)) +
 grafico_da_reta
 ```
 
-]
-
-### No R:
-
-```{r, eval = FALSE, echo=TRUE}
-linear_reg() %>% 
-  fit(dist ~ speed, data=cars)
-```
-
-
 .footnote[
 Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 61 (Simple Linear Regression).
 ]
+
+
+]
+
+
+
+
 
 
 ---
@@ -1028,6 +1063,12 @@ $$
 $$
 mpg = \beta_0 + \beta_1wt + \beta_2disp
 $$
+
+```{r, eval = FALSE, echo=TRUE}
+### No R:
+linear_reg() %>% 
+  fit(mpg ~ wt + disp, data=mtcars)
+```
 
 ]
 
@@ -1060,19 +1101,14 @@ fig <- plot_ly(data = mtcars) %>%
 fig
 ```
 
-]
-
-
-### No R:
-
-```{r, eval = FALSE, echo=TRUE}
-linear_reg() %>% 
-  fit(disp ~ wt + mpg, data=mtcars)
-```
-
 .footnote[
-Fonte: [sthda.com/impressive-package-for-3d](http://www.sthda.com/english/wiki/impressive-package-for-3d-and-4d-graph-r-software-and-data-visualization)
+Fonte: [sthda.com](http://www.sthda.com/english/wiki/impressive-package-for-3d-and-4d-graph-r-software-and-data-visualization)
 ]
+
+]
+
+
+
 
 
 ---
@@ -1081,36 +1117,19 @@ Fonte: [sthda.com/impressive-package-for-3d](http://www.sthda.com/english/wiki/i
 
 Queremos a reta que **erre menos**.
 
-Modelo: $y = b + m x$
-
-![](static/img/0_D7zG46WrdKx54pbU.gif)
-
-.footnote[
-
-Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
-
-]
-
----
-
-# Regressão Linear - "Melhor Reta"
-
-Queremos a reta que **erre menos**.
-
-Uma medida de erro: RMSE
+Uma métrica de erro: RMSE
 
 $$
-RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2}
+RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1speed)})^2}
 $$
 
 Ou seja, nosso é **encontrar os $\hat{\beta}'s$ que nos retorne o ~menor~ RMSE.**
 
 #### IMPORTANTE! 
 
-o RMSE é a nossa **Função de Custo** e pode ser diferente da **Métrica** que vimos nos slides anteriores!
+o RMSE é **Métrica** que a regressão usa como **Função de Custo**.
 
-- **Função de Custo** - para encontrar os melhores parâmetros.
-- **Métrica** - para encontrar os melhores hiperparâmetros.
+- **Função de Custo** - **Métrica** usada para encontrar os melhores parâmetros.
 
 ---
 
@@ -1136,33 +1155,26 @@ Ver [Wikipedia do Gradient Descent](https://en.wikipedia.org/wiki/Gradient_desce
 ]
 
 .pull-right[
-<img src = "static/img/gradient_descent.png" width = 65%>
+<img src = "static/img/gradient_descent.png" width = 45%>
 ]
+
 
 
 ---
 
-## Qual o valor ótimo para $\beta_0$ e $\beta_1$?
+# Regressão Linear - "Melhor Reta"
 
-No nosso exemplo, a nossa **HIPÓTESE** é de que 
+Queremos a reta que **erre menos**.
 
-$$
-dist = \beta_0 + \beta_1speed
-$$
+Modelo: $y = \beta_0 + \beta_1 x$
 
-Então podemos escrever o RMSE
+<img src="static/img/0_D7zG46WrdKx54pbU.gif" style="position: fixed; width: 60%; ">
 
-$$
-RMSE = \sqrt{\frac{1}{N}\sum(y_i - \hat{y_i})^2} = \sqrt{\frac{1}{N}\sum(y_i -  \color{red}{(\hat{\beta}_0 + \hat{\beta}_1speed)})^2} 
-$$
+.footnote[
 
-Curiosidade: com ajuda do Cálculo é possível mostrar que os valores ótimos para $\beta_0$ e $\beta_1$ são
+Fonte: [https://alykhantejani.github.io/images/gradient_descent_line_graph.gif](https://alykhantejani.github.io/images/gradient_descent_line_graph.gif)
 
-$\hat{\beta}_1 = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sum(x_i - \bar{x})^2}$
-
-$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x}$
-
-OBS: Já que vieram do EQM, eles são chamados de **Estimadores de Mínimos Quadrados**.
+]
 
 
 ---
@@ -1170,7 +1182,7 @@ OBS: Já que vieram do EQM, eles são chamados de **Estimadores de Mínimos Quad
 ## Depois de estimar...
 
 $$
-\hat{y} = \hat{\beta}_0 + \hat{\beta}_1x
+\hat{y} = \hat{f}(x) = \hat{\beta}_0 + \hat{\beta}_1x
 $$
 
 ### Exemplo:
@@ -1179,13 +1191,11 @@ $$
 \hat{dist} = \hat{\beta}_0 + \hat{\beta}_1speed
 $$
 
-Colocamos um $\hat{}$ em cima dos termos para representar "estimativas". Ou seja, $\hat{y}_i$ é uma estimativa de $y_i$.
+Colocamos um $\hat{}$ em cima dos termos para representar "estimativas". Ou seja, $\hat{y}_i$ é uma estimativa de $y_i$. No nosso exemplo, 
 
-No nosso exemplo, 
-
-- $\hat{\beta}_0$ é uma estimativa de $\beta_0$ e vale `-17.579`.
-- $\hat{\beta}_1$ é uma estimativa de $\beta_1$ e vale `3.932`.
-- $\hat{dist}$ é uma estimativa de $dist$ e vale `-17.579 + 3.932 x speed`.
+- $\hat{\beta}_0$ é uma estimativa de $\beta_0$ e vale `-17.5`.
+- $\hat{\beta}_1$ é uma estimativa de $\beta_1$ e vale `3.9`.
+- $\hat{dist}$ é uma estimativa de $dist$ e vale `-17.5 + 3.9 x speed`.
 
 ```{r, echo=TRUE}
 # Exercício: se speed for 15 m/h, quanto que 
@@ -1194,74 +1204,266 @@ No nosso exemplo,
 
 ---
 
-## Interpretação dos parâmetros
+## Tidymodels
+
+- Conjunto de pacotes/framework para desenvolvimento de modelos preditivos. Muitos tutoriais e guias no [site](https://www.tidymodels.org/).
+
+- Em desenvolvimento ativo pela RStudio. Possui muitas semelhanças com o 'tidyverse' o que faz com que mais prático.
+
+- Unifica o uso dos modelos já existentes no R. Ele é também extensível: você pode implementar um novo modelo
+que funcione com o tidymodels.
+
+- Alternativas: [{caret}](https://topepo.github.io/caret/), [{mlr3}](https://mlr3.mlr-org.com/), [{scikit-learn}](https://scikit-learn.org/stable/) (Python), [{PyCaret}](https://pycaret.org/) (Python). Em geral é fácil migrar de um framework p/ o outro - a parte mais difícil é aprender o fluxo de trabalho de **machine learning**.
+
+---
+class: middle, center
+
+## Exemplo 01
+
+---
+
+```{r, echo=FALSE}
+library(parsnip)
+library(ggplot2)
+# Dados -------------------------------------------------------------------
+data("diamonds")
+
+set.seed(12)
+diamondsinho <- diamonds %>%
+  filter(x > 0) %>%
+  sample_n(13)
+
+# definicao do modelo -----------------------------------------------------
+especificacao_modelo1 <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+especificacao_modelo2 <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+
+# ajuste do modelo --------------------------------------------------------
+ajuste_modelo1 <- especificacao_modelo1 %>% fit(price ~ poly(x, 2), data = diamondsinho)
+ajuste_modelo2 <- especificacao_modelo2 %>% fit(price ~ poly(x, 8), data = diamondsinho)
+
+
+# predicoes ---------------------------------------------------------------
+diamondsinho_com_previsao <- diamondsinho %>% 
+  mutate(
+    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho)$.pred,
+    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho)$.pred
+  )
+
+# qualidade dos ajustes e graficos ----------------------------------------
+# Métricas de erro
+diamondsinho_com_previsao_longo <- diamondsinho_com_previsao %>%
+  tidyr::pivot_longer(
+    cols = starts_with("price_pred"), 
+    names_to = "modelo", 
+    values_to = "price_pred"
+  ) 
+
+set.seed(3)
+# "dados novos chegaram..."
+diamondsinho_novos <- diamonds %>%
+  filter(x > 0, x < 8) %>%
+  sample_n(20)
+
+# predicoes ---------------------------------------------------------------
+diamondsinho_novos_com_previsao <- diamondsinho_novos %>% 
+  mutate(
+    price_pred1 = predict(ajuste_modelo1, new_data = diamondsinho_novos)$.pred,
+    price_pred2 = predict(ajuste_modelo2, new_data = diamondsinho_novos)$.pred
+  )
+```
+
+
+# Overfitting (sobreajuste)
+
+- Acontece quando um modelo funciona muito pior quando usado com dados novos quando
+  comparado com a performance nos dados em que foi treinado.
+- Uma das principais preocupações quando ajustamos modelos em ML.
+- **Solução**: Sempre testar o modelo com dados 'novos'.
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+set.seed(3)
+dfzim <- diamondsinho_com_previsao
+dfzim_maior <- data.frame(x = seq(from = 4.5, to = 7.5, length.out =100))%>% 
+  mutate(
+    price_pred1 = predict(ajuste_modelo1, new_data = .)$.pred,
+    price_pred2 = predict(ajuste_modelo2, new_data = .)$.pred
+  )
+
+setinha <- annotate(
+    geom = "curve",
+    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
+    colour = "grey",
+    x = dfzim$x[5],
+    y = dfzim$price[5] + 650,
+    xend = 5.3,
+    yend = 13000
+  )
+rotulozinho <- annotate(
+    "text",
+    size = 6,
+    x = 5.3,
+    y = 13000,
+    hjust = 1.01,
+    label = "base de treino",
+    colour = "grey"
+  )
+pt1 <- dfzim %>%
+  ggplot() + 
+  geom_point(aes(x, price), size = 4, alpha = 0.2) +
+  ylim(c(-10, 15000)) +
+  xlim(c(4.5,8)) +
+  setinha +
+  rotulozinho
+pt1
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+
+pt2 <- pt1 +
+  geom_line(aes(x, price_pred2, color = 'modelo2'),data = dfzim_maior, size = 1, show.legend = FALSE) 
+pt2
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+pt3 <- pt1 +
+  geom_line(aes(x, price_pred1, color = 'modelo1'), data = dfzim_maior, size = 1, show.legend = FALSE) 
+pt3
+```
+
+---
+
+# Overfitting (sobreajuste)
+
+```{r, eval=TRUE, echo=FALSE, fig.retina=4, fig.width=10}
+# Pontos observados + curva da f
+set.seed(4)
+dt <- diamondsinho_novos_com_previsao %>% filter(x < 8) %>% ungroup() %>% sample_n(20)
+setinha_vermelha <- annotate(
+    geom = "curve",
+    arrow = arrow(type = "closed", angle = 10, length = unit(0.3, "inches"), ends = "first"),
+    colour = "red", alpha = 0.5,
+    x = dt$x[18],
+    y = dt$price[18] + 650,
+    xend = 5.0,
+    yend = 9000
+  )
+rotulozinho_vermelho <- annotate(
+    "text",
+    size = 6,
+    x = 5.0,
+    y = 9000,
+    hjust = 1.01,
+    label = "base de teste\n(dados novos)", colour = "red", alpha = 0.5
+  )
+pt4 <- pt3 +
+  geom_line(aes(x, price_pred2, color = 'modelo2'), data = dfzim_maior, size = 1, show.legend = FALSE) +
+  geom_point(aes(x, price), size = 4, data = dt, colour = "red", alpha = 0.5)+
+  geom_point(aes(x, price), size = 1, data = dt, colour = "red", alpha = 1) +
+  setinha_vermelha+
+  rotulozinho_vermelho
+pt4
+```
+
+
+
+---
+
+# Overfitting (sobreajuste)
+
+Intuição
+
+![scatter_eqm](static/img/overfiting_scatter_eqm.gif)
+
+
+---
+
+# Overfitting (sobreajuste)
+
+Intuição
+
+![scatter_eqm](static/img/overfiting_scatter_eqm_logistic.gif)
+
+
+---
+
+# Dados novos vs antigos
+
+- **Base de Treino** (dados antigos): a base de histórico que usamos para ajustar o modelo.
+
+- **Base de Teste** (dados novos): a base que irá simular a chegada de dados novos, "em produção".
 
 .pull-left[
 
-```{r}
-grafico_cars <- ggplot(cars, aes(x = speed, y = dist)) + 
-  geom_point(size = 5, alpha = 0.1) + 
-  geom_abline(
-    intercept = melhor_reta$coefficients[1], 
-    slope =     melhor_reta$coefficients[2], 
-    size = 2,
-    colour = "salmon"
-  ) 
-
-grafico_cars+
-  coord_cartesian(xlim = c(-4, 26), ylim = c(-25, 126)) +
-  annotate("segment", 
-           y = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
-           yend = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
-           x = 15,
-           xend = 19,
-           size = 2,
-           colour = "darkgreen") +
-  annotate("segment", 
-           y = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 15,
-           yend = melhor_reta$coefficients[1] + melhor_reta$coefficients[2] * 19,
-           x = 19,
-           xend = 19,
-           size = 2,
-           colour = "darkgreen") +
-  annotate("segment", 
-           y = melhor_reta$coefficients[1],
-           yend = 0,
-           x = 0,
-           xend = 0,
-           size = 2,
-           colour = "darkblue") +
-  geom_vline(xintercept = 0, colour = "grey20") +
-  geom_hline(yintercept = 0, colour = "grey20") +
-  theme_minimal(24)
+```{r, eval = FALSE, echo=TRUE}
+initial_split(dados, prop=3/4)
 ```
 
-$$
-y = \color{darkgblue}{\beta_0} + \color{darkgreen}{\beta_1}x
-$$
+
+> "Quanto mais complexo for o modelo, menor será o **erro de treino.**"
+
+> "Porém, o que importa é o **erro de teste**."
 
 ]
 
 .pull-right[
-
-### Interpretações matemáticas
-
-$\color{darkgblue}{\beta_0}$ é o lugar em que a reta cruza o eixo Y.
-
-$\color{darkgreen}{\beta_1}$ é a derivada de Y em relação ao X. É quanto Y varia quando X varia em 1 unidade.
-
-### Interpretações estatísticas
-
-$\color{darkgblue}{\beta_0}$ é a distância percorrida esperada quando o carro está parado (X = 0).
-
-$\color{darkgreen}{\beta_1}$ é o efeito médio na distância por variar 1 ml/h na velocidade do carro.
-
+<img src="static/img/erro_treino_erro_teste.png" width = "400px">
 
 ]
 
 ---
+class: middle, center
+
+## Exemplo 02
+
+---
+
+# Dados novos vs antigos
+
+## Estratégia
 
 
+#### 1) Separar inicialmente a base de dados em duas: **treino** e **teste**.
+
+```{r, eval = FALSE, echo=TRUE}
+initial_split(dados, prop=3/4) # 3/4  de treino aleatoriamente
+initial_time_split(dados, prop=3/4) # 3/4  de treino respeitando a ordem
+```
+
+A base de teste só será tocada quando a modelagem terminar. Ela nunca deverá influenciar nas decisões que tomamos durante o período da modelagem.
+
+palavra-chave: **data leakage** ou **vazamento de informação**
+
+
+---
+
+## Regularização
+
+**Objetivo da Regularização:** Oferecer um parâmetro (um valor que podemos mudar) para termos controle sobre a **complexidade** da $f(x)$ e assim  evitar o *sobreajuste*.
+
+No exemplo da regressão linear, haverá um valor $\lambda$ que chamaremos de "hiperparâmetro" da regressão. Iremos chutar diferentes valores de $\lambda$ até encontrar a melhor $f(x)$.
+
+---
 
 ## Regularização - LASSO
 
@@ -1275,27 +1477,17 @@ $$RMSE_{regularizado} = RMSE + \color{red}{\lambda}\sum_{j = 1}^{p}|\beta_j|$$
 
 Ou seja, **penalizamos** a função de custo se os $\beta's$ forem muito grandes.
 
-**PS1:** O $\color{red}{\lambda}$ é um hiperparâmetro para a Regressão Linear.
+**PS1:** O $\color{red}{\lambda}$ é um **hiperparâmetro** da Regressão Linear.
 
 **PS2:** Quanto maior o $\color{red}{\lambda}$, mais penalizamos os $\beta's$ por serem grandes.
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 203 (Linear Model Selection and Regularization).
-]
-
 
 ---
 
 ## Regularização - LASSO
 
-Existe um $\color{red}{\lambda}$ que retorna o menor erro de cross-validation.
+Vamos testar diversos valores para $\color{red}{\lambda}$ até encontrar o que dá o menor erro de teste.
 
-
-![scatter_eqm](static/img/lasso_lambda.png)
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 219 (The LASSO).
-]
+<img src='static/img/lasso_lambda2.png' width = 70%>
 
 
 ---
@@ -1314,855 +1506,159 @@ Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Lear
 
 ---
 
-## Ir para o R
+# Hiperparâmetros
 
----
+São parâmetros que têm que ser definidos antes de ajustar o modelo. Não há como achar o valor ótimo diretamente nas funções de custo. Precisam ser achados **na força bruta**.
 
-## Preditores Categóricos
+Exemplo: `lambda` da penalização do LASSO (`penalty`)
 
-### Preditor com apenas 2 categorias
-
-Saldo médio no cartão de crédito é diferente entre homens e mulheres?
-
-```{r, fig.height=1.5}
-Credit %>%
-  ggplot(aes(x = Gender, y = Balance, fill = Gender)) +
-  geom_boxplot(show.legend = FALSE) +
-  coord_flip() +
-  labs(y = "Saldo médio no cartão de crédito (USD)", x = "")
-```
-
-```{r, echo = TRUE, eval = FALSE}
-summary(lm(Balance ~ Gender, data = Credit))
-# Coefficients:
-#              Estimate  Std.Error  t value Pr(>|t|)    
-# (Intercept)    509.80  33.13      15.389   <2e-16 ***
-# GenderFemale    19.73  46.05       0.429    0.669   
-```
-
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 84 (Predictors with Only Two Levels).
-]
-
-
----
-
-## Preditores Categóricos
-
-### Preditor com apenas 2 categorias
-
-Saldo médio no cartão de crédito é diferente entre homens e mulheres?
-
-```{r, fig.height=1.5}
-Credit %>%
-  ggplot(aes(x = Gender, y = Balance, fill = Gender)) +
-  geom_boxplot(show.legend = FALSE) +
-  coord_flip() +
-  labs(y = "Saldo médio no cartão de crédito (USD)", x = "")
-```
-
-
-$$
-y_i = \beta_0 + \beta_1x_i \space\space\space\space\space\space \text{em que}\space\space\space\space\space\space x_i = \Bigg\\{\begin{array}{ll}1&\text{se a i-ésima pessoa for }\texttt{female}\\\\
-0&\text{se a i-ésima pessoa for } \texttt{male}\end{array}
-$$
-
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 84 (Predictors with Only Two Levels).
-]
-
-
----
-
-## Preditores Categóricos
-
-### Preditor com 3 ou mais categorias
 
 .pull-left[
 
-```{r, fig.height=4}
-Credit %>%
-  ggplot(aes(x = Ethnicity, y = Balance, fill = Ethnicity)) +
-  geom_boxplot(show.legend = FALSE) +
-  coord_flip() +
-  labs(y = "Saldo (USD)", x = "") +
-  theme_minimal(22)
+```
+linear_reg(penalty = 0.0)
+linear_reg(penalty = 0.1)
+linear_reg(penalty = 1.0)
+linear_reg(penalty = tune())
 ```
 
+]
 
-```{r, echo=TRUE, eval=FALSE}
-summary(lm(Balance ~ Ethnicity, data = Credit))
-#                    Estimate  Std.Error t value Pr(>|t|)    
-# (Intercept)          531.00  46.32     11.464   <2e-16 ***
-# EthnicityAsian       -18.69  65.02     -0.287    0.774    
-# EthnicityCaucasian   -12.50  56.68     -0.221    0.826  
-```
 
+---
+
+
+## Problema!
+
+Teremos que testar muitos 'lambdas'. Podemos desgastar a base de teste (erro de teste vai ter alta variabilidade). Para isso, inventaram a estratégia de reamostragem que oferece uma estimativa do erro de predição (erro de teste) de forma mais confiável.
+
+
+---
+
+# Cross-validation (validação cruzada)
+
+**O que Validação cruzada faz:** estima (muito bem) o erro de predição.
+
+**Objetivo da Validação cruzada:** encontrar o melhor conjunto de hiperparâmetros.
+
+### Estratégia
+
+.pull-left[
+
+1) Dividir o banco de dados em K partes. (Por ex, K = 5 como na figura)
+
+2) Ajustar o mesmo modelo K vezes, deixar sempre um pedaço de fora para servir de base de teste.
+
+3) Teremos K valores de erros de teste. Tira-se a média dos erros.
 
 ]
 
 .pull-right[
-
-Modelo
-
-$$y_i = \beta_0 + \beta_1x_{1i} + \beta_2x_{2i}$$
-
-Em que
-
-
-$x_{1i} = \Bigg \{ \begin{array}{ll} 1 & \text{se for }\texttt{Asian}\\0&\text{caso contrário}\end{array}$
-
-$x_{2i} = \Bigg \{ \begin{array}{ll} 1 & \text{se for }\texttt{Caucasian}\\0&\text{caso contrário}\end{array}$
+<img src="static/img/k-fold-cv.png">
 
 ]
 
-
 ---
 
-## Preditores Categóricos
+# Cross-validation (validação cruzada)
 
-### Preditor com 3 ou mais categorias
 
-"One hot enconding" ou "Dummies" ou "Indicadores".
-
-```{r}
-Credit %>% slice(1:8) %>% select(Ethnicity) %>%
-  cbind(model.matrix(~Ethnicity, data = .)) %>%
-  knitr::kable(format = "html")
+```{r, echo = TRUE, eval=FALSE}
+vfold_cv(cars, v = 5)
 ```
-
-steps: `step_dummy()`
-
----
-
-## Preditores Categóricos
-
-### Preditor com 3 ou mais categorias
-
-Interpretação dos parâmetros:
-
-$y_{i} = \left\{ \begin{array}{ll} \beta_0 & \text{se for }\texttt{Afro American}\\ \beta_0 + \beta_1&\text{se for } \texttt{Asian}\\ \beta_0 + \beta_2&\text{se for } \texttt{Caucasian}\end{array}\right.$
-
-```{r, echo = TRUE}
-# interprete cada um dos três parâmetros individualmente.
-```
-
-
----
-
-## Principais problemas dos modelos lineares
-
-### Vamos estudar nesse curso
-
-- Escala das variáveis explicativas (apenas LASSO sofre) 
-
-- Relação não-linear entre X e Y
-
-- Outliers/Pontos de alavanca
-
-### Não vamos estudar nesse curso
-
-- Heterocedasticidade: Variância dos erros não constantes
-
-- Multicolinearidade (LASSO resolve)
-
-- Correlação entre os erros (séries temporais, por ex.)
-
----
-
-## Transformações Não Lineares dos Preditores
-
-### Exemplo: log
-
-.pull-left[
-Modelo real: $y = 10 + 0.5log(x)$ 
-]
-
-.pull-right[
-Modelo proposto: $\small y = \beta_0 + \beta_1log(x)$ 
-]
-```{r}
-set.seed(1)
-y_x <- tibble(
-  x = runif(60),
-  y = 10 + 0.5*log(x) + rnorm(30, sd = 0.1)
-) 
-
-grafico_y_x <- y_x %>%
-  ggplot(aes(x = x, y = y)) + 
-  geom_point( size = 3) 
-
-
-grafico_y_x_curvas <- grafico_y_x +
-  geom_smooth(aes(colour = "y ~ x"), method = "lm", se = FALSE, formula = y ~ x) +
-  geom_smooth(aes(colour = "y ~ log(x)"), method = "lm", se = FALSE, formula = y ~ log(x)) +
-  labs(colour = "Modelo") +
-  theme(legend.position = "left") 
-
-grafico_y_x_log <- grafico_y_x + scale_x_log10() + labs(x = "x (escala logarítmica)")
-```
-
-```{r, fig.width=9, fig.height=3, fig.align="center", dpi=300}
-grafico_y_x_curvas + grafico_y_x_log
-```
-
-Outras transformações comuns: raíz quadrada, Box-Cox.
-
-steps: `step_log()`, `step_BoxCox()`, `step_sqrt()`
-
----
-
-## Transformações Não Lineares dos Preditores
-
-### Exemplo: Regressão Polinomial
-
-.pull-left[
-Modelo real: $y = 500 + 0.4(x-10)^3$ 
-]
-
-.pull-right[
-Modelo proposto: $y = \beta_0 + \beta_1x + \beta_2x^2 + \beta_3x^3$ 
-]
-
-
-```{r, fig.height=4, fig.width=11, dpi=300}
-set.seed(1)
-y_x_poly <- tibble(
-  x = runif(30, 0, 20),
-  y = 500 + 0.4 * (x-10)^3 + rnorm(30, sd = 50)
-)
-
-
-grafico_y_x_poly <- y_x_poly %>%
-  ggplot(aes(x = x, y = y)) + 
-  geom_point( size = 3) 
-
-
-grafico_y_x_poly_curvas <- grafico_y_x_poly +
-  geom_smooth(aes(colour = "y ~ x"), method = "lm", se = FALSE, formula = y ~ x) +
-  geom_smooth(aes(colour = "y ~ poly(x, 2)"), method = "lm", se = FALSE, formula = y ~ poly(x, 2)) +
-  geom_smooth(aes(colour = "y ~ poly(x, 3)"), method = "lm", se = FALSE, formula = y ~ poly(x, 3)) +
-  labs(colour = "Modelo") 
-grafico_y_x_poly + grafico_y_x_poly_curvas
-```
-
-Outras expansões comuns: b-splines, natural splines.
-
-steps: `step_poly()`, `step_bs()`, `step_ns`
-
----
-
-## Interações
-
-Modelo proposto (Matemático): Seja `Sepal.Width` o $y$ e `Sepal.Length` o $x$,
-
-$$\small \begin{array}{l} y = \beta_0 + \beta_1x + \beta_2I_{versicolor} + \beta_3I_{virginica} + \beta_4\color{red}{xI_{versicolor}} + \beta_5\color{red}{xI_{virginica}}\end{array}$$
-
-
-```{r, out.height=180, out.height=260, fig.height=2, fig.width=4, fig.align="center", dpi=300}
-iris %>%
-  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
-  geom_point(aes(colour = Species)) +
-  geom_smooth(method = "lm", se = FALSE, colour = "black") +
-  geom_smooth(method = "lm", aes(colour = Species), se = FALSE) +
-  theme_minimal(10)
-```
-
-
-step: `step_interact(terms = ~ Sepal.Length:Species)`
-
-
----
-
-## Outliers
-
-```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
-cars_com_predicoes_outliers <- cars_com_predicoes %>%
-  mutate(outlier = 13 == 1:nrow(.),
-         .resid = ifelse(outlier, 130, .resid)) 
-
-graf_outlier <-cars_com_predicoes_outliers %>%
-  ggplot(aes(x = speed, y = .resid)) +
-  coord_cartesian(ylim = c(-50, 135)) +
-  geom_point(size = 6, colour = "red", data = cars_com_predicoes_outliers %>% filter(outlier), alpha = 0.6) +
-  labs(x = "Valores preditos", y = "Resíduos", title = "Erro grande")+
-  geom_point(size = 2) +
-  theme_minimal(18) +
-  xlim(c(4, 29))
-
-cars_com_predicoes_alavanca <- cars_com_predicoes %>%
-  mutate(outlier = 13 == 1:nrow(.),
-         .resid = ifelse(outlier, 130, .resid),
-         speed = ifelse(outlier, 28, speed),
-         dist = ifelse(outlier, 150, dist)) 
-
-graf_alavanca <-cars_com_predicoes_alavanca %>%
-  ggplot(aes(x = speed, y = .resid)) +
-  coord_cartesian(ylim = c(-50, 135)) +
-  geom_point(size = 6, colour = "red", data = cars_com_predicoes_alavanca %>% filter(outlier), alpha = 0.6) +
-  labs(x = "Valores preditos", y = "Resíduos", title = "Alavanca")+
-  geom_point(size = 2) +
-  theme_minimal(18) +
-  xlim(c(4, 29))
-
-graf_outlier / graf_alavanca
-```
-
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
-]
-
----
-
-## Outliers
-
-```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
-graf_alavanca1 <- cars_com_predicoes_alavanca %>%
-  ggplot(aes(x = speed, y = dist)) +
-  geom_point(size = 2, alpha = 0) +
-  geom_point(size = 2, data = cars_com_predicoes) +
-  geom_abline(
-    intercept = melhor_reta$coefficients[1], 
-    slope =     melhor_reta$coefficients[2], 
-    size = 1,
-    colour = "salmon"
-  ) +
-  theme_minimal(18)
-graf_alavanca1
-```
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
-]
-
----
-
-## Outliers
-
-```{r, fig.align="center", fig.height=6, fig.width=10, dpi = 300}
-graf_alavanca1 +
-  geom_abline(
-    intercept = melhor_reta$coefficients[1] - 9, 
-    slope =     melhor_reta$coefficients[2] + 1.2, 
-    size = 1,
-    colour = "royalblue"
-  ) +
-  geom_point(size = 6, colour = "red", data = cars_com_predicoes_alavanca %>% dplyr::filter(outlier), alpha = 0.6) +
-  geom_point(size = 2, colour = "black", data = cars_com_predicoes_alavanca %>% dplyr::filter(outlier))
-```
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 96 (Outliers).
-]
-
----
-
-## Outliers
-
-### Diagnóstico
-
-- Visualização univariada (histograma, boxplot);
-
-- Comparação do valor com o desvio padrão;
-
-### Tratamentos
-
-- Transformações log(), etc;
-
-- Categorização;
-
-- Remover os valores extremos (raramente boa ideia);
-
-- Usar Random Forest/XGBoost;
-
-- Usar MAE em vez de RMSE;
-
-
----
-
-## Ir para o R
-
----
-class: inverse, center, middle
-
-# CLASSIFICAÇÃO
-
----
-
-# Regressão Logística
-
-
-
-.pull-left[
-
-### Para  $Y \in \{0, 1\}$ (binário)
-
-$$
-log\left\(\frac{p}{1-p}\right\) = \beta_0 + \beta_1x
-$$
-
-em que $p = P(Y = 1|x)$. Ou...
-
-$$
-p = \frac{1}{1 + e^{-(\beta_0 + \beta_1x)}}
-$$
-
-]
-
-
-.pull-right[
-
-```{r,echo = FALSE, fig.height=5}
-set.seed(1)
-email <- tibble(
-  pts_exclamacao = sample.int(300, 1000, replace = TRUE),
-  x = runif(1000) - 0.5,
-  spam = rbinom(1000, 1, prob = 1/(1 + exp(-(-5.9 + 1/23*pts_exclamacao + 2 * x)))),
-    `Regressão Linear` = predict(lm(spam~pts_exclamacao)),
-    `Regressão Logística` = predict(glm(spam~pts_exclamacao, family = binomial()), type = "response")
-  ) 
-
-email %>%
-  sample_n(100) %>%
-  gather("modelo", "pred", starts_with("Reg")) %>%
-  ggplot(aes(x = pts_exclamacao, y = spam)) + 
-  geom_point(size = 5, alpha = 0.2)  +
-  geom_line(size = 3, aes(y = pred, colour = modelo), show.legend = FALSE) +
-  facet_wrap(~ modelo) +
-  theme_minimal(24)+
-  labs(
-    title = "Y = 1: E-mail é Spam", x = "Qtd de pontos de exclamação"
-  ) +
-  scale_y_continuous(breaks = c(0, 1), labels = c("Y = 0", "Y = 1")) +
-  theme(axis.title.y = element_blank())
-```
-
-]
-
-### No R:
-
-```{r, eval = FALSE, echo = TRUE}
-logistic_reg() %>% fit(dist ~ speed, data=Default)
-```
-
-
-.footnote[
-Ver [ISL](https://www.ime.unicamp.br/~dias/Intoduction%20to%20Statistical%20Learning.pdf) página 131 (Logistic Regression).
-]
-
----
-
-# Regressão Logística
-
-```{r,echo = FALSE, fig.height=6, fig.width=10, warning=FALSE, message=FALSE}
-email %>%
-  select(-`Regressão Linear`) %>%
-  # sample_n(100) %>%
-  gather("modelo", "pred", starts_with("Reg")) %>%
-  ggplot(aes(x = pts_exclamacao, y = spam)) + 
-  geom_point(size = 5, alpha = 0.2)  +
-  geom_line(size = 3, aes(y = pred, colour = modelo), show.legend = FALSE) +
-  stat_summary_bin(size = 1, alpha = 0.7, colour = "purple", aes(x = pts_exclamacao))  +
-  facet_wrap(~ modelo) +
-  theme_minimal(20)+
-  labs(
-    title = "Y = 1: E-mail é Spam", x = "Qtd de pontos de exclamação"
-  ) +
-  scale_y_continuous(breaks = c(0, 1), labels = c("Y = 0", "Y = 1")) +
-  theme(axis.title.y = element_blank())
-```
-
-
----
-
-# Regressão Logística
-
-```{r, fig.height=6, fig.align="center", fig.width=8, echo=FALSE}
-set.seed(5)
-x1 <- runif(40)
-x2 <- runif(40)
-y <- rbinom(40, 1, prob = 1/(1 + exp(-4 + 4*x1 + 4*x2)))
-xxy <- data.frame(x1, x2, y)
-xxy$x1x2 <- ifelse(x1 + x2 > 1, 0, 1)
-# Compute the linear regression (z = ax + by + d)
-fit <- glm(y ~ x1 + x2, family = "binomial")
-# predict values on regular xy grid
-grid.lines = 26
-x1.pred <- seq(min(x1), max(x1), length.out = grid.lines)
-x2.pred <- seq(min(x2), max(x2), length.out = grid.lines)
-xx <- expand.grid( x1 = x1.pred, x2 = x2.pred)
-y.pred <- matrix(predict(fit, newdata = xx, type = "response"), 
-                 nrow = grid.lines, ncol = grid.lines)
-library(plotly)
-fig <- plot_ly(data = xxy) %>% 
-  add_trace(x = ~x1, y = ~x2, z = ~y, color = ~x1x2,
-            type = "scatter3d", mode = "markers",
-            opacity = .8) %>%
-  add_trace(z = y.pred,
-            x = x1.pred,
-            y = x2.pred,
-            type = "surface",
-            opacity = .9)
-fig
-```
-
-
----
-
-# Árvore de Decisão
-
-```{r, fig.height=6, fig.align="center", fig.width=8, echo=FALSE}
-library(rpart)
-set.seed(6)
-x1 <- runif(600)
-x2 <- runif(600)
-y <- rbinom(600, 1, prob = 1/(1 + exp(-4 + 4*x1 + 4*x2)))
-xxy <- data.frame(x1, x2, y)
-xxy$x1x2 <- ifelse(x1 + x2 > 1, 0, 1)
-# Compute the linear regression (z = ax + by + d)
-fit <- rpart::rpart(y ~ x1 + x2, data = xxy, control = rpart.control(cp = 0.03, minsplit = 2))
-# predict values on regular xy grid
-grid.lines = 26
-x1.pred <- seq(min(x1), max(x1), length.out = grid.lines)
-x2.pred <- seq(min(x2), max(x2), length.out = grid.lines)
-xx <- expand.grid( x1 = x1.pred, x2 = x2.pred)
-y.pred <- matrix(predict(fit, newdata = xx), 
-                 nrow = grid.lines, ncol = grid.lines)
-library(plotly)
-fig <- plot_ly(data = xxy[1:40,]) %>% 
-  add_trace(x = ~x1, y = ~x2, z = ~y, color = ~x1x2,
-            type = "scatter3d", mode = "markers",
-            opacity = .8) %>%
-  add_trace(z = y.pred,
-            x = x1.pred,
-            y = x2.pred,
-            type = "surface",
-            opacity = .9)
-fig
-```
-
-
----
-
-# Regressão Logística - Custo e Regularização
-A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
-
-$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
-
-
----
-
-# Regressão Logística - Custo e Regularização
-A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
-
-$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
-
-Para cada linha da base de dados seria assim...
-
-$$D_i = \begin{cases} -\log(\hat{y}_i) & \text{quando} \space y_i = 1 \\\\ -\log(1-\hat{y}_i) & \text{quando} \space y_i = 0 \end{cases}$$
-
-```{r, fig.width=7, fig.height=3, fig.retina=TRUE}
-y1 = ggplot(tibble(y_hat = c(1, 0.001)), aes(x = y_hat)) +
-  stat_function(fun = ~-log(.), size = 2) +
-  scale_x_continuous(labels = scales::percent) +
-  labs(y = "D", x = bquote(hat(y)), title = "Quando y = 1") +
-  theme_minimal(16) +
-  theme(
-    panel.grid = element_blank(),
-    axis.line = element_line(colour = "black", size = 1.5),
-    axis.text = element_text(colour = "black", size = 16)
-  )
-
-y2 = ggplot(tibble(y_hat = 1-c(1, 0.001)), aes(x = y_hat)) +
-  stat_function(fun = ~-log(1-.), size = 2) +
-  scale_x_continuous(labels = scales::percent) +
-  labs(y = "D", x = bquote(hat(y)), title = "Quando y = 0") +
-  theme_minimal(16) +
-  theme(
-    panel.grid = element_blank(),
-    axis.line = element_line(colour = "black", size = 1.5),
-    axis.text = element_text(colour = "black", size = 16)
-  )
-library(patchwork)
-y1+y2
-```
-
-
-
-
----
-
-# Regressão Logística - Custo e Regularização
-
-A **função de custo** da Regressão Logística chama-se *log-loss* (ou  *deviance* ou *Binary Cross-Entropy*):
-
-$$D = \frac{-1}{N}\sum[y_i \log\hat{y_i} + (1 - y_i )\log(1 - \hat{y_i})]$$
-
-Regularizar é analogo a Regressão Linear.
-
-$$D_{regularizado} = D + \color{red}{\lambda}\sum_{j = 1}^{p}|\beta_j|$$
-
-**PS1:** $\hat{y_i} = \hat{p_i} = \hat{P}(Y = 1|X)$.
-
-**PS2:** Se $\log\left(\frac{\hat{p_i}}{1-\hat{p_i}}\right) = \beta_0 + \beta_1x$ então 
-$\hat{p_i} = \frac{1}{1 + e^{-(\beta_0 + \beta_1x)}}$. 
-
-
-
----
-
-# Regressão Logística - Predições
-
-O "produto final" será um vetor de probabilidades estimadas.
-
-.pull-left[
 
 ```{r, echo = FALSE}
-email_tratado <- email %>%
-  select(pts_exclamacao, spam, `Regressão Logística`) %>%
-  rename(
-    prob = `Regressão Logística`,
-    `pts excl` = pts_exclamacao,
-    `classe observada` = spam
-  ) %>%
+library(rsample)
+set.seed(1)
+cars_cv <- rsample::vfold_cv(cars, v = 5) %>%
   mutate(
-    prob = round(prob, 2),
-    `classe predita` = if_else(prob < 0.5, "Não Spam", "Spam"),
-    `classe observada` = if_else(`classe observada` == 0, "Não Spam", "Spam"),
-  ) 
-
-email_tratado %>%
-  head() %>%
-  knitr::kable() %>%
-  kableExtra::row_spec(0:6, align = "center", background = "white") # %>%
-  # kableExtra::column_spec(3, background = "#6688f3", color = "white", include_thead = TRUE, image = "")
+    n_treino = map_dbl(splits, ~nrow(as.data.frame(.x))),
+    n_teste = map_dbl(splits, ~nrow(assessment(.x))),
+    regressao = map(splits, ~lm(dist ~ speed, data = .x)),
+    rmse_teste = map2_dbl(regressao, splits, ~ {
+      df <- rsample::assessment(.y) %>%
+        mutate(pred = predict(.x, newdata = rsample::assessment(.y)))
+      
+      round(sqrt(mean((df$dist - df$pred)^2)), 2)
+    })
+  )
+cars_cv
 ```
 
-]
-
-.pull-right[
-
-```{r, echo=FALSE}
-email_tratado %>%
-  ggplot(aes(x = `prob`, fill = `classe observada`, colour = `classe observada`)) +
-  geom_density(alpha = 0.2, size = 2) +
-  geom_vline(xintercept = 0.5, size = 2, colour = "purple", linetype = "dashed") +
-  geom_label(x = 0.5, y = 5, hjust = -0.1, label = "threshold", colour = "purple", size = 7, fontface = "bold", fill = "#f0deff") +
-  theme_minimal(28) +
-  labs(y = "Concentração", x = expression(hat(y) (prob))) +
-  theme(
-    legend.position = "bottom"
-  ) +
-  guides(fill = guide_legend(nrow = 2, ncol = 1, byrow = TRUE)) 
-```
-
-
-]
-
+ERRO DE VALIDAÇÃO CRUZADA: $$RMSE_{cv} = \frac{1}{5}\sum_{i=1}^{5}RMSE_{Fold_i} = 15,1$$
 
 ---
 
-```{r, echo=FALSE}
-confusion_matrix_kable <- function(threshold, font_size = 20) {
-  header <- c(1, 2)
-  names(header) <- c(paste0("p > ", scales::percent(threshold)), "Observado")
-  email %>%
-    mutate(
-      Predito = factor(if_else(`Regressão Logística` < threshold, "Não Spam", "Spam"), levels = c("Não Spam", "Spam")),
-      spam = factor(if_else(spam == 0, "Não Spam", "Spam"), levels = c("Não Spam", "Spam")),
-    ) %>%
-    count(Predito, spam) %>%
-    spread(spam, n, fill = 0) %>% 
-    kable() %>%
-    kable_styling(c("bordered", "basic"), full_width = FALSE, font_size = font_size) %>%
-    add_header_above(header, background = "white", color = c("red", "black", "black")) %>%
-    collapse_rows(columns = 1, valign = "top") %>%
-    kableExtra::row_spec(0:2, background = "white", align = "center") %>%
-    kableExtra::column_spec(1, "3in", bold = TRUE) %>%
-    kableExtra::column_spec(2, "3in") %>%
-    kableExtra::column_spec(3, "2in") 
+# Cross-validation (validação cruzada)
+
+### Esquema das divisões de bases:
+
+<img src="static/img/resampling.svg" width = 45%>
+
+.footnote[
+Fonte: [bookdown.org/max/FES/resampling.html](https://bookdown.org/max/FES/resampling.html)
+]
+
+---
+
+# Cross-validation (validação cruzada)
+
+Em pseudo-código:
+
+```
+K <- 5
+
+fold <- sample.int(K, nrow(mtcars), replace = TRUE)
+for (k in 1:K) {
+  train <- mtcars[fold != k,]
+  valid <- mtcars[fold == k,]
+  
+  # ajusta_modelo(train)
+  # metrics(valid)
 }
-
-
-cm_num <- confusion_matrix_kable(threshold = 0.5)
-
-cm <- tribble(
-  ~Predito, ~`Neg     `, ~`Pos `,
-  "Neg",    "TN", "FN",
-  "Pos",    "FP", "TP"
-) %>% 
-  kable() %>%
-  kable_styling(c("bordered", "basic"), full_width = FALSE, font_size = 20) %>%
-  add_header_above(c(" " = 1, "Observado" = 2), background = "white") %>%
-  collapse_rows(columns = 1, valign = "top") %>%
-  kableExtra::row_spec(0:2, background = "white", align = "center") %>%
-  kableExtra::column_spec(1, "3in", bold = TRUE) %>%
-  kableExtra::column_spec(2, "3in") %>%
-  kableExtra::column_spec(3, "2in")
 ```
 
+---
+class: middle, center
 
-# Matriz de Confusão
-
-.pull-left[
-```{r, echo = FALSE}
-cm 
-```
-
-<br/>
-
-```{r, echo = FALSE}
-cm_num
-```
-]
-
-.pull-right[
-
-$$
-\begin{array}{lcc}
-\mbox{accuracy}  & = & \frac{TP + TN}{TP + TN + FP + FN}\\\\
-&   & \\\\
-\mbox{precision} & = & \frac{TP}{TP + FP}\\\\
-&   & \\\\
-\mbox{recall/TPR}    & = & \frac{TP}{TP + FN} \\\\
-&   & \\\\
-\mbox{F1 score}       & =& \frac{2}{1/\mbox{precision} + 1/\mbox{recall}}\\\\
-&   & \\\\
-\mbox{FPR}    & = & \frac{FP}{FP + TN}
-\end{array}
-$$
-
-]
+## Exemplo 03
 
 ---
 
-# Nota de Corte (Threshold)
+## Regularização - Ridge
 
-.pull-left[
+No LASSO, usamos o módulo dos betas para fazer a regularização.
+É possível fazer também usando o quadrado dos coeficientes:
 
-```{r, echo=FALSE}
-confusion_matrix_kable(threshold = 0.1, font_size = 16)
-confusion_matrix_kable(threshold = 0.25, font_size = 16)
-confusion_matrix_kable(threshold = 0.5, font_size = 16)
-```
+$$RMSE_{Ridge} = RMSE + \color{red}{\lambda}\sum_{j = 1}^{p}\beta_j^2$$
 
-]
+Também é possível misturar os dois
 
-.pull-right[
+$$RMSE_{regularizado} = RMSE + (\alpha) \times \color{red}{\lambda}\sum_{j = 1}^{p}|\beta_j| + (1 - \alpha) \times \color{red}{\lambda}\sum_{j = 1}^{p}\beta_j^2$$
 
-```{r, echo=FALSE}
-confusion_matrix_kable(threshold = 0.75, font_size = 16)
-confusion_matrix_kable(threshold = 0.9, font_size = 16)
-```
-
-]
-
+Nessa definição $\alpha$ é chamado de 'mixture' (mistura). Quando $\alpha=1$ temos o LASSO e quando $\alpha=0$ temos Ridge. O $\alpha$ também pode ser tunado.
 
 ---
 
+## Ridge vs LASSO
 
-# Curva ROC
+O LASSO tem uma propriedade muito interessante quando
+comparada ao Ridge. Por razões matemáticas, ele consegue produzir estamativas esparsas, isto é, alguns coeficientes podem ser exatamente 0.
 
-.pull-left[
-```{r, echo = FALSE}
-roc_df <- email_tratado %>%
-  mutate(`classe observada` = as.factor(`classe observada`)) %>%
-  yardstick::roc_curve(`classe observada`, `prob`, event_level = "second") 
-
-roc_df_points <- roc_df %>%
-  filter(.threshold %in% c(0.1, 0.25, 0.5, 0.75, 0.9))
-
-roc_curve <- roc_df %>%
-  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
-  geom_path(size = 2) +
-  geom_point(data = roc_df_points, size = 7, colour = "red", shape = 21) +
-  geom_point(data = roc_df_points, size = 5, colour = "red") +
-  geom_abline(lty = "dashed", size = 1) +
-  coord_equal() +
-  theme_minimal(28) +
-  labs(x = "False Positive Rate (FPR)", y = "True Positive Rate (TPR)")
-
-roc_curve
-```
-
-]
-
-.pull-right[
-
-<br/>
-
-```{r, echo = FALSE}
-cm
-```
-
-
-$$
-\begin{array}{lcc}
-\mbox{TPR}    & = & \frac{TP}{TP + FN} \\\\
-&   & \\\\
-\mbox{FPR}    & = & \frac{FP}{FP + TN}
-\end{array}
-$$
-
-]
-
+<img src="static/img/ridge-vs-lasso.png" width = "45%">
 
 .footnote[
-[An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
+ Fonte: [ISLR pag. 224](https://web.stanford.edu/~hastie/ISLRv2_website.pdf)
 ]
 
 ---
+class: middle, center
 
-# Curva ROC - Métrica AUC
-
-.pull-left[
-
-```{r, echo = FALSE}
-
-auc <- email_tratado %>%
-  mutate(`classe observada` = as.factor(`classe observada`)) %>%
-  yardstick::roc_auc(`classe observada`, `prob`, event_level = "second") 
-
-roc_curve +
-  stat_smooth(
-        geom = 'area', method = 'loess', span = 1/3,
-        alpha = 0.3, fill = "royalblue") +
-  geom_label(x = 0.5, y = 0.25, label = paste("AUC = ", scales::percent(auc$.estimate)), hjust = 0, fill = "transparent", size = 7)
-```
-
-]
-
-.pull-right[
-
-<br/>
-
-```{r, echo = FALSE}
-cm
-```
-
-$$
-\mbox{AUC} = \mbox{Area Under The ROC Curve}
-$$
-]
-
-**PS:** AUC varia de 0.5 a 1.0. O que significa se AUC for zero?
-
-.footnote[
-[An introduction to ROC analysis](https://people.inf.elte.hu/kiss/11dwhdm/roc.pdf)
-]
+## Exercício 01
 
 ---
 
-# Curva ROC - Playground
+## Resumo dos conceitos
 
+<img src="static/img/ml_101.png" width = 85%>
 
-<a href = "http://arogozhnikov.github.io/2015/10/05/roc-curve.html">
-<img src="static/img/roc_curve.gif" style=" display: block; margin-left: auto; margin-right: auto;"></img>
-</a>
-
----
-
-## Ir para o R
