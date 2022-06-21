@@ -16,16 +16,6 @@ ames <- ames %>%
   mutate(
     Sale_Price = log10(Sale_Price)
   ) %>%
-  # select(
-  #   Sale_Price, # Preço da casa que queremos prever.
-  #   Neighborhood, # Nome do bairro
-  #   Gr_Liv_Area, # Área construida
-  #   Year_Built, # Ano de construção
-  #   Bldg_Type, # Tipo da casa (1 familia, etc)
-  #   Latitude,
-  #   Longitude,
-  #   Bedroom_AbvGr # Numero de quartos (sem ser no porão)
-  # ) %>%
   select(
     - Sale_Condition,
     - Sale_Type,
@@ -47,7 +37,6 @@ ames_test <- testing(ames_initial_split)
 
 
 # EDA ---------------------------------------------------------------------
-
 
 # Discretização
 ames %>%
@@ -101,10 +90,9 @@ ames %>%
 
 # Dataprep ----------------------------------------------------------------
 
-
 ames_recipe <- recipe(Sale_Price ~ ., data = ames_train) %>%
   step_cut(Bedroom_AbvGr, breaks = c(1,2,3,4), include_outside_range = TRUE) %>%
-  # step_discretize(Bedroom_AbvGr, num_breaks = 4) %>%
+  #step_discretize(Bedroom_AbvGr, num_breaks = 4) %>%
   step_other(Neighborhood, threshold = tune()) %>%
   step_log(Gr_Liv_Area, base = 10) %>%
   step_normalize(all_numeric_predictors()) %>%
@@ -116,8 +104,7 @@ ames_recipe <- recipe(Sale_Price ~ ., data = ames_train) %>%
 # dar uma olhada no resultado da receita.
 ames_recipe %>%
   prep() %>%
-  #juice()
-  #bake(new_data = ames_train) %>%
+  bake(new_data = NULL) %>%
   glimpse()
 
 # definicao do modelo -----------------------------------------------------
@@ -127,7 +114,7 @@ ames_recipe %>%
 ames_model <- linear_reg(
   penalty = tune()
 ) %>%
-  set_engine("glmnet", family = "binomial") %>%
+  set_engine("glmnet") %>%
   set_mode("regression")
 
 # Criando o workflow ------------------------------------------------------
