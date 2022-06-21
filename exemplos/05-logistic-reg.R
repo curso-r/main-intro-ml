@@ -96,7 +96,7 @@ credit_lr_tune_grid <- tune_grid(
     mn_log_loss, #binary cross entropy
     accuracy,
     roc_auc,
-    #kap, # KAPPA
+    kap # KAPPA
     # precision,
     # recall,
     # f_meas,
