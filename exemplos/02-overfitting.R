@@ -17,12 +17,16 @@ diamondsinho <- diamonds %>%
   ungroup() %>%
   sample_n(60)
 
+qplot(price, x, data = diamondsinho)
+
 # definicao do modelo -----------------------------------------------------
 especificacao_modelo <- linear_reg() %>%
   set_engine("lm") %>%
   set_mode("regression")
 
 # ajuste do modelo --------------------------------------------------------
+
+# head(model.matrix(~poly(x, 10), data = diamondsinho))
 
 ajuste_modelo1 <- especificacao_modelo %>%
   fit(price ~ poly(x, 4), data = diamondsinho)

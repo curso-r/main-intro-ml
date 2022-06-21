@@ -7,11 +7,11 @@ library(tidymodels)
 # Dados -------------------------------------------------------------------
 data("diamonds")
 
-# EDA ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 glimpse(diamonds)
 skim(diamonds)
 GGally::ggpairs(diamonds %>% sample_n(2000))
-qplot(x, price, data = diamonds)
+qplot(x, log(price), data = diamonds)
 qplot(price, data = diamonds, geom = "histogram")
 
 # Precisamos passar pro R:
@@ -24,19 +24,22 @@ qplot(price, data = diamonds, geom = "histogram")
 # b) o pacote 'motor' (engine);
 # c) a tarefa/modo ("regression" ou "classification").
 
+# Essas funções sao do parsnip.
 especificacao_modelo <- linear_reg() %>%
   set_engine("lm") %>%
   set_mode("regression")
 
+especificacao_modelo
+
 # Outros exemplos...
 
 # especificacao_modelo <- decision_tree() %>%
-# set_engine("rpart") %>%
-# set_mode("regression")
-
+#   set_engine("rpart") %>%
+#   set_mode("regression")
+# 
 # especificacao_modelo <- rand_forest() %>%
-# set_engine("ranger") %>%
-# set_mode("regression)
+#   set_engine("ranger") %>%
+#   set_mode("regression")
 
 
 # --------------------------------------------------------------------
@@ -52,14 +55,21 @@ modelo <- especificacao_modelo %>%
 
 print(modelo)
 
+# esses dois são iguais
+reg1 <- extract_fit_engine(modelo)
+reg2 <- lm(price ~ x, data = diamonds)
+
 # --------------------------------------------------------------------
 # Passo 3: Analisar as previsões
 
-so_o_x <- diamonds %>% select(x)
-predict(modelo, new_data =  so_o_x)
+so_o_x <- diamonds %>% select(x, flag_maior_que_8)
+pred <- predict(modelo, new_data =  so_o_x)
+
+
+# aqui só vamos usar tidyverse p/ baixo
 
 diamonds_com_previsao <- diamonds %>%
-  add_column(predict(modelo, new_data = diamonds)) %>%
+  add_column(pred) %>%
   mutate(.pred_price = exp(.pred))
 
 # Pontos observados + curva da f
@@ -93,13 +103,14 @@ metrics <- metric_set(rmse, mae, rsq)
 
 # Métricas de erro
 diamonds_com_previsao %>%
-  group_by(flag_maior_que_8) %>%
   metrics(truth = price, estimate = .pred_price)
+
+
 diamonds_com_previsao %>%
-  group_by(flag_maior_que_8) %>%
   mae(truth = price, estimate = .pred_price)
 diamonds_com_previsao %>%
-  group_by(flag_maior_que_8) %>%
   rsq(truth = price, estimate = .pred_price)
+diamonds_com_previsao %>%
+  rmse(truth = price, estimate = .pred_price)
 
 
