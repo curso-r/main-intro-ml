@@ -10,7 +10,7 @@ data("diamonds")
 # ---------------------------------------------------------------------
 glimpse(diamonds)
 skim(diamonds)
-GGally::ggpairs(diamonds %>% sample_n(2000))
+
 qplot(x, log(price), data = diamonds)
 qplot(price, data = diamonds, geom = "histogram")
 
