@@ -10,7 +10,7 @@ data(ames)
 
 ames %>%
   ggplot(aes(x  = Sale_Price)) +
-  geom_histogram()
+  geom_histogram(color = "white")
 
 ames <- ames %>%
   mutate(
@@ -145,7 +145,7 @@ ames_tune_grid <- tune_grid(
 # inspecao da tunagem -----------------------------------------------------
 autoplot(ames_tune_grid)
 collect_metrics(ames_tune_grid) %>% View()
-show_best(ames_tune_grid)
+show_best(ames_tune_grid, "mae")
 
 # seleciona o melhor conjunto de hiperparametros
 ames_best_hiperparams <- select_best(ames_tune_grid, "rmse")

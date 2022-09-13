@@ -14,7 +14,7 @@ data("credit_data")
 help(credit_data)
 glimpse(credit_data) # German Risk
 
-credit_data %>% count(Status)
+credit_test %>% count(Status)
 
 # Base de treino e teste --------------------------------------------------
 
@@ -42,7 +42,7 @@ credit_recipe <- recipe(Status ~ ., data = credit_train) %>%
   step_indicate_na(Income, Assets, Debt) %>%
   step_impute_linear(Income, Assets, Debt, impute_with = imp_vars(Expenses)) %>%
 
-  step_impute_mode(all_nominal_predictors()) %>%
+  #step_impute_mode(all_nominal_predictors()) %>%
   step_unknown(all_nominal_predictors()) %>%
 
   step_zv(all_predictors()) %>%
